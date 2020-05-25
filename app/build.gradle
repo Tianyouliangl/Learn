@@ -1,0 +1,81 @@
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+
+android {
+    compileSdkVersion var.compileSdkVersion
+
+    defaultConfig {
+        applicationId "com.learn.agg"
+        minSdkVersion var.minSdkVersion
+        targetSdkVersion var.targetSdkVersion
+        versionCode var.versionCode
+        versionName var.versionName
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation 'com.android.support:appcompat-v7:28.0.0'
+    implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation 'androidx.core:core-ktx:1.0.2'
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+    // library
+    implementation project(path: ':imlibrary')
+    implementation project(path: ':cbkeyboardlibrary')
+    implementation project(path: ':commonalitylibrary')
+    implementation project(path: ':mvplib')
+    implementation project(path: ':netlib')
+    // net
+    //retrofit
+    implementation 'com.squareup.okhttp3:logging-interceptor:3.8.1'
+    implementation 'com.squareup.retrofit2:retrofit:2.4.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.4.0'
+    implementation 'com.squareup.retrofit2:adapter-rxjava2:2.4.0'
+    //rxjava
+    implementation 'io.reactivex.rxjava2:rxandroid:2.0.2'
+    implementation 'io.reactivex.rxjava2:rxjava:2.2.0'
+    implementation 'com.trello.rxlifecycle2:rxlifecycle:2.2.1'
+    implementation 'com.trello.rxlifecycle2:rxlifecycle-android:2.2.1'
+    implementation 'com.trello.rxlifecycle2:rxlifecycle-components:2.2.1'
+    // recyclerview
+    implementation 'com.android.support:recyclerview-v7:28.0.0'
+    //智能刷新
+    implementation 'com.scwang.smartrefresh:SmartRefreshLayout:1.1.0-alpha-14'
+    //没有使用特殊Header和Footer，可以不加下面这行
+    implementation 'com.scwang.smartrefresh:SmartRefreshHeader:1.1.0-alpha-14'
+    //任意位置弹出的popwindow
+    implementation 'com.github.zyyoona7:EasyPopup:1.1.2'
+    //尖角气泡控件
+    implementation 'com.github.zengzhaoxing:SharpView:v2.4.4'
+    // 权限
+    implementation 'com.github.githubZYQ:easypermission:v1.0.0'
+    //圆角图片
+    implementation 'com.github.SheHuan:NiceImageView:1.0.5'
+    //图片加载
+    implementation 'com.github.bumptech.glide:glide:3.7.0'
+    // eventbus
+    implementation 'org.greenrobot:eventbus:3.1.1'
+    // 小红点
+    implementation 'q.rorbin:badgeview:1.1.3'
+    // 跑马灯
+    implementation 'com.gongwen:marqueelibrary:1.1.3'
+    // sp
+    implementation 'com.white:easysp:1.0.0'
+    // zxing
+    implementation 'com.mylhyl:zxingscanner:1.2.1'
+}

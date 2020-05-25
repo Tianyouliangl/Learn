@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:orientation="vertical"
+    android:layout_height="match_parent"
+    tools:context=".msg.act.NewFriendActivity">
+
+    <include layout="@layout/layout_toolbar"/>
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:background="@color/whitesmoke"
+        android:layout_height="60dp">
+
+        <RelativeLayout
+            android:id="@+id/rl_add_zh"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+
+            <ImageView
+                android:id="@+id/iv_left_zh"
+                android:layout_width="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="20dp"
+                android:src="@drawable/icon_zhanghao"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_toLeftOf="@id/iv_jt_zh"
+                android:layout_centerVertical="true"
+                android:textSize="16sp"
+                android:text="账号添加"
+                android:layout_marginLeft="16sp"
+                android:layout_marginRight="16sp"
+                android:maxLines="1"
+                android:textStyle="bold"
+                android:textColor="@color/darkslategrey"
+                android:ellipsize="end"
+                android:layout_toRightOf="@id/iv_left_zh"
+                android:layout_height="wrap_content"/>
+
+            <ImageView
+                android:id="@+id/iv_jt_zh"
+                android:layout_width="wrap_content"
+                android:src="@mipmap/icon_youjiantou"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="20dp"
+                android:layout_centerVertical="true"
+                android:layout_height="wrap_content"/>
+        </RelativeLayout>
+
+    </androidx.cardview.widget.CardView>
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_marginTop="2dp"
+        android:background="@color/whitesmoke"
+        android:layout_height="60dp">
+
+        <RelativeLayout
+            android:id="@+id/rl_add_ss"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+
+            <ImageView
+                android:id="@+id/iv_left_ss"
+                android:layout_width="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="20dp"
+                android:src="@drawable/icon_saoyisao"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_toLeftOf="@id/iv_jt_ss"
+                android:layout_centerVertical="true"
+                android:textSize="16sp"
+                android:text="扫一扫添加"
+                android:layout_marginLeft="16sp"
+                android:layout_marginRight="16sp"
+                android:maxLines="1"
+                android:textStyle="bold"
+                android:textColor="@color/darkslategrey"
+                android:ellipsize="end"
+                android:layout_toRightOf="@id/iv_left_ss"
+                android:layout_height="wrap_content"/>
+
+            <ImageView
+                android:id="@+id/iv_jt_ss"
+                android:layout_width="wrap_content"
+                android:src="@mipmap/icon_youjiantou"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="20dp"
+                android:layout_centerVertical="true"
+                android:layout_height="wrap_content"/>
+        </RelativeLayout>
+
+    </androidx.cardview.widget.CardView>
+
+    <com.scwang.smartrefresh.layout.SmartRefreshLayout
+        android:id="@+id/smart_layout"
+        android:layout_width="match_parent"
+        app:srlEnableLoadMore="false"
+        android:layout_height="match_parent">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_new_friend"
+            android:layout_width="match_parent"
+            android:layout_marginTop="4dp"
+            android:padding="2dp"
+            android:layout_height="match_parent"/>
+
+    </com.scwang.smartrefresh.layout.SmartRefreshLayout>
+
+</LinearLayout>

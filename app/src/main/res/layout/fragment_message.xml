@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical">
+
+    <include layout="@layout/layout_toolbar" />
+
+    <com.scwang.smartrefresh.layout.SmartRefreshLayout
+        android:id="@+id/msg_sl"
+        android:layout_width="match_parent"
+        app:srlEnableLoadMore="false"
+        android:layout_height="match_parent">
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:orientation="vertical"
+            android:layout_height="match_parent">
+
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="60dp">
+
+                <RelativeLayout
+                    android:id="@+id/rl_find_friend"
+                    android:layout_width="match_parent"
+                    android:clipChildren="false"
+                    android:orientation="horizontal"
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:id="@+id/tv_new"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:layout_weight="1"
+                        android:paddingLeft="20dp"
+                        android:text="新朋友"
+                        android:textStyle="bold"
+                        android:layout_centerVertical="true"
+                        android:textColor="@color/darkslategrey"
+                        android:textSize="16sp" />
+
+                    <com.gongwen.marqueen.SimpleMarqueeView
+                        android:id="@+id/simpleMarqueeView"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_toRightOf="@id/tv_new"
+                        android:layout_toLeftOf="@id/rl_bv"
+                        android:flipInterval="2000"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginRight="10dp"
+                        android:inAnimation="@anim/in_bottom"
+                        android:outAnimation="@anim/out_top"
+                        app:marqueeAnimDuration="600"
+                        app:smvTextColor="@color/deepskyblue"
+                        app:smvTextEllipsize="end"
+                        app:smvTextGravity="center_vertical"
+                        app:smvTextSingleLine="true"
+                        android:animateFirstView="true"
+                        app:smvTextSize="16sp" />
+
+                    <com.learn.agg.widgets.BadgeView
+                        android:id="@+id/rl_bv"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:layout_width="wrap_content"
+                        android:minWidth="60dp"
+                        android:paddingTop="4dp"
+                        app:badgeAnchorPosition="AnchorLeftBottom"
+                        app:badgeBgColor="@color/red"
+                        app:badgeBorderColor="@color/white"
+                        app:badgeBorderWidth="2dp"
+                        app:badgeMarginHorizon="4dp"
+                        app:badgeMarginVertical="20dp"
+                        app:badgeTextColor="@color/white"
+                        app:badgeTextSize="10sp"
+                        android:layout_height="match_parent">
+
+                        <ImageView
+                            android:layout_width="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:src="@mipmap/icon_youjiantou"
+                            android:layout_centerInParent="true"
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
+
+                    </com.learn.agg.widgets.BadgeView>
+
+
+
+                </RelativeLayout>
+
+
+            </androidx.cardview.widget.CardView>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rl_message"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+        </LinearLayout>
+
+
+    </com.scwang.smartrefresh.layout.SmartRefreshLayout>
+
+
+
+</LinearLayout>

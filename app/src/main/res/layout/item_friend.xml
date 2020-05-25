@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="horizontal"
+    android:layout_marginTop="8dp"
+    android:layout_height="50dp">
+
+    <com.shehuan.niv.NiceImageView
+        android:id="@+id/niv_icon"
+        android:layout_width="45dp"
+        android:layout_marginLeft="15dp"
+        app:corner_radius="6dp"
+        android:layout_centerVertical="true"
+        android:layout_height="45dp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:orientation="vertical"
+        android:layout_toRightOf="@id/niv_icon"
+        android:layout_alignTop="@id/niv_icon"
+        android:layout_marginLeft="10dp"
+        android:layout_alignBottom="@id/niv_icon"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/tv_name"
+            android:layout_width="match_parent"
+            android:layout_weight="1"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:text="像雾像风又像雨"
+            android:gravity="center_vertical"
+            android:textColor="@color/darkslategrey"
+            android:layout_height="0dp"/>
+
+        <TextView
+            android:id="@+id/tv_content"
+            android:layout_width="match_parent"
+            android:layout_weight="1"
+            android:textSize="14sp"
+            android:text="[WIFI在线]退一步海阔天空。"
+            android:gravity="bottom"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:textColor="@color/grey"
+            android:layout_height="0dp"/>
+
+    </LinearLayout>
+
+</RelativeLayout>

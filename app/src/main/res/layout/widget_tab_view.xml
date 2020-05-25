@@ -1,0 +1,47 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:orientation="vertical"
+    android:clipChildren="false"
+    android:layout_height="match_parent">
+
+
+    <com.learn.agg.widgets.BadgeView
+        android:id="@+id/badge_view"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:layout_width="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:paddingTop="4dp"
+        app:badgeAnchorPosition="AnchorRightBottom"
+        app:badgeBgColor="@color/red"
+        app:badgeBorderColor="@color/white"
+        app:badgeBorderWidth="2dp"
+        app:badgeMarginHorizon="-2dp"
+        app:badgeMarginVertical="18dp"
+        app:badgeTextColor="@color/white"
+        app:badgeTextSize="8sp"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/mTabImg"
+            android:layout_centerHorizontal="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:duplicateParentState="true" />
+
+    </com.learn.agg.widgets.BadgeView>
+
+
+    <TextView
+        android:id="@+id/mTabLabel"
+        android:layout_width="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:layout_height="wrap_content"
+        android:duplicateParentState="true"
+        android:textSize="12sp"
+        android:textColor="@color/selector_tab_color" />
+
+</LinearLayout>

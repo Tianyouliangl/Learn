@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Learn</string>
+
+
+    <string name="msg">消息</string>
+
+
+    <string name="video">视频</string>
+
+</resources>

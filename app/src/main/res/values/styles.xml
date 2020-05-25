@@ -1,0 +1,69 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/deepskyblue</item>
+        <item name="colorPrimaryDark">@color/deepskyblue</item>
+        <item name="colorAccent">@color/deepskyblue</item>
+    </style>
+
+    <style name="SplashTheme" parent="@android:style/Theme.NoTitleBar.Fullscreen">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/deepskyblue</item>
+        <item name="colorPrimaryDark">@color/deepskyblue</item>
+        <item name="colorAccent">@color/deepskyblue</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="custom_dialog" parent="@android:style/Theme.Dialog">
+        <!-- 边框 -->
+        <item name="android:windowFrame">@null</item>
+        <!-- 是否浮现在activity之上 -->
+        <item name="android:windowIsFloating">true</item>
+        <!-- 半透明 -->
+        <item name="android:windowIsTranslucent">true</item>
+        <!-- 无标题 -->
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:background">@android:color/transparent</item>
+        <!-- 背景透明 -->
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <!-- 模糊 -->
+        <item name="android:backgroundDimEnabled">true</item>
+        <!-- 遮罩层 -->
+        <item name="android:backgroundDimAmount">0.5</item>
+    </style>
+
+    <declare-styleable name="BadgeView">
+        <!--显示文本-->
+        <attr name="badgeText" format="string" />
+        <!--文本字体大小-->
+        <attr name="badgeTextSize" format="dimension" />
+        <!--文本颜色-->
+        <attr name="badgeTextColor" format="color" />
+        <!--边框宽度-->
+        <attr name="badgeBorderWidth" format="dimension" />
+        <!--边框颜色-->
+        <attr name="badgeBorderColor" format="color" />
+        <!--气泡背景色-->
+        <attr name="badgeBgColor" format="color" />
+        <!--徽章显示的位置-->
+        <attr name="badgeAnchorPosition">
+            <enum name="AnchorLeftTop" value="0" />
+            <enum name="AnchorLeftBottom" value="1" />
+            <enum name="AnchorRightTop" value="2" />
+            <enum name="AnchorRightBottom" value="3" />
+        </attr>
+        <!--徽章在水平方向的margin-->
+        <attr name="badgeMarginHorizon" format="dimension" />
+        <!--徽章在垂直方向的margin-->
+        <attr name="badgeMarginVertical" format="dimension" />
+        <!--徽章内部水平padding-->
+        <attr name="badgePaddingHorizon" format="dimension" />
+        <!--徽章内部垂直padding-->
+        <attr name="badgePaddingVertical" format="dimension" />
+    </declare-styleable>
+
+</resources>

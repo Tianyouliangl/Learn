@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/toolbar"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_alignParentTop="true"
+    android:maxHeight="65dp"
+    android:background="@drawable/shape_toolbar_bg"
+    android:minHeight="?attr/actionBarSize"
+    android:gravity="center_horizontal"
+    android:layout_gravity="center_horizontal"
+    app:contentInsetStart="0dp">
+
+    <RelativeLayout
+        android:layout_marginRight="12dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <com.shehuan.niv.NiceImageView
+            android:id="@+id/toolbar_back"
+            android:layout_width="28dp"
+            android:minHeight="25dp"
+            android:minWidth="25dp"
+            android:maxHeight="35dp"
+            android:maxWidth="35dp"
+            android:layout_height="28dp"
+            app:corner_radius="12dp"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="4dp"
+            android:visibility="gone"
+            android:src="@mipmap/icon_back_toolbar" />
+
+        <TextView
+            android:id="@+id/toolbar_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_centerHorizontal="true"
+            android:textColor="@color/white"
+            android:textSize="17sp"
+            android:visibility="gone"
+            android:textStyle="bold"
+            tools:text="title" />
+
+        <TextView
+            android:id="@+id/toolbar_action"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:textColor="@color/white"
+            android:textSize="15sp"
+            android:visibility="gone" />
+
+    </RelativeLayout>
+</Toolbar>
