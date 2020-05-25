@@ -102,7 +102,7 @@ public class MessageFragment extends BaseMvpFragment<MessageContract.IPresenter>
         simpleMarqueeView.setOnItemClickListener(this);
         rl_find_friend.setOnClickListener(this);
         smart_layout.setOnRefreshListener(this);
-        smart_layout.autoRefresh();
+//        smart_layout.autoRefresh();
     }
 
     @Override
