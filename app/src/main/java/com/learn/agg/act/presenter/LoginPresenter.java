@@ -41,7 +41,7 @@ public class LoginPresenter extends BasePresenter<LoginContract.IView> implement
 
                     @Override
                     protected void onNextEx(@NonNull LoginBean data) {
-                        NotificationUtils.getUserThreadCirBitmap(data.getImageUrl());
+//                        NotificationUtils.getUserThreadCirBitmap(data.getImageUrl());
                         getMvpView().onSuccess(data);
                     }
 

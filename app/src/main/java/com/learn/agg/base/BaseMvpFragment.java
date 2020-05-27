@@ -134,6 +134,21 @@ public abstract class BaseMvpFragment <P extends IPresenterContract> extends Mvp
         right_content.setOnClickListener(onClickListener);
     }
 
+    protected void initToolbar(String titleContent, String right,View.OnClickListener onClickListenerBack,View.OnClickListener onClickListener) {
+        NiceImageView back = view.findViewById(R.id.toolbar_back);
+        TextView title = view.findViewById(R.id.toolbar_title);
+        TextView right_content = view.findViewById(R.id.toolbar_action);
+        right_content.setText(right);
+        Toolbar toolbar = view.findViewById(R.id.toolbar);
+        getActivity().setActionBar(toolbar);
+        if (back == null || title == null || right_content == null) {
+            throw new MissingResourceException("not find toolbar view", this.getClass().getName(), "toolbar");
+        }
+        back.setOnClickListener(onClickListenerBack);
+        title.setText(titleContent);
+        right_content.setOnClickListener(onClickListener);
+    }
+
     protected void initToolbar(int left_action,String titleContent, String right,View.OnClickListener onClickListener) {
         NiceImageView back = view.findViewById(R.id.toolbar_back);
         TextView title = view.findViewById(R.id.toolbar_title);

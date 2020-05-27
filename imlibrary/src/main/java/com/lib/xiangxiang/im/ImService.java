@@ -1,36 +1,27 @@
 package com.lib.xiangxiang.im;
 
 import android.app.Notification;
-import android.app.NotificationChannel;
 import android.app.NotificationChannelGroup;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.Context;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
 import android.os.Build;
 import android.os.IBinder;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
-import com.learn.commonalitylibrary.BuildConfig;
 import com.learn.commonalitylibrary.Constant;
-import com.learn.commonalitylibrary.util.GsonUtil;
 import com.learn.commonalitylibrary.util.NotificationUtils;
 import com.white.easysp.EasySP;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
-
-import static android.app.Notification.VISIBILITY_SECRET;
+import java.net.URLConnection;
 
 /**
  * author : fengzhangwei
@@ -66,7 +57,7 @@ public class ImService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        createSystemNotification();
+        NotificationUtils.createNotification(this,true,this);
     }
 
     @Override
@@ -108,7 +99,7 @@ public class ImService extends Service {
     }
 
     private void createSystemNotification() {
-        startForeground(1069,NotificationUtils.createSystemNotification(this));
+        NotificationUtils.createNotification(this,false,this);
     }
 
     private void releaseSocket() {

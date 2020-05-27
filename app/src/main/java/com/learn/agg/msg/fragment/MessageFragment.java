@@ -4,6 +4,7 @@ package com.learn.agg.msg.fragment;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import androidx.annotation.NonNull;
@@ -62,7 +63,6 @@ public class MessageFragment extends BaseMvpFragment<MessageContract.IPresenter>
     @Override
     protected void initView() {
         super.initView();
-        initToolbar(true, true, true);
         setToolBarIcon();
         rl_message = view.findViewById(R.id.rl_message);
         rl_bv = view.findViewById(R.id.rl_bv);
@@ -72,26 +72,10 @@ public class MessageFragment extends BaseMvpFragment<MessageContract.IPresenter>
     }
 
     private void setToolBarIcon() {
-        new Thread(){
-            @Override
-            public void run() {
-                super.run();
-                String image_url = EasySP.init(getContext()).getString(Constant.SPKey_icon(getContext()));
-                try {
-                    URL url = new URL(image_url);
-                    Bitmap bitmap = BitmapFactory.decodeStream(url.openStream());
-                    cirleBitmap = NotificationUtils.getCirleBitmap(bitmap);
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            initToolbar(cirleBitmap,"消息", "联系人", MessageFragment.this);
-                        }
-                    });
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }.start();
+        initToolbar(true, true, true);
+        final String image_url = EasySP.init(getContext()).getString(Constant.SPKey_icon(getContext()));
+        NotificationUtils.getUserThreadCirBitmap(image_url,(ImageView) getView().findViewById(R.id.toolbar_back),getActivity());
+        initToolbar("消息","联系人",this,this);
     }
 
     @Override

@@ -2,10 +2,13 @@ package com.learn.agg;
 
 import android.app.Application;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
+import com.learn.agg.act.MainActivity;
 import com.learn.commonalitylibrary.Constant;
 import com.learn.commonalitylibrary.util.NotificationUtils;
 import com.scwang.smartrefresh.header.MaterialHeader;
