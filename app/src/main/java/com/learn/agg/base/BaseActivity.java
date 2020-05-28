@@ -12,19 +12,11 @@ import android.widget.Toolbar;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentActivity;
-
-import com.bumptech.glide.Glide;
 import com.learn.agg.R;
-import com.shehuan.niv.NiceImageView;
+import com.makeramen.roundedimageview.RoundedImageView;
 import com.zyq.easypermission.EasyPermission;
 import com.zyq.easypermission.EasyPermissionHelper;
 import com.zyq.easypermission.EasyPermissionResult;
-
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
-
-import java.util.HashMap;
 import java.util.List;
 import java.util.MissingResourceException;
 
@@ -113,7 +105,7 @@ public abstract class BaseActivity extends FragmentActivity {
     }
 
     protected void initToolbar(Boolean l, Boolean c, Boolean r) {
-        NiceImageView back = findViewById(R.id.toolbar_back);
+        RoundedImageView back = findViewById(R.id.toolbar_back);
         TextView title = findViewById(R.id.toolbar_title);
         TextView right_content = findViewById(R.id.toolbar_action);
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -128,7 +120,7 @@ public abstract class BaseActivity extends FragmentActivity {
     }
 
     protected void initToolbar(String titleContent) {
-        NiceImageView back = findViewById(R.id.toolbar_back);
+        RoundedImageView back = findViewById(R.id.toolbar_back);
         TextView title = findViewById(R.id.toolbar_title);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setActionBar(toolbar);
@@ -145,7 +137,7 @@ public abstract class BaseActivity extends FragmentActivity {
     }
 
     protected void initToolbar(String titleContent, String right) {
-        NiceImageView back = findViewById(R.id.toolbar_back);
+        RoundedImageView back = findViewById(R.id.toolbar_back);
         TextView title = findViewById(R.id.toolbar_title);
         TextView right_content = findViewById(R.id.toolbar_action);
         right_content.setText(right);
@@ -165,7 +157,7 @@ public abstract class BaseActivity extends FragmentActivity {
 
 
     protected void initToolbar(String titleContent, String right, View.OnClickListener onClickListener) {
-        NiceImageView back = findViewById(R.id.toolbar_back);
+        RoundedImageView back = findViewById(R.id.toolbar_back);
         TextView title = findViewById(R.id.toolbar_title);
         TextView right_content = findViewById(R.id.toolbar_action);
         right_content.setText(right);
@@ -185,7 +177,7 @@ public abstract class BaseActivity extends FragmentActivity {
     }
 
     protected void initToolbar(Bitmap bitmap, String titleContent, String right, View.OnClickListener onClickListener) {
-        NiceImageView back = findViewById(R.id.toolbar_back);
+        RoundedImageView back = findViewById(R.id.toolbar_back);
         TextView title = findViewById(R.id.toolbar_title);
         TextView right_content = findViewById(R.id.toolbar_action);
         right_content.setText(right);

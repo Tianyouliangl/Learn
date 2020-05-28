@@ -8,15 +8,12 @@
     tools:context=".act.LoginActivity">
 
 
-    <com.shehuan.niv.NiceImageView
+    <com.makeramen.roundedimageview.RoundedImageView
         android:id="@+id/iv_nice_icon"
         android:layout_centerHorizontal="true"
         android:layout_width="60dp"
         android:layout_marginTop="60dp"
-        app:corner_top_left_radius="6dp"
-        app:corner_top_right_radius="6dp"
-        app:corner_bottom_left_radius="6dp"
-        app:corner_bottom_right_radius="6dp"
+        app:riv_corner_radius="6dp"
         android:src="@mipmap/icon_icon_default"
         android:layout_height="60dp"/>
 

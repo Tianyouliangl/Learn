@@ -27,12 +27,12 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <com.shehuan.niv.NiceImageView
+        <com.makeramen.roundedimageview.RoundedImageView
             android:id="@+id/niv_icon"
             android:layout_width="50dp"
             android:layout_centerVertical="true"
             android:layout_marginLeft="10dp"
-            app:corner_radius="6dp"
+            app:riv_corner_radius="6dp"
             android:layout_height="50dp"/>
 
         <LinearLayout

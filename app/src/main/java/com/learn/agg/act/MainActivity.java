@@ -18,6 +18,7 @@ import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
 import com.learn.agg.R;
 import com.learn.agg.base.BaseAppCompatActivity;
 import com.learn.agg.base.BaseSlidingFragmentActivity;
+import com.learn.agg.base.IconOnClickListener;
 import com.learn.agg.fragment.MenuLeftFragment;
 import com.learn.agg.msg.fragment.MessageFragment;
 import com.learn.agg.net.NetConfig;
@@ -38,7 +39,7 @@ import java.util.HashMap;
 
 import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
 
-public class MainActivity extends BaseSlidingFragmentActivity implements TabLayout.OnTabClickListener, View.OnClickListener {
+public class MainActivity extends BaseSlidingFragmentActivity implements TabLayout.OnTabClickListener, View.OnClickListener, IconOnClickListener {
 
 
     private TabLayout tab_layout;
@@ -98,13 +99,23 @@ public class MainActivity extends BaseSlidingFragmentActivity implements TabLayo
         // 设置滑动菜单视图的宽度
         menu.setBehindOffsetRes(R.dimen.slidingmenu_offset);
         // 设置渐入渐出效果的值
-        menu.setFadeDegree(0.35f);
+        menu.setFadeDegree(1.0f);
     }
 
-    public void showLeftMenu(View view) {
+    public void showLeftMenu() {
         getSlidingMenu().showMenu();
     }
 
+    @Override
+    public void showMenu() {
+        super.showMenu();
+        showLeftMenu();
+    }
+
+    @Override
+    public void closeMenu() {
+        getSlidingMenu().toggle();
+    }
 
     // 判断是否打开了通知
     private boolean isNotificationEnabled(Context context) {

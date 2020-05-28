@@ -16,7 +16,7 @@ import com.learn.agg.net.bean.LoginBean;
 import com.learn.commonalitylibrary.Constant;
 import com.learn.commonalitylibrary.util.GsonUtil;
 import com.learn.commonalitylibrary.util.OfTenUtils;
-import com.shehuan.niv.NiceImageView;
+import com.makeramen.roundedimageview.RoundedImageView;
 import com.white.easysp.EasySP;
 
 import org.jetbrains.annotations.NotNull;
@@ -24,7 +24,7 @@ import org.jetbrains.annotations.NotNull;
 public class FriendInfoActivity extends BaseMvpActivity<FriendInfoContract.IPresenter> implements FriendInfoContract.IView, View.OnClickListener {
 
 
-    private NiceImageView iv_icon;
+    private RoundedImageView iv_icon;
     private TextView tv_name;
     private TextView tv_mobile;
     private TextView tv_sex_location;

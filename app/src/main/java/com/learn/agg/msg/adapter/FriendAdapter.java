@@ -13,7 +13,7 @@ import com.bumptech.glide.Glide;
 import com.learn.agg.R;
 import com.learn.agg.net.bean.LoginBean;
 import com.learn.commonalitylibrary.util.NetState;
-import com.shehuan.niv.NiceImageView;
+import com.makeramen.roundedimageview.RoundedImageView;
 
 import java.util.List;
 
@@ -79,7 +79,7 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.FriendHold
 
     public class FriendHolder extends RecyclerView.ViewHolder {
 
-        public NiceImageView iv_icon;
+        public RoundedImageView iv_icon;
         public TextView tv_name;
         public TextView tv_content;
 

@@ -18,8 +18,7 @@ import com.learn.agg.act.presenter.LoginPresenter;
 import com.learn.agg.base.BaseMvpActivity;
 import com.learn.agg.net.bean.LoginBean;
 import com.learn.commonalitylibrary.Constant;
-import com.learn.commonalitylibrary.util.NotificationUtils;
-import com.shehuan.niv.NiceImageView;
+import com.makeramen.roundedimageview.RoundedImageView;
 import com.white.easysp.EasySP;
 
 import org.jetbrains.annotations.NotNull;
@@ -27,7 +26,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class LoginActivity extends BaseMvpActivity<LoginContract.IPresenter> implements LoginContract.IView, View.OnClickListener {
 
-    private NiceImageView iv_nice_icon;
+    private RoundedImageView iv_nice_icon;
     private EditText ed_phone;
     private EditText ed_pwd;
     private Button btn_login;

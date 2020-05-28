@@ -15,7 +15,9 @@ import com.gongwen.marqueen.SimpleMF;
 import com.gongwen.marqueen.SimpleMarqueeView;
 import com.gongwen.marqueen.util.OnItemClickListener;
 import com.learn.agg.R;
+import com.learn.agg.act.MainActivity;
 import com.learn.agg.base.BaseMvpFragment;
+import com.learn.agg.base.IconOnClickListener;
 import com.learn.agg.msg.act.FriendActivity;
 import com.learn.agg.msg.act.NewFriendActivity;
 import com.learn.agg.msg.contract.MessageContract;
@@ -47,7 +49,6 @@ public class MessageFragment extends BaseMvpFragment<MessageContract.IPresenter>
     private SimpleMarqueeView simpleMarqueeView;
     private RelativeLayout rl_find_friend;
     private SmartRefreshLayout smart_layout;
-    private Bitmap cirleBitmap;
 
     @Override
     protected int getLayoutId() {
@@ -86,7 +87,6 @@ public class MessageFragment extends BaseMvpFragment<MessageContract.IPresenter>
         simpleMarqueeView.setOnItemClickListener(this);
         rl_find_friend.setOnClickListener(this);
         smart_layout.setOnRefreshListener(this);
-//        smart_layout.autoRefresh();
     }
 
     @Override
@@ -123,8 +123,9 @@ public class MessageFragment extends BaseMvpFragment<MessageContract.IPresenter>
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.toolbar_back:
-                showToast("二维码");
-
+                if (getActivity() instanceof IconOnClickListener){
+                    ((IconOnClickListener) getActivity()).showMenu();
+                }
                 break;
             case R.id.toolbar_action:
                 goActivity(FriendActivity.class);

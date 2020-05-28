@@ -18,7 +18,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <com.shehuan.niv.NiceImageView
+        <com.makeramen.roundedimageview.RoundedImageView
             android:id="@+id/toolbar_back"
             android:layout_width="28dp"
             android:minHeight="25dp"
@@ -26,7 +26,7 @@
             android:maxHeight="35dp"
             android:maxWidth="35dp"
             android:layout_height="28dp"
-            app:corner_radius="12dp"
+            app:riv_oval="true"
             android:layout_centerVertical="true"
             android:layout_marginLeft="4dp"
             android:visibility="gone"

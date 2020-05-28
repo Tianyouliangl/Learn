@@ -31,7 +31,7 @@ public class LoginBean {
     private String uid;
     private BigDecimal money;
     private int online;
-    private Boolean isFriend;
+    private Boolean isFriend = false;
     private int source = -1;
     private String remark = "";
 

@@ -22,8 +22,8 @@ import com.learn.agg.net.bean.FriendMsgBean;
 import com.learn.agg.net.bean.LoginBean;
 import com.learn.commonalitylibrary.Constant;
 import com.learn.commonalitylibrary.util.GsonUtil;
+import com.makeramen.roundedimageview.RoundedImageView;
 import com.senyint.ihospital.client.HttpFactory;
-import com.shehuan.niv.NiceImageView;
 import com.white.easysp.EasySP;
 
 import java.util.HashMap;
@@ -267,7 +267,7 @@ public class FriendMsgAdapter extends RecyclerView.Adapter<FriendMsgAdapter.Frie
 
     public class FriendMsgHolder extends RecyclerView.ViewHolder {
 
-        public NiceImageView iv_icon;
+        public RoundedImageView iv_icon;
         public TextView tv_name;
         public TextView tv_content;
         public TextView tv_reject;

@@ -12,13 +12,9 @@ import com.learn.agg.act.contract.EnrollContract;
 import com.learn.agg.act.presenter.EnrollPresenter;
 import com.learn.agg.base.BaseMvpActivity;
 import com.learn.commonalitylibrary.Constant;
-import com.shehuan.niv.NiceImageView;
+import com.makeramen.roundedimageview.RoundedImageView;
 
 import org.jetbrains.annotations.NotNull;
-
-import javax.xml.transform.Result;
-
-import static android.icu.text.DateTimePatternGenerator.PatternInfo.OK;
 
 public class EnrollActivity extends BaseMvpActivity<EnrollContract.IPresenter> implements EnrollContract.IView, View.OnClickListener {
 
@@ -29,7 +25,7 @@ public class EnrollActivity extends BaseMvpActivity<EnrollContract.IPresenter> i
     private EditText ed_password;
     private Button btn_enroll;
     private String image_url;
-    private NiceImageView iv_nice_icon;
+    private RoundedImageView iv_nice_icon;
 
     @Override
     protected Boolean isRequestMission() {

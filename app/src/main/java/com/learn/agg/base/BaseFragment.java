@@ -14,15 +14,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.bumptech.glide.Glide;
 import com.learn.agg.R;
-import com.shehuan.niv.NiceImageView;
-
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
-
-import java.util.HashMap;
+import com.makeramen.roundedimageview.RoundedImageView;
 import java.util.MissingResourceException;
 
 import static android.view.View.GONE;
@@ -71,7 +64,7 @@ public abstract class BaseFragment extends Fragment {
     }
 
     protected void initToolbar(Boolean l, Boolean c, Boolean r) {
-        NiceImageView back = view.findViewById(R.id.toolbar_back);
+        RoundedImageView back = view.findViewById(R.id.toolbar_back);
         TextView title = view.findViewById(R.id.toolbar_title);
         TextView right_content = view.findViewById(R.id.toolbar_action);
         Toolbar toolbar = view.findViewById(R.id.toolbar);
@@ -86,7 +79,7 @@ public abstract class BaseFragment extends Fragment {
     }
 
     protected void initToolbar(String titleContent) {
-        NiceImageView back = view.findViewById(R.id.toolbar_back);
+        RoundedImageView back = view.findViewById(R.id.toolbar_back);
         TextView title = view.findViewById(R.id.toolbar_title);
         Toolbar toolbar = view.findViewById(R.id.toolbar);
         getActivity().setActionBar(toolbar);
@@ -103,7 +96,7 @@ public abstract class BaseFragment extends Fragment {
     }
 
     protected void initToolbar(String titleContent, String right) {
-        NiceImageView back = view.findViewById(R.id.toolbar_back);
+        RoundedImageView back = view.findViewById(R.id.toolbar_back);
         TextView title = view.findViewById(R.id.toolbar_title);
         TextView right_content = view.findViewById(R.id.toolbar_action);
         right_content.setText(right);
@@ -122,7 +115,7 @@ public abstract class BaseFragment extends Fragment {
     }
 
     protected void initToolbar(Bitmap bitmap, String titleContent, String right, View.OnClickListener onClickListener) {
-        NiceImageView back = view.findViewById(R.id.toolbar_back);
+        RoundedImageView back = view.findViewById(R.id.toolbar_back);
         TextView title = view.findViewById(R.id.toolbar_title);
         TextView right_content = view.findViewById(R.id.toolbar_action);
         right_content.setText(right);

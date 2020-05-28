@@ -13,17 +13,10 @@ import android.widget.Toolbar;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.bumptech.glide.Glide;
 import com.learn.agg.R;
+import com.makeramen.roundedimageview.RoundedImageView;
 import com.senyint.ihospital.contract.IPresenterContract;
 import com.senyint.ihospital.view.MvpFragment;
-import com.shehuan.niv.NiceImageView;
-
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
-
-import java.util.HashMap;
 import java.util.MissingResourceException;
 
 import static android.view.View.GONE;
@@ -83,7 +76,7 @@ public abstract class BaseMvpFragment <P extends IPresenterContract> extends Mvp
     }
 
     protected void initToolbar(Boolean l, Boolean c, Boolean r) {
-        NiceImageView back = view.findViewById(R.id.toolbar_back);
+        RoundedImageView back = view.findViewById(R.id.toolbar_back);
         TextView title = view.findViewById(R.id.toolbar_title);
         TextView right_content = view.findViewById(R.id.toolbar_action);
         Toolbar toolbar = view.findViewById(R.id.toolbar);
@@ -98,7 +91,7 @@ public abstract class BaseMvpFragment <P extends IPresenterContract> extends Mvp
     }
 
     protected void initToolbar(String titleContent) {
-        NiceImageView back = view.findViewById(R.id.toolbar_back);
+        RoundedImageView back = view.findViewById(R.id.toolbar_back);
         TextView title = view.findViewById(R.id.toolbar_title);
         Toolbar toolbar = view.findViewById(R.id.toolbar);
         getActivity().setActionBar(toolbar);
@@ -115,7 +108,7 @@ public abstract class BaseMvpFragment <P extends IPresenterContract> extends Mvp
     }
 
     protected void initToolbar(String titleContent, String right,View.OnClickListener onClickListener) {
-        NiceImageView back = view.findViewById(R.id.toolbar_back);
+        RoundedImageView back = view.findViewById(R.id.toolbar_back);
         TextView title = view.findViewById(R.id.toolbar_title);
         TextView right_content = view.findViewById(R.id.toolbar_action);
         right_content.setText(right);
@@ -135,7 +128,7 @@ public abstract class BaseMvpFragment <P extends IPresenterContract> extends Mvp
     }
 
     protected void initToolbar(String titleContent, String right,View.OnClickListener onClickListenerBack,View.OnClickListener onClickListener) {
-        NiceImageView back = view.findViewById(R.id.toolbar_back);
+        RoundedImageView back = view.findViewById(R.id.toolbar_back);
         TextView title = view.findViewById(R.id.toolbar_title);
         TextView right_content = view.findViewById(R.id.toolbar_action);
         right_content.setText(right);
@@ -150,7 +143,7 @@ public abstract class BaseMvpFragment <P extends IPresenterContract> extends Mvp
     }
 
     protected void initToolbar(int left_action,String titleContent, String right,View.OnClickListener onClickListener) {
-        NiceImageView back = view.findViewById(R.id.toolbar_back);
+        RoundedImageView back = view.findViewById(R.id.toolbar_back);
         TextView title = view.findViewById(R.id.toolbar_title);
         TextView right_content = view.findViewById(R.id.toolbar_action);
         right_content.setText(right);
@@ -166,7 +159,7 @@ public abstract class BaseMvpFragment <P extends IPresenterContract> extends Mvp
     }
 
     protected void initToolbar(Bitmap bitmap, String titleContent, String right, View.OnClickListener onClickListener) {
-        NiceImageView back = view.findViewById(R.id.toolbar_back);
+        RoundedImageView back = view.findViewById(R.id.toolbar_back);
         TextView title = view.findViewById(R.id.toolbar_title);
         TextView right_content = view.findViewById(R.id.toolbar_action);
         right_content.setText(right);
