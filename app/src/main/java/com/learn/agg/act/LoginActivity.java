@@ -18,6 +18,7 @@ import com.learn.agg.act.presenter.LoginPresenter;
 import com.learn.agg.base.BaseMvpActivity;
 import com.learn.agg.net.bean.LoginBean;
 import com.learn.commonalitylibrary.Constant;
+import com.lib.xiangxiang.im.SocketManager;
 import com.makeramen.roundedimageview.RoundedImageView;
 import com.white.easysp.EasySP;
 

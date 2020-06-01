@@ -48,4 +48,8 @@ public class Constant {
     public static String SPKey_info(Context context){
         return EasySP.init(context).getString(SPKey_UID) + "_user_info";
     }
+
+    public static String SPKey_switch(Context context){
+        return EasySP.init(context).getString(SPKey_UID) + "_user_switch";
+    }
 }

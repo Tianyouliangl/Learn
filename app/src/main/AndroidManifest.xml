@@ -29,6 +29,7 @@
         <activity android:name=".msg.act.FindFriendActivity" />
         <activity android:name=".act.EnrollActivity" />
         <activity android:name=".msg.act.FriendActivity" />
+        <activity android:name=".msg.act.ChatActivity"/>
         <activity
             android:name=".act.LoginActivity"
             android:theme="@style/SplashTheme" />

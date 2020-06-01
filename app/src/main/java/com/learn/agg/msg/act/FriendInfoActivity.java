@@ -38,6 +38,7 @@ public class FriendInfoActivity extends BaseMvpActivity<FriendInfoContract.IPres
     private TextView tv_remark;
     private LinearLayout ll_remark;
     private LinearLayout ll_source;
+    private LoginBean toBean;
 
     @Override
     protected Boolean isRequestMission() {
@@ -79,20 +80,20 @@ public class FriendInfoActivity extends BaseMvpActivity<FriendInfoContract.IPres
         Bundle bundle = getIntent().getBundleExtra("bundle");
         String data = bundle.getString("data");
         boolean gson = bundle.getBoolean("isGone", false);
-        LoginBean bean = GsonUtil.GsonToBean(data, LoginBean.class);
-        uid = bean.getUid();
-        String imageUrl = bean.getImageUrl();
-        String username = bean.getUsername();
-        String mobile = bean.getMobile();
-        String sex = bean.getSex();
-        String location = bean.getLocation();
-        String sign = bean.getSign();
-        String birthday = bean.getBirthday();
-        String email = bean.getEmail();
-        String remark = bean.getRemark();
-        int source = bean.getSource();
-        online = bean.getOnline();
-        Boolean friend = bean.getFriend();
+        toBean = GsonUtil.GsonToBean(data, LoginBean.class);
+        uid = toBean.getUid();
+        String imageUrl = toBean.getImageUrl();
+        String username = toBean.getUsername();
+        String mobile = toBean.getMobile();
+        String sex = toBean.getSex();
+        String location = toBean.getLocation();
+        String sign = toBean.getSign();
+        String birthday = toBean.getBirthday();
+        String email = toBean.getEmail();
+        String remark = toBean.getRemark();
+        int source = toBean.getSource();
+        online = toBean.getOnline();
+        Boolean friend = toBean.getFriend();
         Glide.with(this).load(imageUrl).into(iv_icon);
         tv_name.setText(username);
         tv_mobile.setText("账号:" + mobile);
@@ -126,7 +127,10 @@ public class FriendInfoActivity extends BaseMvpActivity<FriendInfoContract.IPres
         switch (v.getId()) {
             case R.id.btn_start:
                 if (btn_start.getText().equals("发消息")) {
-
+                    String json = EasySP.init(this).getString(Constant.SPKey_info(this));
+                    LoginBean from_bean = GsonUtil.GsonToBean(json, LoginBean.class);
+                    ChatActivity.startActivity(this,from_bean,toBean);
+                    finish();
                 }
                 if (btn_start.getText().equals("加好友")) {
                     showLoadingDialog();

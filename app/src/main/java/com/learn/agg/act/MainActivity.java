@@ -70,7 +70,6 @@ public class MainActivity extends BaseSlidingFragmentActivity implements TabLayo
         initMenu();
         NetConfig.init(getApplicationContext());
         NotificationUtils.setSystemPendingIntent(this);
-        SocketManager.loginSocket(this, "uid=" + EasySP.init(this).getString(Constant.SPKey_UID));
         customDialog = new CustomDialog(this, false, R.layout.layout_notification);
         ArrayList<TabLayout.Tab> list = new ArrayList<>();
         list.add(new TabLayout.Tab(R.drawable.selector_tab_msg, R.string.msg, MessageFragment.class));
@@ -83,7 +82,7 @@ public class MainActivity extends BaseSlidingFragmentActivity implements TabLayo
     }
 
     private void initMenu() {
-        if(Build.VERSION.SDK_INT >= 21){
+        if (Build.VERSION.SDK_INT >= 21) {
             getSlidingMenu().setSystemUiVisibility(SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
         }
         Fragment leftMenuFragment = new MenuLeftFragment();
@@ -191,14 +190,10 @@ public class MainActivity extends BaseSlidingFragmentActivity implements TabLayo
                 customDialog.show();
             }
         } else {
-            SocketManager.cancelSystemNotification(this);
+            String uid = EasySP.init(this).getString(Constant.SPKey_UID);
+            Log.i("Net","------------uid==========  " + uid);
+            SocketManager.loginSocket(this, "uid=" + uid);
         }
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        SocketManager.startSystemNotification(this);
     }
 
     //黏性事件的 订阅 
@@ -230,7 +225,7 @@ public class MainActivity extends BaseSlidingFragmentActivity implements TabLayo
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         Log.i("main", "keyCode == " + keyCode);
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            if (!getSlidingMenu().isMenuShowing()){
+            if (!getSlidingMenu().isMenuShowing()) {
                 Intent intent = new Intent(Intent.ACTION_MAIN);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 intent.addCategory(Intent.CATEGORY_HOME);
@@ -246,6 +241,7 @@ public class MainActivity extends BaseSlidingFragmentActivity implements TabLayo
         super.onDestroy();
 //        NetConfig.unRegisterReceiver(this);
         EventBus.getDefault().unregister(this);
+        SocketManager.logOutSocket(this);
     }
 
     @Override
@@ -261,4 +257,5 @@ public class MainActivity extends BaseSlidingFragmentActivity implements TabLayo
                 break;
         }
     }
+
 }

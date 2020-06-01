@@ -1,5 +1,7 @@
 package com.learn.agg;
 
+import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.Application;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -7,10 +9,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Bundle;
+import android.util.Log;
 
 import com.learn.agg.act.MainActivity;
 import com.learn.commonalitylibrary.Constant;
 import com.learn.commonalitylibrary.util.NotificationUtils;
+import com.lib.xiangxiang.im.ImService;
+import com.lib.xiangxiang.im.SocketManager;
 import com.scwang.smartrefresh.header.MaterialHeader;
 import com.scwang.smartrefresh.layout.SmartRefreshLayout;
 import com.scwang.smartrefresh.layout.api.DefaultRefreshFooterCreator;
@@ -21,8 +27,9 @@ import com.scwang.smartrefresh.layout.api.RefreshLayout;
 import com.scwang.smartrefresh.layout.footer.ClassicsFooter;
 import com.senyint.ihospital.HttpConfig;
 import java.util.HashMap;
+import java.util.List;
 
-public class LearnApplication extends Application{
+public class LearnApplication extends Application implements AppFrontBackHelper.OnAppStatusListener {
 
     static {
         //设置全局的Header构建器
@@ -43,11 +50,10 @@ public class LearnApplication extends Application{
         });
     }
 
-    private int count = 0;
     @Override
     public void onCreate() {
         super.onCreate();
-        NotificationUtils.initChannel(this,NotificationUtils.System_channelId,NotificationUtils.System_channelName, NotificationManager.IMPORTANCE_LOW);
+        new AppFrontBackHelper().register(this,this);
         NotificationUtils.initChannel(this,NotificationUtils.Chat_channelId,NotificationUtils.Chat_channelName, NotificationManager.IMPORTANCE_HIGH);
         HttpConfig.INSTANCE.init(Constant.BASE_GROUP_URL,getHeader(),getParams(),true);
     }
@@ -69,5 +75,44 @@ public class LearnApplication extends Application{
     public static HashMap<String,String> getParams(){
         HashMap<String, String> hashMap = new HashMap<>();
         return hashMap;
+    }
+
+    /**
+     * 判断某个服务是否正在运行的方法
+     *
+     * @param mContext
+     * @param serviceName
+     *            是包名+服务的类名（例如：net.loonggg.testbackstage.TestService）
+     * @return true代表正在运行，false代表服务没有正在运行
+     */
+    public static boolean isServiceWork(Context mContext, String serviceName) {
+        boolean isWork = false;
+        ActivityManager myAM = (ActivityManager) mContext
+                .getSystemService(Context.ACTIVITY_SERVICE);
+        List<ActivityManager.RunningServiceInfo> myList = myAM.getRunningServices(40);
+        if (myList.size() <= 0) {
+            return false;
+        }
+        for (int i = 0; i < myList.size(); i++) {
+            String mName = myList.get(i).service.getClassName().toString();
+            if (mName.equals(serviceName)) {
+                isWork = true;
+                break;
+            }
+        }
+        return isWork;
+    }
+
+    @Override
+    public void onFront() {
+        NotificationUtils.setIsSwitch(false);
+        Log.i("Net","App回到前台"+ NotificationUtils.getIsSwitch());
+        NotificationUtils.cancelAllNotification(this);
+    }
+
+    @Override
+    public void onBack() {
+        NotificationUtils.setIsSwitch(true);
+        Log.i("Net","App遁入后台" + NotificationUtils.getIsSwitch());
     }
 }

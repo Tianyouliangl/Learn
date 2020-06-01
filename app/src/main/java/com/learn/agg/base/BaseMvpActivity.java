@@ -68,13 +68,6 @@ public abstract class BaseMvpActivity<P extends IPresenterContract> extends MvpA
 
     protected abstract void initData();
 
-    protected void setPermissionList(String[] p){
-        if (p.length <= 0){
-            return;
-        }
-        needPermissions = p;
-    }
-
     private void requestPermission() {
         if (EasyPermission.build().hasPermission(this, needPermissions)) {
             initView();

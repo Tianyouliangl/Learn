@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".msg.act.ChatActivity">
+
+
+    <com.codebear.keyboard.CBEmoticonsKeyBoard
+        android:id="@+id/cb_kb"
+        android:layout_width="match_parent"
+        android:background="@color/whitesmoke"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <com.scwang.smartrefresh.layout.SmartRefreshLayout
+                android:id="@+id/smart_refresh"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:srlEnableLoadMore="false">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:orientation="vertical"
+                    android:layout_height="match_parent">
+
+                    <FrameLayout
+                        android:id="@+id/fl_socket_hint"
+                        android:visibility="gone"
+                        android:layout_width="match_parent"
+                        android:layout_height="40dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:text="连接服务器失败,正在尝试重新连接..."
+                            android:textSize="12sp"
+                            android:gravity="center"
+                            android:textColor="@color/red"
+                            android:layout_gravity="center"
+                            android:layout_height="wrap_content"/>
+
+                    </FrameLayout>
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rv_chat"
+                        android:layout_width="match_parent"
+                        android:layout_marginBottom="10dp"
+                        android:layout_height="match_parent" />
+
+                </LinearLayout>
+
+
+            </com.scwang.smartrefresh.layout.SmartRefreshLayout>
+
+
+        </LinearLayout>
+
+
+    </com.codebear.keyboard.CBEmoticonsKeyBoard>
+
+</LinearLayout>

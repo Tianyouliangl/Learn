@@ -24,13 +24,13 @@ android {
 
     signingConfigs {
         debug {
-            storeFile file('../key/key.jks')
+            storeFile file('../key/key')
             storePassword "123456"
             keyAlias "key"
             keyPassword "123456"
         }
         release {
-            storeFile file('../key/key.jks')
+            storeFile file('../key/key')
             storePassword "123456"
             keyAlias "key"
             keyPassword "123456"

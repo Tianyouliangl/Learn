@@ -76,8 +76,6 @@ public interface IHttpProtocol {
     @FormUrlEncoded
     Observable<BaseResponseTC<List<ChatMessage>>> getHistory(@FieldMap HashMap<String, Object> map);
 
-
-
     @POST("")
     @FormUrlEncoded
     Observable<BaseResponse<CommonBean>> getData(@Url String url, @FieldMap HashMap<String, String> map);

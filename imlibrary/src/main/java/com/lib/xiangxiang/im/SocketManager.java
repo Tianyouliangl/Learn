@@ -5,10 +5,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Build;
+import android.os.Bundle;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import com.learn.commonalitylibrary.ChatMessage;
+import com.learn.commonalitylibrary.body.TextBody;
 import com.learn.commonalitylibrary.util.GsonUtil;
+import com.learn.commonalitylibrary.util.NotificationUtils;
 
 import org.greenrobot.eventbus.EventBus;
 import org.json.JSONObject;
@@ -63,18 +68,18 @@ public class SocketManager {
     /**
      * 断开Socket
      */
-    public static void logOutSocket(Context context){
+    public static void logOutSocket(Context context) {
         Context appContext = context.getApplicationContext();
         Intent intent = new Intent(appContext, ImService.class);
         intent.putExtra(ImService.SOCKET_CMD, ImService.SOCKET_RESET);
         startService(appContext, intent);
         // 注销广播
-        if (brCallReceiver != null){
+        if (brCallReceiver != null) {
             appContext.unregisterReceiver(brCallReceiver);
             brCallReceiver = null;
             mCallBackMap.clear();
         }
-        if (msgReceiver != null){
+        if (msgReceiver != null) {
             appContext.unregisterReceiver(msgReceiver);
             msgReceiver = null;
         }
@@ -103,20 +108,6 @@ public class SocketManager {
         }
     }
 
-    public static void startSystemNotification(Context context){
-        Context appContext = context.getApplicationContext();
-        Intent intent = new Intent(appContext, ImService.class);
-        intent.putExtra(ImService.SOCKET_CMD, ImService.NOTIFICATION_START);
-        startService(appContext, intent);
-    }
-
-    public static void cancelSystemNotification(Context context){
-        Context appContext = context.getApplicationContext();
-        Intent intent = new Intent(appContext, ImService.class);
-        intent.putExtra(ImService.SOCKET_CMD, ImService.NOTIFICATION_CANCEL);
-        startService(appContext, intent);
-    }
-
     /**
      * 清空消息callback
      */
@@ -127,11 +118,11 @@ public class SocketManager {
     }
 
     private static void startService(Context appContext, Intent intent) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                appContext.startForegroundService(intent);
-            } else {
-                appContext.startService(intent);
-            }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            appContext.startForegroundService(intent);
+        } else {
+            appContext.startService(intent);
+        }
 //        appContext.startService(intent);
     }
 
@@ -178,31 +169,31 @@ public class SocketManager {
             String result = intent.getStringExtra(RESULT);
             switch (intent.getAction()) {
                 case ACTION:
-                    receiverMsg(result);
+                    receiverMsg(context, result);
                     break;
                 default:
                     break;
             }
         }
 
-        private void receiverMsg(String result) {
+        private void receiverMsg(Context context, String result) {
             if (result.isEmpty()) {
                 return;
             }
-            sendEvent(result);
+            sendEvent(context, result);
         }
 
-        private void sendEvent(String result) {
+        private void sendEvent(Context context, String result) {
             ChatMessage chatMessage = GsonUtil.GsonToBean(result, ChatMessage.class);
-            if (chatMessage.getType() == ChatMessage.MSG_SEND_SYS){
+            if (chatMessage.getType() == ChatMessage.MSG_SEND_SYS) {
                 Map<String, Object> map = new HashMap<>();
-                map.put("notification","change");
+                map.put("notification", "change");
                 EventBus.getDefault().postSticky(map);
-
-            }else {
+            } else {
                 EventBus.getDefault().postSticky(chatMessage);
+                Log.i(ImSocketClient.TAG, "------------" + chatMessage.getBody() + "------------");
             }
-            Log.i(ImSocketClient.TAG,"------------" + chatMessage.getBody() + "------------");
+            NotificationUtils.showNotificationMessage(context, chatMessage);
         }
     }
 }

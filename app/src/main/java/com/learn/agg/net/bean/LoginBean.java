@@ -1,12 +1,13 @@
 package com.learn.agg.net.bean;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 
 /**
  * author : fengzhangwei
  * date : 2019/11/14
  */
-public class LoginBean {
+public class LoginBean implements Serializable {
     /**
      * birthday : 1999-01-01
      * sex : 男
