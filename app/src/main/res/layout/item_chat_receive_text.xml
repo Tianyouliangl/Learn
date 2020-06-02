@@ -38,7 +38,6 @@
             android:layout_width="wrap_content"
             android:padding="6dp"
             android:textSize="14sp"
-            android:text="哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈"
             android:layout_toRightOf="@id/iv_icon"
             android:layout_centerVertical="true"
             android:textColor="@color/darkslategrey"

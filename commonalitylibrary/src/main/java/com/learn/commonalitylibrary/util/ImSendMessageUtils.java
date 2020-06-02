@@ -3,6 +3,7 @@ package com.learn.commonalitylibrary.util;
 import android.text.TextUtils;
 
 import com.learn.commonalitylibrary.ChatMessage;
+import com.learn.commonalitylibrary.body.EmoticonBody;
 import com.learn.commonalitylibrary.body.ImageBody;
 import com.learn.commonalitylibrary.body.RedEnvelopeBody;
 import com.learn.commonalitylibrary.body.TextBody;
@@ -61,7 +62,7 @@ public class ImSendMessageUtils {
             object.put("toId",toId);
             object.put("pid",getPid());
             object.put("bodyType",ChatMessage.MSG_BODY_TYPE_TEXT);
-            object.put("body",body);
+            object.put("body",GsonUtil.BeanToJson(new TextBody(body)));
             object.put("msgStatus", ChatMessage.MSG_SEND_LOADING);
             object.put("time",System.currentTimeMillis());
             object.put("type", ChatMessage.MSG_SEND_CHAT);
@@ -73,28 +74,18 @@ public class ImSendMessageUtils {
         return object.toString();
     }
 
-    public static String getTextBody(String text){
-        JSONObject jsonObject = new JSONObject();
-        try {
-            jsonObject.put("msg", text);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return jsonObject.toString();
-    }
-
-    public static String getChatMessageEmoji(String msg,String fromId,String toId,int bodyType,int displaytime){
+    public static String getChatMessageEmoji(String msg,String fromId,String toId,String conversation,int displaytime){
         JSONObject object = new JSONObject();
         try {
             object.put("fromId",fromId);
             object.put("toId",toId);
             object.put("pid",getPid());
-            object.put("bodyType",bodyType);
-            object.put("body",GsonUtil.BeanToJson(new ImageBody(msg)));
+            object.put("bodyType",ChatMessage.MSG_BODY_TYPE_EMOJI);
+            object.put("body",GsonUtil.BeanToJson(new EmoticonBody(msg)));
             object.put("msgStatus",ChatMessage.MSG_SEND_LOADING);
             object.put("time",System.currentTimeMillis());
             object.put("type", ChatMessage.MSG_SEND_CHAT);
-            object.put("conversation", OfTenUtils.getConviction(fromId,toId));
+            object.put("conversation",conversation);
             object.put("displaytime",displaytime);
         } catch (JSONException e) {
             e.printStackTrace();

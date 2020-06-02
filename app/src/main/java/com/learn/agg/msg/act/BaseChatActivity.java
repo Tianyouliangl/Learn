@@ -1,6 +1,7 @@
 package com.learn.agg.msg.act;
 
 import android.content.Intent;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -25,6 +26,7 @@ import com.learn.commonalitylibrary.ChatMessage;
 import com.learn.commonalitylibrary.util.GsonUtil;
 import com.learn.commonalitylibrary.util.ImSendMessageUtils;
 import com.learn.commonalitylibrary.util.OfTenUtils;
+import com.lib.xiangxiang.im.ImSocketClient;
 import com.lib.xiangxiang.im.SocketManager;
 import com.scwang.smartrefresh.layout.SmartRefreshLayout;
 import com.scwang.smartrefresh.layout.api.RefreshLayout;
@@ -43,14 +45,14 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
 
     private RecyclerView mRecyclerView;
     private ChatAdapter chatAdapter = new ChatAdapter(this, new ArrayList<ChatMessage>());
-    private CBEmoticonsKeyBoard mKbView;
+    public CBEmoticonsKeyBoard mKbView;
     private LoginBean from_bean;
     private int OPTION_TYPE_CARD = 1;
     private int OPTION_TYPE_IMAGE = 2;
     private int OPTION_TYPE_LOCATION = 3;
     private int pageNo = 1;
     private int pageSize = 30;
-    private LoginBean to_bean;
+    public LoginBean to_bean;
     private String conviction;
     private SmartRefreshLayout mSmart;
     private LinearLayoutManager layoutManager;
@@ -137,6 +139,7 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
         smartRefreshLayout.setOnRefreshListener(this);
     }
 
+
     @Override
     protected void initData() {
         EventBus.getDefault().register(this);
@@ -146,6 +149,7 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
         chatAdapter.setFromUserBean(from_bean);
         chatAdapter.setToUserBean(to_bean);
         conviction = OfTenUtils.getConviction(from_bean.getUid(), to_bean.getUid());
+        showLoadingDialog();
         getPresenter().getHistory(pageNo, pageSize);
     }
 
@@ -161,7 +165,9 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
 
     @Override
     public void onSuccess(List<ChatMessage> list) {
+        dismissDialog();
         mSmart.finishRefresh();
+        Log.i(ImSocketClient.TAG,"请求到的数据大小----" + list.size());
         if (list.size() > 0) {
             chatAdapter.setData(list);
             layoutManager.scrollToPositionWithOffset(list.size(), 0);
@@ -173,6 +179,7 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
 
     @Override
     public void onSuccess() {
+        dismissDialog();
         mSmart.finishRefresh();
         if (pageNo > 1) {
             pageNo--;
@@ -181,6 +188,7 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
 
     @Override
     public void onError(String msg) {
+        dismissDialog();
         mSmart.finishRefresh();
         showToast(msg);
     }
@@ -227,7 +235,7 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
         }
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void EventBus(ChatMessage msg) {
         chatAdapter.setData(msg);
         toLastItem();
@@ -235,8 +243,7 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
 
     private void sendText(String text) {
         if (!to_bean.getUid().isEmpty() && !from_bean.getUid().isEmpty()){
-            String body = ImSendMessageUtils.getTextBody(text);
-            String json = ImSendMessageUtils.getChatMessageText(body, from_bean.getUid(), to_bean.getUid(), conviction, chatAdapter.getLastItemDisplayTime());
+            String json = ImSendMessageUtils.getChatMessageText(text, from_bean.getUid(), to_bean.getUid(), conviction, chatAdapter.getLastItemDisplayTime());
             ChatMessage message = GsonUtil.GsonToBean(json, ChatMessage.class);
             chatAdapter.setData(message);
             toLastItem();
@@ -277,7 +284,20 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
     // 表情点击事件
     @Override
     public void onEmoticonClick(EmoticonsBean emoticon, boolean isDel) {
+        String uri = (String) emoticon.getIconUri();
+        String name = emoticon.getName();
+        Log.i(ImSocketClient.TAG,"uil:" + uri + "-----name:"+name);
+        sendEmoji(uri);
+    }
 
+    private void sendEmoji(String uri) {
+        if (!to_bean.getUid().isEmpty() && !from_bean.getUid().isEmpty()){
+            String json = ImSendMessageUtils.getChatMessageEmoji(uri, from_bean.getUid(), to_bean.getUid(), conviction, chatAdapter.getLastItemDisplayTime());
+            ChatMessage message = GsonUtil.GsonToBean(json, ChatMessage.class);
+            chatAdapter.setData(message);
+            toLastItem();
+            SocketSendJson(json);
+        }
     }
 
     // 发送图片 等等
@@ -298,6 +318,6 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
     @Override
     protected void onDestroy() {
         super.onDestroy();
-
+        chatAdapter = null;
     }
 }

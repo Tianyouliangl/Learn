@@ -40,7 +40,6 @@
             android:layout_marginRight="10dp"
             android:layout_toLeftOf="@id/iv_icon"
             android:textSize="14sp"
-            android:text="nihao"
             android:layout_centerVertical="true"
             android:textColor="@color/white"
             android:autoLink="all"

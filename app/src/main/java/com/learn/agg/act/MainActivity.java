@@ -196,8 +196,8 @@ public class MainActivity extends BaseSlidingFragmentActivity implements TabLayo
         }
     }
 
-    //黏性事件的 订阅 
-    @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
+    //事件的 订阅 
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void MessageEvent(HashMap<String, Object> map) {
         String fragmentName = (String) map.get("FragmentName");
         if (fragmentName != null && !fragmentName.isEmpty()) {

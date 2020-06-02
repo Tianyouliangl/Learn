@@ -1,6 +1,9 @@
 package com.learn.agg.msg.adapter;
 
 import android.content.Context;
+import android.net.Uri;
+import android.os.Environment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,10 +19,14 @@ import com.learn.agg.msg.chatHolder.ChatTextReceiveHolder;
 import com.learn.agg.msg.chatHolder.ChatTextSendHolder;
 import com.learn.agg.net.bean.LoginBean;
 import com.learn.commonalitylibrary.ChatMessage;
+import com.learn.commonalitylibrary.body.EmoticonBody;
 import com.learn.commonalitylibrary.body.TextBody;
 import com.learn.commonalitylibrary.util.GsonUtil;
 import com.learn.commonalitylibrary.util.TimeUtil;
+import com.lib.xiangxiang.im.ImSocketClient;
 
+import java.io.File;
+import java.net.URL;
 import java.util.List;
 
 public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
@@ -101,8 +108,27 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         final ChatMessage message = mList.get(position);
         showIcon(holder);
         showContent(holder, message);
+        showEmoji(holder,message);
         whetherShowTime(holder, message);
         whetherShowLoading(holder, message);
+    }
+
+    private void showEmoji(RecyclerView.ViewHolder holder, ChatMessage message) {
+        int bodyType = message.getBodyType();
+        EmoticonBody body = GsonUtil.GsonToBean(message.getBody(), EmoticonBody.class);
+        String url = body.getUrl();
+        if (bodyType == ChatMessage.MSG_BODY_TYPE_EMOJI){
+            switch (holder.getItemViewType()){
+                case TYPE_FACE_SEND:
+                    Glide.with(mContext).load(url).into(((ChatEmojiSendHolder) holder).iv_emoji);
+                    break;
+                case TYPE_FACE_RECEIVE:
+                    Glide.with(mContext).load(url).into(((ChatEmojiReceiveHolder) holder).iv_emoji);
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 
     private void showContent(RecyclerView.ViewHolder holder, ChatMessage message) {
@@ -121,7 +147,6 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     break;
             }
         }
-
     }
 
     private void whetherShowLoading(RecyclerView.ViewHolder holder, ChatMessage message) {
@@ -208,6 +233,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     public void setData(List<ChatMessage> list) {
         mList.addAll(0, list);
+        Log.i(ImSocketClient.TAG,"add到的数据大小----" + mList.size());
         notifyDataSetChanged();
     }
 
@@ -217,13 +243,16 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     public void setData(ChatMessage message) {
         Boolean isAdd = true;
+        String pid = message.getPid();
         for (int i = mList.size() - 1; i >= 0; i--){
             ChatMessage chatMessage = mList.get(i);
-            if (chatMessage.getPid().equals(message.getPid())){
+            String messagePid = chatMessage.getPid();
+            if (messagePid.equals(pid)){
                 isAdd = false;
                 return;
             }
         }
+        Log.i(ImSocketClient.TAG,"是否能添加----" + isAdd);
         if (isAdd){
             mList.add(message);
         }

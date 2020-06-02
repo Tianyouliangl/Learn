@@ -188,9 +188,9 @@ public class SocketManager {
             if (chatMessage.getType() == ChatMessage.MSG_SEND_SYS) {
                 Map<String, Object> map = new HashMap<>();
                 map.put("notification", "change");
-                EventBus.getDefault().postSticky(map);
+                EventBus.getDefault().post(map);
             } else {
-                EventBus.getDefault().postSticky(chatMessage);
+                EventBus.getDefault().post(chatMessage);
                 Log.i(ImSocketClient.TAG, "------------" + chatMessage.getBody() + "------------");
             }
             NotificationUtils.showNotificationMessage(context, chatMessage);

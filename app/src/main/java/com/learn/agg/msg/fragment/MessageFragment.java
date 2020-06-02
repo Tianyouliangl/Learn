@@ -32,6 +32,8 @@ import com.scwang.smartrefresh.layout.listener.OnRefreshListener;
 import com.white.easysp.EasySP;
 
 import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -64,6 +66,7 @@ public class MessageFragment extends BaseMvpFragment<MessageContract.IPresenter>
     @Override
     protected void initView() {
         super.initView();
+        EventBus.getDefault().register(this);
         setToolBarIcon();
         rl_message = view.findViewById(R.id.rl_message);
         rl_bv = view.findViewById(R.id.rl_bv);
@@ -166,7 +169,18 @@ public class MessageFragment extends BaseMvpFragment<MessageContract.IPresenter>
             rl_bv.showBadge(0);
             map.put("count",0);
         }
-        EventBus.getDefault().postSticky(map);
+        EventBus.getDefault().post(map);
+    }
+
+    //事件的 订阅 
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void MessageEvent(HashMap<String, Object> map) {
+        String name = (String) map.get("notification");
+        if (name != null && !name.isEmpty()) {
+            if (name.equals("change")){
+                getPresenter().getAddFriendMsg();
+            }
+        }
     }
 
     @Override
@@ -177,5 +191,11 @@ public class MessageFragment extends BaseMvpFragment<MessageContract.IPresenter>
     @Override
     public void onRefresh(@NonNull RefreshLayout refreshLayout) {
         getPresenter().getAddFriendMsg();
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        EventBus.getDefault().unregister(this);
     }
 }
