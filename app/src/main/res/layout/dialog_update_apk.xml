@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:clipChildren="false"
+    android:layout_gravity="center"
+    android:layout_height="match_parent">
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:minWidth="300dp"
+        android:layout_gravity="center"
+        android:clipChildren="false"
+        android:background="#00000000"
+        android:minHeight="300dp"
+        android:layout_height="345dp">
+        <RelativeLayout
+            android:layout_alignParentBottom="true"
+            android:layout_gravity="center"
+            android:layout_width="300dp"
+            android:minHeight="220dp"
+            android:background="@drawable/shape_new"
+            android:minWidth="240dp"
+            android:layout_height="240dp">
+
+            <ImageView
+                android:id="@+id/iv_top"
+                android:layout_width="match_parent"
+                android:scaleType="fitXY"
+                android:layout_marginTop="-100dp"
+                android:src="@mipmap/icon_update"
+                android:layout_height="130dp"/>
+
+            <TextView
+                android:id="@+id/tv_content"
+                android:layout_width="match_parent"
+                android:minHeight="160dp"
+                android:layout_below="@id/iv_top"
+                android:layout_above="@id/line"
+                android:layout_marginBottom="10dp"
+                android:layout_marginTop="10dp"
+                android:textColor="@color/white"
+                android:gravity="center"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:layout_marginRight="10dp"
+                android:layout_marginLeft="10dp"
+                android:layout_height="wrap_content"/>
+
+            <View
+                android:id="@+id/line"
+                android:layout_width="match_parent"
+                android:background="@color/white"
+                android:layout_above="@id/tv_update"
+                android:layout_height="1dp"/>
+
+            <TextView
+                android:id="@+id/tv_update"
+                android:layout_width="match_parent"
+                android:minHeight="45dp"
+                android:text="更新"
+                android:gravity="center"
+                android:textColor="@color/white"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:layout_alignParentBottom="true"
+                android:layout_height="wrap_content"/>
+        </RelativeLayout>
+    </RelativeLayout>
+</FrameLayout>

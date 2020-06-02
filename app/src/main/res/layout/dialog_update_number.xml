@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    xmlns:gastudio="http://schemas.android.com/apk/res-auto"
+    android:clipChildren="false"
+    android:layout_gravity="center"
+    android:layout_height="match_parent">
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:minWidth="300dp"
+        android:layout_gravity="center"
+        android:clipChildren="false"
+        android:background="#00000000"
+        android:minHeight="300dp"
+        android:layout_height="305dp">
+        <RelativeLayout
+            android:layout_alignParentBottom="true"
+            android:layout_gravity="center"
+            android:layout_width="300dp"
+            android:minHeight="220dp"
+            android:animateLayoutChanges="true"
+            android:background="@drawable/shape_new"
+            android:minWidth="240dp"
+            android:layout_height="200dp">
+
+            <ImageView
+                android:id="@+id/iv_top"
+                android:layout_width="match_parent"
+                android:scaleType="fitXY"
+                android:layout_marginTop="-100dp"
+                android:src="@mipmap/icon_update"
+                android:layout_height="130dp"/>
+
+            <RelativeLayout
+                android:layout_below="@id/iv_top"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:id="@+id/tv_top"
+                    android:layout_width="wrap_content"
+                    android:text="正在下载:"
+                    android:layout_marginTop="10dp"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/white"
+                    android:layout_marginLeft="10dp"
+                    android:layout_height="wrap_content"/>
+                <TextView
+                    android:id="@+id/tv_success"
+                    android:layout_width="wrap_content"
+                    android:text="完成"
+                    android:layout_marginTop="10dp"
+                    android:textSize="18sp"
+                    android:visibility="gone"
+                    android:textStyle="bold"
+                    android:layout_centerHorizontal="true"
+                    android:textColor="@color/chartreuse"
+                    android:layout_height="wrap_content"/>
+
+                <com.gastudio.downloadloadding.library.GADownloadingView
+                    android:id="@+id/ga_downloading"
+                    android:layout_width="match_parent"
+                    android:layout_marginLeft="6dp"
+                    android:layout_marginRight="6dp"
+                    android:layout_centerVertical="true"
+                    android:layout_height="wrap_content"
+                    gastudio:arrow_color="@color/white"
+                    gastudio:done_text_color="@color/deepskyblue"
+                    gastudio:loading_circle_back_color="@color/deepskyblue"
+                    gastudio:loading_line_color="@color/white"
+                    gastudio:progress_line_color="@color/white"
+                    gastudio:progress_text_color="@color/deepskyblue" />
+
+                <LinearLayout
+                    android:id="@+id/line_top"
+                    android:layout_width="match_parent"
+                    android:layout_alignParentBottom="true"
+                    android:orientation="vertical"
+                    android:visibility="gone"
+                    android:layout_height="wrap_content">
+                    <View
+                        android:layout_width="match_parent"
+                        android:background="@color/white"
+                        android:layout_height="1dp"/>
+                    <TextView
+                        android:id="@+id/tv_install"
+                        android:layout_width="match_parent"
+                        android:text="点击进行安装"
+                        android:gravity="center"
+                        android:textColor="@color/white"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:layout_alignParentBottom="true"
+                        android:layout_height="45dp"/>
+                </LinearLayout>
+
+            </RelativeLayout>
+
+        </RelativeLayout>
+    </RelativeLayout>
+</FrameLayout>

@@ -94,4 +94,8 @@ dependencies {
     implementation 'com.white:easysp:1.0.0'
     // zxing
     implementation 'com.mylhyl:zxingscanner:1.2.1'
+    // 蒲公英版本更新
+    implementation 'com.pgyersdk:sdk:3.0.10'
+    // 进度条
+    implementation 'com.github.Ajian-studio:GADownloading:v1.0.2'
 }

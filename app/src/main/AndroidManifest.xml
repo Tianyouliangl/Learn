@@ -13,6 +13,7 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 
     <application
         android:name=".LearnApplication"
@@ -23,6 +24,12 @@
         android:supportsRtl="true"
         android:networkSecurityConfig="@xml/network_config"
         android:theme="@style/AppTheme">
+
+        <meta-data
+            android:name="PGYER_APPID"
+            android:value="07575b06e7687a201c3e583cc077bd63" >
+        </meta-data>
+
         <activity android:name=".act.CoreActivity"></activity>
         <activity android:name=".msg.act.FriendInfoActivity" />
         <activity android:name=".msg.act.NewFriendActivity" />
