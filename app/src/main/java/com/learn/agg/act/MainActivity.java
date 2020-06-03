@@ -8,6 +8,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -50,6 +51,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import static android.view.View.FOCUS_LEFT;
 import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
 
 public class MainActivity extends BaseSlidingFragmentActivity implements TabLayout.OnTabClickListener, View.OnClickListener, IconOnClickListener, DownloadFileListener, UpdateManagerListener {
@@ -66,11 +68,11 @@ public class MainActivity extends BaseSlidingFragmentActivity implements TabLayo
     private String updateUrl;
     private LinearLayout line_top;
     private File file;
-    private Handler mHandle = new Handler(){
+    private Handler mHandle = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
-            if (msg.what == 1){
+            if (msg.what == 1) {
                 updateDialog.setCancelable(true);
                 updateDialog.setCanceledOnTouchOutside(false);
                 line_top.setVisibility(View.VISIBLE);
@@ -306,7 +308,7 @@ public class MainActivity extends BaseSlidingFragmentActivity implements TabLayo
         EventBus.getDefault().unregister(this);
         SocketManager.logOutSocket(this);
         mHandle.removeMessages(1);
-        mHandle= null;
+        mHandle = null;
     }
 
     @Override
@@ -332,7 +334,7 @@ public class MainActivity extends BaseSlidingFragmentActivity implements TabLayo
                 }
                 break;
             case R.id.tv_install:
-                if (file != null){
+                if (file != null) {
                     PgyUpdateManager.installApk(file);
                 }
                 break;
@@ -352,8 +354,21 @@ public class MainActivity extends BaseSlidingFragmentActivity implements TabLayo
         //调用以下方法，DownloadFileListener 才有效；
         //如果完全使用自己的下载方法，不需要设置DownloadFileListener
         //PgyUpdateManager.downLoadApk(appBean.getDownloadURL());
+        String versionName = appBean.getVersionName();
+        String downloadURL = appBean.getDownloadURL();
+        String releaseNote = appBean.getReleaseNote();
+        String versionCode = appBean.getVersionCode();
+        Log.i("main", "versionName:" + versionName + "\n" +
+                "downloadURL:" + downloadURL + "\n" + "releaseNote:" +
+                releaseNote + "\n" + "versionCode:" + versionCode);
         updateUrl = appBean.getDownloadURL();
-        updateTvContent.setText("新版本:" + appBean.getVersionName() + "\n" + "赶紧下载体验吧~");
+        if (!releaseNote.isEmpty()) {
+            updateTvContent.setGravity(Gravity.LEFT);
+            updateTvContent.setText("更新内容:"+"\n"+releaseNote);
+        } else {
+            updateTvContent.setGravity(Gravity.CENTER);
+            updateTvContent.setText("新版本:" + appBean.getVersionName() + "\n" + "赶紧下载体验吧~");
+        }
         if (updateDialog != null && !updateDialog.isShowing()) {
             updateDialog.show();
         }
@@ -380,7 +395,7 @@ public class MainActivity extends BaseSlidingFragmentActivity implements TabLayo
         // 使用蒲公英提供的安装方法提示用户 安装apk
         // PgyUpdateManager.installApk(file);
         file = f;
-        mHandle.sendEmptyMessageDelayed(1,2000);
+        mHandle.sendEmptyMessageDelayed(1, 2000);
     }
 
     @Override
