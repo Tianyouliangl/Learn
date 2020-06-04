@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.learn.agg.R;
+import com.learn.agg.act.ScannerActivity;
 import com.learn.agg.base.BaseMvpActivity;
 import com.learn.agg.msg.adapter.FriendMsgAdapter;
 import com.learn.agg.msg.contract.NewFriendContract;
@@ -49,7 +50,7 @@ public class NewFriendActivity extends BaseMvpActivity<NewFriendContract.IPresen
         smart_layout = findViewById(R.id.smart_layout);
         rv_new_friend = findViewById(R.id.rv_new_friend);
         rl_zh = findViewById(R.id.rl_add_zh);
-        rl_sao = findViewById(R.id.rl_add_ss);
+        rl_sao = findViewById(R.id.rl_add_scanner);
     }
 
     @Override
@@ -81,8 +82,8 @@ public class NewFriendActivity extends BaseMvpActivity<NewFriendContract.IPresen
             case R.id.rl_add_zh:
                 goActivity(FindFriendActivity.class);
                 break;
-            case R.id.rl_add_ss:
-
+            case R.id.rl_add_scanner:
+                goActivity(ScannerActivity.class);
                 break;
             default:
                 break;

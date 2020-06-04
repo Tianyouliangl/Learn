@@ -63,7 +63,7 @@
         android:layout_height="60dp">
 
         <RelativeLayout
-            android:id="@+id/rl_add_ss"
+            android:id="@+id/rl_add_scanner"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 

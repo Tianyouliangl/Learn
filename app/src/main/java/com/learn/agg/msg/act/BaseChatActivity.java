@@ -6,9 +6,11 @@ import android.view.MotionEvent;
 import android.view.View;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.alibaba.sdk.android.oss.model.PutObjectRequest;
 import com.codebear.keyboard.CBEmoticonsKeyBoard;
 import com.codebear.keyboard.data.AppFuncBean;
 import com.codebear.keyboard.data.EmoticonsBean;
@@ -28,6 +30,9 @@ import com.learn.commonalitylibrary.util.ImSendMessageUtils;
 import com.learn.commonalitylibrary.util.OfTenUtils;
 import com.lib.xiangxiang.im.ImSocketClient;
 import com.lib.xiangxiang.im.SocketManager;
+import com.luck.picture.lib.PictureSelector;
+import com.luck.picture.lib.config.PictureMimeType;
+import com.luck.picture.lib.entity.LocalMedia;
 import com.scwang.smartrefresh.layout.SmartRefreshLayout;
 import com.scwang.smartrefresh.layout.api.RefreshLayout;
 import com.scwang.smartrefresh.layout.listener.OnRefreshListener;
@@ -43,6 +48,7 @@ import java.util.List;
 public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.IPresenter> implements BaseChatContract.IView, View.OnLayoutChangeListener, FuncLayout.OnFuncKeyBoardListener, View.OnClickListener, RecordIndicator.OnRecordListener, CBEmoticonsView.OnEmoticonClickListener, CBAppFuncView.OnAppFuncClickListener, View.OnTouchListener, OnRefreshListener, SocketManager.SendMsgCallBack {
 
 
+    private static final int REQUEST_CODE_IMAGE = 1231;
     private RecyclerView mRecyclerView;
     private ChatAdapter chatAdapter = new ChatAdapter(this, new ArrayList<ChatMessage>());
     public CBEmoticonsKeyBoard mKbView;
@@ -305,13 +311,43 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
     public void onAppFunClick(AppFuncBean emoticon) {
         int emoticonId = emoticon.getId();
         if (emoticonId == OPTION_TYPE_IMAGE) {
-
+            showLoadingDialog();
+            PictureSelector.create(BaseChatActivity.this)
+                    .openGallery(PictureMimeType.ofImage())
+                    .maxSelectNum(1)
+                    .minSelectNum(0)
+                    .imageSpanCount(6)
+                    .previewImage(true)
+                    .isCamera(true)
+                    .forResult(REQUEST_CODE_IMAGE);
         }
         if (emoticonId == OPTION_TYPE_LOCATION) {
 
         }
         if (emoticonId == OPTION_TYPE_CARD) {
 
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        dismissDialog();
+        List<LocalMedia> images;
+        if (resultCode == RESULT_OK){
+            switch (requestCode){
+                case REQUEST_CODE_IMAGE:
+                    images = PictureSelector.obtainMultipleResult(data);
+                    Log.i("main","size:" + images.size());
+                    if (images.size() > 0){
+                        String path = images.get(0).getPath();
+
+                    }
+                    break;
+                default:
+                    break;
+
+            }
         }
     }
 

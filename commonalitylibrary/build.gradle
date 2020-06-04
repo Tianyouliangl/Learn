@@ -35,4 +35,6 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
     //图片加载
     implementation 'com.github.bumptech.glide:glide:3.7.0'
+    // 阿里云对象存储
+    implementation 'com.aliyun.dpa:oss-android-sdk:+'
 }

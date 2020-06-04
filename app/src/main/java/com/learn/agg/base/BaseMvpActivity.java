@@ -58,6 +58,8 @@ public abstract class BaseMvpActivity<P extends IPresenterContract> extends MvpA
 
     protected abstract Boolean isRequestMission();
 
+
+
     private void createLoading() {
         mLoading = new CustomDialog(this, mDialogIsBack);
     }
@@ -67,6 +69,7 @@ public abstract class BaseMvpActivity<P extends IPresenterContract> extends MvpA
     protected abstract void initView();
 
     protected abstract void initData();
+
 
     private void requestPermission() {
         if (EasyPermission.build().hasPermission(this, needPermissions)) {
@@ -131,6 +134,10 @@ public abstract class BaseMvpActivity<P extends IPresenterContract> extends MvpA
     public void showToast(@NotNull String msg) {
         super.showToast(msg);
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+    }
+
+    protected void setDialogBack(Boolean b){
+        mDialogIsBack = b;
     }
 
     protected void initToolbar(Boolean l, Boolean c, Boolean r) {

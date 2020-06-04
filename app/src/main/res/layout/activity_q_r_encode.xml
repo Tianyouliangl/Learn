@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".act.QREncodeActivity">
+
+    <include layout="@layout/layout_toolbar"/>
+
+    <RelativeLayout
+        android:layout_below="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:minHeight="800dp"
+        android:minWidth="800dp"
+        android:clipChildren="false"
+        android:background="@color/whitesmoke"
+        android:layout_height="match_parent">
+
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_marginLeft="50dp"
+            android:layout_marginRight="50dp"
+            android:layout_centerInParent="true"
+            android:clipChildren="false"
+            android:minWidth="220dp"
+            android:background="@drawable/shape_chat_time"
+            android:layout_height="wrap_content">
+
+            <com.makeramen.roundedimageview.RoundedImageView
+                android:layout_width="60dp"
+                android:id="@+id/round_icon"
+                app:riv_oval="true"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="-30dp"
+                android:layout_height="60dp"/>
+
+            <TextView
+                android:id="@+id/tv_name"
+                android:layout_width="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_below="@id/round_icon"
+                android:layout_marginTop="10dp"
+                android:textSize="22dp"
+                android:textColor="@color/darkslategrey"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:id="@+id/tv_mobile"
+                android:layout_width="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_below="@id/tv_name"
+                android:layout_marginTop="5dp"
+                android:textSize="14dp"
+                android:layout_height="wrap_content"/>
+
+            <ImageView
+                android:id="@+id/iv_qre_code"
+                android:layout_below="@id/tv_mobile"
+                android:layout_width="240dp"
+                android:scaleType="fitXY"
+                android:layout_centerHorizontal="true"
+                android:layout_marginBottom="20dp"
+                android:layout_height="240dp" />
+
+
+
+
+        </RelativeLayout>
+
+
+
+    </RelativeLayout>
+
+</RelativeLayout>

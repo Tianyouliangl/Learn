@@ -76,8 +76,6 @@ dependencies {
     implementation 'com.scwang.smartrefresh:SmartRefreshHeader:1.1.0-alpha-14'
     //任意位置弹出的popwindow
     implementation 'com.github.zyyoona7:EasyPopup:1.1.2'
-    //尖角气泡控件
-    implementation 'com.github.zengzhaoxing:SharpView:v2.4.4'
     // 权限
     implementation 'com.github.githubZYQ:easypermission:v1.0.0'
     //圆角图片
@@ -98,4 +96,10 @@ dependencies {
     implementation 'com.pgyersdk:sdk:3.0.10'
     // 进度条
     implementation 'com.github.Ajian-studio:GADownloading:v1.0.2'
+    //图库
+    implementation 'com.github.LuckSiege.PictureSelector:picture_library:v2.2.2'
+    // 阿里云对象存储
+    implementation 'com.aliyun.dpa:oss-android-sdk:+'
+    // cardview
+    implementation 'com.android.support:cardview-v7:28.0.0'
 }

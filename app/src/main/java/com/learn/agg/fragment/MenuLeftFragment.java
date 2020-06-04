@@ -14,6 +14,7 @@ import androidx.appcompat.view.menu.MenuPresenter;
 
 import com.bumptech.glide.Glide;
 import com.learn.agg.R;
+import com.learn.agg.act.QREncodeActivity;
 import com.learn.agg.base.BaseMvpFragment;
 import com.learn.agg.base.IconOnClickListener;
 import com.learn.agg.fragment.contract.MenuLeftContract;
@@ -39,6 +40,7 @@ public class MenuLeftFragment extends BaseMvpFragment<MenuLeftContract.IPresente
     private RelativeLayout rl_info;
     private String json;
     private TextView tv_code;
+    private ImageView iv_code;
 
     @Override
     protected int getLayoutId() {
@@ -61,8 +63,10 @@ public class MenuLeftFragment extends BaseMvpFragment<MenuLeftContract.IPresente
         iv_close = view.findViewById(R.id.iv_close);
         tv_money = view.findViewById(R.id.tv_money);
         tv_code = view.findViewById(R.id.tv_code);
+        iv_code = view.findViewById(R.id.iv_code);
         iv_close.setOnClickListener(this);
         rl_info.setOnClickListener(this);
+        iv_code.setOnClickListener(this);
     }
 
     @Override
@@ -120,6 +124,11 @@ public class MenuLeftFragment extends BaseMvpFragment<MenuLeftContract.IPresente
                 Intent intent = new Intent(getActivity(), FriendInfoActivity.class);
                 intent.putExtra("bundle", bundle);
                 startActivity(intent);
+                break;
+            case R.id.iv_code:
+                Bundle bundleCode = new Bundle();
+                bundleCode.putBoolean("isFinish",false);
+                goActivity(QREncodeActivity.class,bundleCode);
                 break;
             default:
                 break;

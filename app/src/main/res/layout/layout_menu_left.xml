@@ -61,7 +61,7 @@
           android:layout_toLeftOf="@id/iv_code"
           android:layout_height="wrap_content"/>
 
-      <com.rey.material.widget.ImageView
+      <ImageView
           android:id="@+id/iv_code"
           android:layout_width="35dp"
           android:layout_marginRight="20dp"

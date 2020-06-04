@@ -14,6 +14,7 @@
         android:layout_width="60dp"
         android:layout_marginTop="60dp"
         app:riv_corner_radius="6dp"
+        app:riv_oval="true"
         android:src="@mipmap/icon_icon_default"
         android:layout_height="60dp"/>
 

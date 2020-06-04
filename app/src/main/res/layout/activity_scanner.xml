@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.mylhyl.zxing.scanner.ScannerView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:id="@+id/scanner_view"
+    android:layout_height="match_parent"
+    tools:context=".act.ScannerActivity">
+
+  <RelativeLayout
+      android:layout_width="match_parent"
+      android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="60dp">
+
+      <ImageView
+          android:id="@+id/iv_back"
+          android:layout_width="30dp"
+          android:layout_marginTop="10dp"
+          android:src="@mipmap/icon_back_toolbar"
+          android:layout_centerVertical="true"
+          android:layout_marginLeft="10dp"
+          android:layout_height="30dp"/>
+
+      <TextView
+          android:layout_width="wrap_content"
+          android:text="扫一扫"
+          android:textSize="16sp"
+          android:textColor="@color/white"
+          android:layout_centerInParent="true"
+          android:layout_height="wrap_content"/>
+
+      <ImageView
+          android:id="@+id/iv_images"
+          android:layout_width="30dp"
+          android:layout_marginTop="10dp"
+          android:src="@mipmap/ic_launcher"
+          android:layout_centerVertical="true"
+          android:layout_alignParentRight="true"
+          android:layout_marginRight="10dp"
+          android:layout_height="30dp"/>
+
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/tv_code"
+        android:layout_width="wrap_content"
+        android:text="我的二维码"
+        android:textColor="@color/deepskyblue"
+        android:textSize="14sp"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="110dp"
+        android:gravity="center"
+        android:padding="2dp"
+        android:layout_height="wrap_content"/>
+
+    <ImageView
+        android:layout_toLeftOf="@id/tv_code"
+        android:layout_alignTop="@id/tv_code"
+        android:layout_alignBottom="@id/tv_code"
+        android:src="@drawable/icon_erweima_to"
+        android:layout_width="wrap_content"
+        android:padding="2dp"
+        android:layout_height="wrap_content"/>
+
+
+
+  </RelativeLayout>
+
+
+
+</com.mylhyl.zxing.scanner.ScannerView>
