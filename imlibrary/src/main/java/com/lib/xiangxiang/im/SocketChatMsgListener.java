@@ -34,12 +34,9 @@ public class SocketChatMsgListener implements Emitter.Listener {
         intent.putExtra(ImService.SOCKET_CMD,ImService.SOCKET_RECEIVER_MSG);
         intent.putExtra(ImService.SOCKET_MSG,result);
         startService(mContext,intent);
-        ChatMessage bean = GsonUtil.GsonToBean(result, ChatMessage.class);
-        if (bean.getType() == ChatMessage.MSG_SEND_CHAT){
-            Log.i(ImSocketClient.TAG,
-                    "收到消息------"
-                            + "\n" + result);
-        }
+        Log.i(ImSocketClient.TAG,
+                "收到消息------"
+                        + "\n" + result);
 
     }
 

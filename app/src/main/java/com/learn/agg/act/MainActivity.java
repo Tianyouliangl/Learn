@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
@@ -18,6 +19,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
@@ -25,15 +27,16 @@ import androidx.fragment.app.FragmentTransaction;
 import com.gastudio.downloadloadding.library.GADownloadingView;
 import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
 import com.learn.agg.R;
-import com.learn.agg.base.BaseAppCompatActivity;
 import com.learn.agg.base.BaseSlidingFragmentActivity;
 import com.learn.agg.base.IconOnClickListener;
 import com.learn.agg.fragment.MenuLeftFragment;
 import com.learn.agg.msg.fragment.MessageFragment;
 import com.learn.agg.net.NetConfig;
+import com.learn.agg.net.bean.LoginBean;
 import com.learn.agg.video.VideoFragment;
 import com.learn.agg.widgets.CustomDialog;
 import com.learn.agg.widgets.TabLayout;
+import com.learn.commonalitylibrary.ChatMessage;
 import com.learn.commonalitylibrary.Constant;
 import com.learn.commonalitylibrary.util.NotificationUtils;
 import com.lib.xiangxiang.im.SocketManager;
@@ -51,7 +54,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import static android.view.View.FOCUS_LEFT;
 import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
 
 public class MainActivity extends BaseSlidingFragmentActivity implements TabLayout.OnTabClickListener, View.OnClickListener, IconOnClickListener, DownloadFileListener, UpdateManagerListener {
@@ -74,7 +76,7 @@ public class MainActivity extends BaseSlidingFragmentActivity implements TabLayo
             super.handleMessage(msg);
             if (msg.what == 1) {
                 updateDialog.setCancelable(true);
-                updateDialog.setCanceledOnTouchOutside(false);
+                updateDialog.setCanceledOnTouchOutside(true);
                 line_top.setVisibility(View.VISIBLE);
                 tv_top.setVisibility(View.INVISIBLE);
                 tv_success.setVisibility(View.VISIBLE);
@@ -83,6 +85,7 @@ public class MainActivity extends BaseSlidingFragmentActivity implements TabLayo
     };
     private TextView tv_top;
     private TextView tv_success;
+    private CustomDialog offlineDialog;
 
     @Override
     protected int getLayoutId() {
@@ -107,16 +110,22 @@ public class MainActivity extends BaseSlidingFragmentActivity implements TabLayo
         initMenu();
         initDialog();
         updateCode();
+        loginSocket();
         NetConfig.init(getApplicationContext());
         NotificationUtils.setSystemPendingIntent(this);
-        String uid = EasySP.init(this).getString(Constant.SPKey_UID);
-        Log.i("Net", "------------uid==========  " + uid);
-        SocketManager.loginSocket(this, "uid=" + uid);
         ArrayList<TabLayout.Tab> list = new ArrayList<>();
         list.add(new TabLayout.Tab(R.drawable.selector_tab_msg, R.string.msg, MessageFragment.class));
         list.add(new TabLayout.Tab(R.drawable.selector_tab_video, R.string.video, VideoFragment.class));
         tab_layout.setUpData(list, this);
         tab_layout.setCurrentTab(0);
+    }
+
+    private void loginSocket() {
+        String token = EasySP.init(this).getString(Constant.SPKey_token(this));
+        String uid = EasySP.init(this).getString(Constant.SPKey_UID);
+        String mobile = EasySP.init(this).getString(Constant.SPKey_phone(this));
+        Log.i("Net", "------------token==========  " + token);
+        SocketManager.loginSocket(this, "token=" + token + "&" + "uid=" + uid + "&" + "mobile=" + mobile + "&" + "desc=" + "Android");
     }
 
     private void initDialog() {
@@ -261,6 +270,7 @@ public class MainActivity extends BaseSlidingFragmentActivity implements TabLayo
         }
     }
 
+
     //事件的 订阅 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void MessageEvent(HashMap<String, Object> map) {
@@ -273,6 +283,23 @@ public class MainActivity extends BaseSlidingFragmentActivity implements TabLayo
                     tab_layout.onDataChanged(index, count);
                 }
             }
+        }
+    }
+
+    //事件的 订阅 
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void MessageEvent(ChatMessage msg) {
+        if (msg.getType() == ChatMessage.MSG_OFFLINE) {
+            if (updateDialog != null && updateDialog.isShowing()) {
+                updateDialog.dismiss();
+            }
+            SocketManager.logOutSocket(this);
+            goActivity(MainActivity.class);
+            Bundle bundle = new Bundle();
+            bundle.putString("body", msg.getBody());
+            Intent intent = new Intent(this, GlobalDialogActivity.class);
+            intent.putExtra("bundle", bundle);
+            startActivityForResult(intent, 1232);
         }
     }
 
@@ -306,7 +333,6 @@ public class MainActivity extends BaseSlidingFragmentActivity implements TabLayo
         super.onDestroy();
 //        NetConfig.unRegisterReceiver(this);
         EventBus.getDefault().unregister(this);
-        SocketManager.logOutSocket(this);
         mHandle.removeMessages(1);
         mHandle = null;
     }
@@ -343,6 +369,7 @@ public class MainActivity extends BaseSlidingFragmentActivity implements TabLayo
         }
     }
 
+
     @Override
     public void onNoUpdateAvailable() {
         //没有更新是回调此方法
@@ -364,7 +391,7 @@ public class MainActivity extends BaseSlidingFragmentActivity implements TabLayo
         updateUrl = appBean.getDownloadURL();
         if (!releaseNote.isEmpty()) {
             updateTvContent.setGravity(Gravity.LEFT);
-            updateTvContent.setText("更新内容:"+"\n"+releaseNote);
+            updateTvContent.setText("更新内容:" + "\n" + releaseNote);
         } else {
             updateTvContent.setGravity(Gravity.CENTER);
             updateTvContent.setText("新版本:" + appBean.getVersionName() + "\n" + "赶紧下载体验吧~");
@@ -404,5 +431,19 @@ public class MainActivity extends BaseSlidingFragmentActivity implements TabLayo
         ga_downloading.updateProgress(args[0]);
     }
 
-
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 1232) {
+            if (resultCode == RESULT_OK) {
+                boolean isFinish = data.getBooleanExtra("isFinish", false);
+                if (isFinish){
+                    goActivity(LoginActivity.class);
+                    finish();
+                }else {
+                    loginSocket();
+                }
+            }
+        }
+    }
 }

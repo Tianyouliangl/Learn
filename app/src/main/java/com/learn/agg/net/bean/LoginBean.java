@@ -35,6 +35,7 @@ public class LoginBean implements Serializable {
     private Boolean isFriend = false;
     private int source = -1;
     private String remark = "";
+    private String token;
 
     public int getSource() {
         return source;
@@ -154,5 +155,13 @@ public class LoginBean implements Serializable {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 }

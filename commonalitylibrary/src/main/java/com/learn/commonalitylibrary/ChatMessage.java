@@ -28,6 +28,7 @@ public class ChatMessage {
 
     public static int MSG_SEND_CHAT = 1;   // 聊天
     public static int MSG_SEND_SYS = 2;    // 通知
+    public static int MSG_OFFLINE = 3;    // 其他设备登录
 
     // 是否显示时间
     public static int MSG_TIME_FALSE = 0;

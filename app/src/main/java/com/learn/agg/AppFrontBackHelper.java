@@ -81,6 +81,10 @@ public class AppFrontBackHelper {
     };
 
     public interface OnAppStatusListener{
+        void onResumed(Activity activity);
+        void onPaused(Activity activity);
+        void onStarted(Activity activity);
+        void onStopped(Activity activity);
         void onFront();
         void onBack();
     }

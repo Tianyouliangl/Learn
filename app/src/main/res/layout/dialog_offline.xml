@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+   <RelativeLayout
+       android:layout_width="match_parent"
+       android:minWidth="260dp"
+       android:minHeight="260dp"
+       android:layout_marginLeft="40dp"
+       android:layout_marginRight="40dp"
+       android:background="@drawable/shape_offline"
+       android:layout_centerInParent="true"
+       android:layout_height="200dp">
+
+      <TextView
+          android:id="@+id/tv_top"
+          android:layout_width="wrap_content"
+          android:layout_centerHorizontal="true"
+          android:textSize="16sp"
+          android:text="下线通知"
+          android:textStyle="bold"
+          android:textColor="@color/black"
+          android:layout_marginTop="22dp"
+          android:layout_height="wrap_content"/>
+
+      <TextView
+          android:id="@+id/tv_content"
+          android:layout_below="@id/tv_top"
+          android:layout_above="@id/linear_bottom"
+          android:layout_marginTop="12dp"
+          android:layout_marginLeft="12dp"
+          android:layout_marginRight="12dp"
+          android:layout_marginBottom="16dp"
+          android:textSize="14dp"
+          android:lineSpacingExtra="10dp"
+          android:maxLines="4"
+          android:ellipsize="end"
+          android:textColor="@color/darkslategrey"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"/>
+
+      <View
+          android:layout_width="match_parent"
+          android:layout_above="@id/linear_bottom"
+          android:background="@color/whitesmoke"
+          android:layout_height="1dp"/>
+
+      <LinearLayout
+          android:id="@+id/linear_bottom"
+          android:layout_width="match_parent"
+          android:orientation="horizontal"
+          android:layout_alignParentBottom="true"
+          android:layout_height="45dp">
+
+         <TextView
+             android:id="@+id/tv_exit"
+             android:layout_width="0dp"
+             android:layout_weight="1"
+             android:gravity="center"
+             android:text="退出"
+             android:textColor="@color/black"
+             android:layout_height="match_parent"/>
+
+         <TextView
+             android:id="@+id/tv_again_login"
+             android:layout_width="0dp"
+             android:layout_weight="1"
+             android:textColor="@color/black"
+             android:gravity="center"
+             android:text="重新登录"
+             android:layout_height="match_parent"/>
+
+      </LinearLayout>
+
+   </RelativeLayout>
+
+</RelativeLayout>

@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 
 import com.learn.commonalitylibrary.Constant;
 import com.learn.commonalitylibrary.util.NetState;
+import com.lib.xiangxiang.im.BuildConfig;
 import com.senyint.ihospital.client.HttpFactory;
 import com.white.easysp.EasySP;
 
@@ -20,8 +21,6 @@ import io.reactivex.schedulers.Schedulers;
 
 
 public class NetBroadcastReceiver extends BroadcastReceiver {
-
-
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -34,7 +33,6 @@ public class NetBroadcastReceiver extends BroadcastReceiver {
             if (netWorkState){
                 upUserInfo(workStatus,context);
             }
-
         }
     }
 

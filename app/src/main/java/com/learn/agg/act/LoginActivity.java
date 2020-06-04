@@ -119,7 +119,8 @@ public class LoginActivity extends BaseMvpActivity<LoginContract.IPresenter> imp
                 .put(Constant.SPKey_pwd(this), getPassword())
                 .put(Constant.SPKey_userName(this),data.getUsername())
                 .put(Constant.SPKey_icon(this),data.getImageUrl())
-                .put(Constant.SPKey_info(this), new Gson().toJson(data));
+                .put(Constant.SPKey_info(this), new Gson().toJson(data))
+                .put(Constant.SPKey_token(this),data.getToken());
         goActivity(MainActivity.class);
         finish();
     }

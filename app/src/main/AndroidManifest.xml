@@ -14,6 +14,7 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
     <application
         android:name=".LearnApplication"
@@ -24,7 +25,11 @@
         android:roundIcon="@mipmap/icon_logo_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".act.QREncodeActivity"></activity>
+        <activity
+            android:launchMode="singleTop"
+            android:name=".act.GlobalDialogActivity"
+            android:theme="@style/MyDialogStyle"></activity>
+        <activity android:name=".act.QREncodeActivity" />
         <activity android:name=".act.ScannerActivity" />
 
         <meta-data
@@ -50,7 +55,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".act.MainActivity" />
+        <activity android:name=".act.MainActivity" android:launchMode="singleTask"/>
 
         <service android:name="com.lib.xiangxiang.im.ImService" />
     </application>

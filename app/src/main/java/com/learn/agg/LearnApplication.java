@@ -12,10 +12,14 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.Log;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.learn.agg.act.MainActivity;
+import com.learn.agg.widgets.CustomDialog;
 import com.learn.commonalitylibrary.Constant;
 import com.learn.commonalitylibrary.util.NotificationUtils;
 import com.lib.xiangxiang.im.ImService;
+import com.lib.xiangxiang.im.ImSocketClient;
 import com.lib.xiangxiang.im.SocketManager;
 import com.scwang.smartrefresh.header.MaterialHeader;
 import com.scwang.smartrefresh.layout.SmartRefreshLayout;
@@ -26,6 +30,9 @@ import com.scwang.smartrefresh.layout.api.RefreshHeader;
 import com.scwang.smartrefresh.layout.api.RefreshLayout;
 import com.scwang.smartrefresh.layout.footer.ClassicsFooter;
 import com.senyint.ihospital.HttpConfig;
+
+import org.greenrobot.eventbus.EventBus;
+
 import java.util.HashMap;
 import java.util.List;
 
@@ -57,6 +64,8 @@ public class LearnApplication extends Application implements AppFrontBackHelper.
         NotificationUtils.initChannel(this,NotificationUtils.Chat_channelId,NotificationUtils.Chat_channelName, NotificationManager.IMPORTANCE_HIGH);
         HttpConfig.INSTANCE.init(Constant.BASE_GROUP_URL,getHeader(),getParams(),true);
     }
+
+
 
 
     /**
@@ -104,6 +113,26 @@ public class LearnApplication extends Application implements AppFrontBackHelper.
     }
 
     @Override
+    public void onResumed(Activity activity) {
+
+    }
+
+    @Override
+    public void onPaused(Activity activity) {
+
+    }
+
+    @Override
+    public void onStarted(Activity activity) {
+
+    }
+
+    @Override
+    public void onStopped(Activity activity) {
+       
+    }
+
+    @Override
     public void onFront() {
         NotificationUtils.setIsSwitch(false);
         Log.i("Net","App回到前台"+ NotificationUtils.getIsSwitch());
@@ -115,4 +144,5 @@ public class LearnApplication extends Application implements AppFrontBackHelper.
         NotificationUtils.setIsSwitch(true);
         Log.i("Net","App遁入后台" + NotificationUtils.getIsSwitch());
     }
+
 }

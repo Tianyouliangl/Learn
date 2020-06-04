@@ -243,8 +243,10 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void EventBus(ChatMessage msg) {
-        chatAdapter.setData(msg);
-        toLastItem();
+        if (msg.getType() == ChatMessage.MSG_SEND_CHAT){
+            chatAdapter.setData(msg);
+            toLastItem();
+        }
     }
 
     private void sendText(String text) {
