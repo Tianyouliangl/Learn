@@ -49,6 +49,7 @@ public class ImService extends Service {
     public static final String SOCKET_DATA = "data";
     public static final String SOCKET_MSG = "msg";
     public static final String SOCKET_EVENT = "event";
+    public static Boolean startService = false;
 
 
     @Nullable
@@ -156,6 +157,7 @@ public class ImService extends Service {
     }
 
     private void releaseSocket() {
+        startService = false;
         ImSocketClient.release();
         stopSelf();
     }
@@ -185,6 +187,7 @@ public class ImService extends Service {
     }
 
     private void initSocket(Intent intent) {
+        startService = true;
         String token = intent.getStringExtra(SOCKET_DATA);
         ImSocketClient.initSocket(token, this);
     }

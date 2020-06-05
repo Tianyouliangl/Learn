@@ -19,12 +19,14 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.gastudio.downloadloadding.library.GADownloadingView;
+import com.google.gson.Gson;
 import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
 import com.learn.agg.R;
 import com.learn.agg.base.BaseSlidingFragmentActivity;
@@ -32,18 +34,25 @@ import com.learn.agg.base.IconOnClickListener;
 import com.learn.agg.fragment.MenuLeftFragment;
 import com.learn.agg.msg.fragment.MessageFragment;
 import com.learn.agg.net.NetConfig;
+import com.learn.agg.net.base.BaseObserverTC;
+import com.learn.agg.net.base.IHttpProtocol;
 import com.learn.agg.net.bean.LoginBean;
+import com.learn.agg.util.ActivityUtil;
+import com.learn.agg.util.PhoneUtils;
 import com.learn.agg.video.VideoFragment;
 import com.learn.agg.widgets.CustomDialog;
 import com.learn.agg.widgets.TabLayout;
 import com.learn.commonalitylibrary.ChatMessage;
 import com.learn.commonalitylibrary.Constant;
 import com.learn.commonalitylibrary.util.NotificationUtils;
+import com.lib.xiangxiang.im.ImService;
+import com.lib.xiangxiang.im.ImSocketClient;
 import com.lib.xiangxiang.im.SocketManager;
 import com.pgyersdk.update.DownloadFileListener;
 import com.pgyersdk.update.PgyUpdateManager;
 import com.pgyersdk.update.UpdateManagerListener;
 import com.pgyersdk.update.javabean.AppBean;
+import com.senyint.ihospital.client.HttpFactory;
 import com.white.easysp.EasySP;
 
 import org.greenrobot.eventbus.EventBus;
@@ -54,6 +63,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
+
 import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
 
 public class MainActivity extends BaseSlidingFragmentActivity implements TabLayout.OnTabClickListener, View.OnClickListener, IconOnClickListener, DownloadFileListener, UpdateManagerListener {
@@ -62,7 +74,7 @@ public class MainActivity extends BaseSlidingFragmentActivity implements TabLayo
     private TabLayout tab_layout;
     private Fragment mCurrentFragment;
     private CustomDialog customDialog;
-    private Button btn_notification;
+    private TextView tv_notification;
     private CustomDialog updateDialog;
     private TextView updateTvContent;
     private View updateNumberView;
@@ -70,6 +82,7 @@ public class MainActivity extends BaseSlidingFragmentActivity implements TabLayo
     private String updateUrl;
     private LinearLayout line_top;
     private File file;
+    private Boolean isUpdateAPK = false;
     private Handler mHandle = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -85,7 +98,7 @@ public class MainActivity extends BaseSlidingFragmentActivity implements TabLayo
     };
     private TextView tv_top;
     private TextView tv_success;
-    private CustomDialog offlineDialog;
+    private CustomDialog offLineDialog;
 
     @Override
     protected int getLayoutId() {
@@ -110,7 +123,6 @@ public class MainActivity extends BaseSlidingFragmentActivity implements TabLayo
         initMenu();
         initDialog();
         updateCode();
-        loginSocket();
         NetConfig.init(getApplicationContext());
         NotificationUtils.setSystemPendingIntent(this);
         ArrayList<TabLayout.Tab> list = new ArrayList<>();
@@ -137,8 +149,8 @@ public class MainActivity extends BaseSlidingFragmentActivity implements TabLayo
         updateTvContent = updateView.findViewById(R.id.tv_content);
         TextView tv_update = updateView.findViewById(R.id.tv_update);
         tv_update.setOnClickListener(this);
-        btn_notification = view.findViewById(R.id.btn_notification);
-        btn_notification.setOnClickListener(this);
+        tv_notification = view.findViewById(R.id.tv_notification);
+        tv_notification.setOnClickListener(this);
         ga_downloading = updateNumberView.findViewById(R.id.ga_downloading);
         line_top = updateNumberView.findViewById(R.id.line_top);
         tv_top = updateNumberView.findViewById(R.id.tv_top);
@@ -267,6 +279,16 @@ public class MainActivity extends BaseSlidingFragmentActivity implements TabLayo
             if (customDialog != null && !customDialog.isShowing()) {
                 customDialog.show();
             }
+        }else {
+            if (customDialog != null && customDialog.isShowing()) {
+                customDialog.dismiss();
+            }
+            if (isUpdateAPK){
+                showUpdateDialog();
+            }
+            if (!ImService.startService){
+                loginSocket();
+            }
         }
     }
 
@@ -293,13 +315,19 @@ public class MainActivity extends BaseSlidingFragmentActivity implements TabLayo
             if (updateDialog != null && updateDialog.isShowing()) {
                 updateDialog.dismiss();
             }
+            ActivityUtil.getInstance().finishAllActivityExcept(MainActivity.class);
             SocketManager.logOutSocket(this);
-            goActivity(MainActivity.class);
-            Bundle bundle = new Bundle();
-            bundle.putString("body", msg.getBody());
-            Intent intent = new Intent(this, GlobalDialogActivity.class);
-            intent.putExtra("bundle", bundle);
-            startActivityForResult(intent, 1232);
+            if (offLineDialog == null){
+                offLineDialog = new CustomDialog(this, false, R.layout.dialog_offline);
+            }
+            View view = offLineDialog.getView();
+            TextView tv_content = view.findViewById(R.id.tv_content);
+            TextView tv_exit = view.findViewById(R.id.tv_exit);
+            TextView aga_login = view.findViewById(R.id.tv_again_login);
+            tv_exit.setOnClickListener(this);
+            aga_login.setOnClickListener(this);
+            tv_content.setText(msg.getBody());
+            offLineDialog.show();
         }
     }
 
@@ -333,18 +361,17 @@ public class MainActivity extends BaseSlidingFragmentActivity implements TabLayo
         super.onDestroy();
 //        NetConfig.unRegisterReceiver(this);
         EventBus.getDefault().unregister(this);
+        PgyUpdateManager.unRegister();
         mHandle.removeMessages(1);
         mHandle = null;
+        offLineDialog = null;
     }
 
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.btn_notification:
+            case R.id.tv_notification:
                 goToSetNotification(this);
-                if (customDialog != null && customDialog.isShowing()) {
-                    customDialog.dismiss();
-                }
                 break;
             case R.id.iv_close:
 
@@ -364,8 +391,61 @@ public class MainActivity extends BaseSlidingFragmentActivity implements TabLayo
                     PgyUpdateManager.installApk(file);
                 }
                 break;
+            case R.id.tv_exit:
+                dismissOffLineDialog();
+                goActivity(LoginActivity.class);
+                finish();
+                break;
+            case R.id.tv_again_login:
+                dismissOffLineDialog();
+                agaLogin();
+                break;
             default:
                 break;
+        }
+    }
+
+    private void agaLogin() {
+        String phone = EasySP.init(this).getString(Constant.SPKey_phone(this));
+        final String password = EasySP.init(this).getString(Constant.SPKey_pwd(this));
+        HashMap<String, String> map = new HashMap<>();
+        map.put("mobile", phone);
+        map.put("password", password);
+        HttpFactory.INSTANCE.getProtocol(IHttpProtocol.class)
+                .login(map)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new BaseObserverTC<LoginBean>(){
+
+                    @Override
+                    protected void onNextEx(@NonNull LoginBean data) {
+                        EasySP.init(MainActivity.this).put(Constant.SPKey_UID, data.getUid())
+                                .put(Constant.SPKey_phone(MainActivity.this), data.getMobile())
+                                .put(Constant.SPKey_pwd(MainActivity.this),password)
+                                .put(Constant.SPKey_userName(MainActivity.this),data.getUsername())
+                                .put(Constant.SPKey_icon(MainActivity.this),data.getImageUrl())
+                                .put(Constant.SPKey_info(MainActivity.this), new Gson().toJson(data))
+                                .put(Constant.SPKey_token(MainActivity.this),data.getToken());
+                        loginSocket();
+                    }
+
+                    @Override
+                    protected void onErrorEx(@NonNull Throwable e) {
+                        goActivity(LoginActivity.class);
+                        MainActivity.this.finish();
+                    }
+
+                    @Override
+                    protected void onNextSN(String msg) {
+                        goActivity(LoginActivity.class);
+                        MainActivity.this.finish();
+                    }
+                });
+    }
+
+    public void dismissOffLineDialog(){
+        if (offLineDialog != null && offLineDialog.isShowing()){
+            offLineDialog.dismiss();
         }
     }
 
@@ -377,6 +457,7 @@ public class MainActivity extends BaseSlidingFragmentActivity implements TabLayo
 
     @Override
     public void onUpdateAvailable(AppBean appBean) {
+        isUpdateAPK = true;
         //有更新回调此方法
         //调用以下方法，DownloadFileListener 才有效；
         //如果完全使用自己的下载方法，不需要设置DownloadFileListener
@@ -396,6 +477,12 @@ public class MainActivity extends BaseSlidingFragmentActivity implements TabLayo
             updateTvContent.setGravity(Gravity.CENTER);
             updateTvContent.setText("新版本:" + appBean.getVersionName() + "\n" + "赶紧下载体验吧~");
         }
+        if (!customDialog.isShowing()){
+            showUpdateDialog();
+        }
+    }
+
+    public void showUpdateDialog(){
         if (updateDialog != null && !updateDialog.isShowing()) {
             updateDialog.show();
         }
@@ -431,19 +518,4 @@ public class MainActivity extends BaseSlidingFragmentActivity implements TabLayo
         ga_downloading.updateProgress(args[0]);
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == 1232) {
-            if (resultCode == RESULT_OK) {
-                boolean isFinish = data.getBooleanExtra("isFinish", false);
-                if (isFinish){
-                    goActivity(LoginActivity.class);
-                    finish();
-                }else {
-                    loginSocket();
-                }
-            }
-        }
-    }
 }

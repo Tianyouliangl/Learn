@@ -25,10 +25,6 @@
         android:roundIcon="@mipmap/icon_logo_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity
-            android:launchMode="singleTop"
-            android:name=".act.GlobalDialogActivity"
-            android:theme="@style/MyDialogStyle"></activity>
         <activity android:name=".act.QREncodeActivity" />
         <activity android:name=".act.ScannerActivity" />
 

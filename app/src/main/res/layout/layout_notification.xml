@@ -1,52 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
-    android:background="@drawable/shape_item_loading"
-    android:layout_height="wrap_content">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
 
 
     <RelativeLayout
-        android:layout_width="280dp"
-        android:layout_height="280dp">
+        android:layout_width="240dp"
+        android:background="@drawable/shape_offline"
+        android:layout_centerInParent="true"
+        android:layout_height="240dp">
+
+
+        <ImageView
+            android:id="@+id/iv_no"
+            android:layout_width="45dp"
+            android:layout_centerHorizontal="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="10dp"
+            android:src="@drawable/icon_notification"
+            android:layout_height="45dp"/>
 
         <TextView
             android:id="@+id/tv_content"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:textSize="16sp"
-            android:text="检测到没有通知权限,开启权限不错过好友消息。"
+            android:text="检测到没有通知权限~\n为了您的体验请前往打开。"
             android:layout_centerInParent="true"
             android:layout_marginLeft="20dp"
             android:layout_marginRight="20dp"
+            android:lineSpacingExtra="10dp"
             android:textColor="@color/darkslategrey"
             android:textStyle="bold"
             android:layout_height="wrap_content"/>
 
-        <Button
-            android:id="@+id/btn_notification"
-            android:textColor="@color/white"
-            android:text="去开启"
-            android:textSize="18sp"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
-            android:padding="4dp"
-            android:layout_marginBottom="10dp"
-            android:layout_width="wrap_content"
-            android:background="@drawable/shape_tv_agree"
-            android:layout_height="wrap_content"/>
+        <View
+            android:layout_width="match_parent"
+            android:background="@color/whitesmoke"
+            android:layout_above="@id/tv_notification"
+            android:layout_height="1dp"/>
 
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_above="@id/tv_content"
-            android:maxWidth="45dp"
-            android:maxHeight="45dp"
-            android:layout_marginBottom="16dp"
-            android:src="@drawable/icon_notification"
+        <TextView
+            android:id="@+id/tv_notification"
+            android:textColor="@color/black"
+            android:text="去开启"
+            android:gravity="center"
+            android:textSize="18sp"
+            android:minHeight="45dp"
+            android:textStyle="bold"
+            android:layout_alignParentBottom="true"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
 
     </RelativeLayout>
 
 
 
-</FrameLayout>
+</RelativeLayout>

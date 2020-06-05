@@ -9,6 +9,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.learn.agg.R;
+import com.learn.agg.util.ActivityUtil;
 import com.zyq.easypermission.EasyPermission;
 import com.zyq.easypermission.EasyPermissionHelper;
 import com.zyq.easypermission.EasyPermissionResult;
@@ -33,6 +34,7 @@ public abstract class BaseAppCompatActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        ActivityUtil.getInstance().addActivity(this);
         setTheme(R.style.AppTheme);
         setContentView(getLayoutId());
         isRequestMission = isRequestMission();
@@ -128,5 +130,11 @@ public abstract class BaseAppCompatActivity extends AppCompatActivity {
                 finish();
             }
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        ActivityUtil.getInstance().removeActivity(this);
     }
 }

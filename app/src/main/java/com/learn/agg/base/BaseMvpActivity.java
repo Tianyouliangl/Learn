@@ -11,6 +11,7 @@ import android.widget.Toolbar;
 import androidx.annotation.NonNull;
 
 import com.learn.agg.R;
+import com.learn.agg.util.ActivityUtil;
 import com.learn.agg.widgets.CustomDialog;
 import com.makeramen.roundedimageview.RoundedImageView;
 import com.senyint.ihospital.contract.IPresenterContract;
@@ -28,7 +29,7 @@ import java.util.MissingResourceException;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
-public abstract class BaseMvpActivity<P extends IPresenterContract> extends MvpActivity<P> {
+public abstract class BaseMvpActivity<P extends IPresenterContract> extends MvpActivity<P>{
 
     private CustomDialog mLoading;
     private Boolean mDialogIsBack = true;
@@ -44,6 +45,7 @@ public abstract class BaseMvpActivity<P extends IPresenterContract> extends MvpA
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        ActivityUtil.getInstance().addActivity(this);
         setTheme(R.style.AppTheme);
         setContentView(getLayoutId());
         isRequestMission = isRequestMission();
@@ -252,5 +254,11 @@ public abstract class BaseMvpActivity<P extends IPresenterContract> extends MvpA
                 finish();
             }
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        ActivityUtil.getInstance().removeActivity(this);
     }
 }

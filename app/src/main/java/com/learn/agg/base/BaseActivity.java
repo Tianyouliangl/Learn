@@ -13,6 +13,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentActivity;
 import com.learn.agg.R;
+import com.learn.agg.util.ActivityUtil;
 import com.makeramen.roundedimageview.RoundedImageView;
 import com.zyq.easypermission.EasyPermission;
 import com.zyq.easypermission.EasyPermissionHelper;
@@ -37,6 +38,7 @@ public abstract class BaseActivity extends FragmentActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        ActivityUtil.getInstance().addActivity(this);
         setTheme(R.style.AppTheme);
         setContentView(getLayoutId());
         isRequestMission = isRequestMission();
@@ -220,5 +222,11 @@ public abstract class BaseActivity extends FragmentActivity {
                 finish();
             }
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        ActivityUtil.getInstance().removeActivity(this);
     }
 }
