@@ -1,7 +1,10 @@
 package com.learn.agg.msg.act;
 
+import android.Manifest;
 import android.content.Intent;
+import android.media.MediaPlayer;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -14,6 +17,7 @@ import com.alibaba.sdk.android.oss.model.PutObjectRequest;
 import com.codebear.keyboard.CBEmoticonsKeyBoard;
 import com.codebear.keyboard.data.AppFuncBean;
 import com.codebear.keyboard.data.EmoticonsBean;
+import com.codebear.keyboard.fragment.CBVoice;
 import com.codebear.keyboard.widget.CBAppFuncView;
 import com.codebear.keyboard.widget.CBEmoticonsView;
 import com.codebear.keyboard.widget.FuncLayout;
@@ -24,9 +28,13 @@ import com.learn.agg.msg.adapter.ChatAdapter;
 import com.learn.agg.msg.contract.BaseChatContract;
 import com.learn.agg.msg.presenter.BaseChatPresenter;
 import com.learn.agg.net.bean.LoginBean;
+import com.learn.agg.widgets.FileUpLoadManager;
 import com.learn.commonalitylibrary.ChatMessage;
+import com.learn.commonalitylibrary.body.ImageBody;
+import com.learn.commonalitylibrary.body.VoiceBody;
 import com.learn.commonalitylibrary.util.GsonUtil;
 import com.learn.commonalitylibrary.util.ImSendMessageUtils;
+import com.learn.commonalitylibrary.util.MediaManager;
 import com.learn.commonalitylibrary.util.OfTenUtils;
 import com.lib.xiangxiang.im.ImSocketClient;
 import com.lib.xiangxiang.im.SocketManager;
@@ -42,10 +50,11 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.IPresenter> implements BaseChatContract.IView, View.OnLayoutChangeListener, FuncLayout.OnFuncKeyBoardListener, View.OnClickListener, RecordIndicator.OnRecordListener, CBEmoticonsView.OnEmoticonClickListener, CBAppFuncView.OnAppFuncClickListener, View.OnTouchListener, OnRefreshListener, SocketManager.SendMsgCallBack {
+public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.IPresenter> implements BaseChatContract.IView, View.OnLayoutChangeListener, FuncLayout.OnFuncKeyBoardListener, View.OnClickListener, RecordIndicator.OnRecordListener, CBEmoticonsView.OnEmoticonClickListener, CBAppFuncView.OnAppFuncClickListener, View.OnTouchListener, OnRefreshListener, SocketManager.SendMsgCallBack,CBVoice.VoiceStateListener {
 
 
     private static final int REQUEST_CODE_IMAGE = 1231;
@@ -62,6 +71,8 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
     private String conviction;
     private SmartRefreshLayout mSmart;
     private LinearLayoutManager layoutManager;
+    private String send_image_json = null;
+    private String send_voice_json = null;
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
@@ -79,10 +90,60 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
         getPresenter().getHistory(pageNo, pageSize);
     }
 
+    // socket 回调
     @Override
     public void call(String msg) {
         ChatMessage bean = GsonUtil.GsonToBean(msg, ChatMessage.class);
         chatAdapter.notifyChatMessage(bean);
+    }
+
+    // 语音回调
+    @Override
+    public void onStartVoice(String pid) {
+
+    }
+
+    @Override
+    public void onCancelVoice(String pid) {
+        showToast("取消");
+    }
+
+    @Override
+    public void onEndVoice(String filePath, String fileAbsPath, long time,String pid) {
+        if (time < 1000){
+            showToast("时间过短");
+            return;
+        }
+        Log.i("TAG", "filePath:" + filePath + "\n" + "fileAbsPath:" + fileAbsPath + "\n" + "time:" + time);
+        send_voice_json = ImSendMessageUtils.getChatMessageVoice(filePath,fileAbsPath, time, from_bean.getUid(), to_bean.getUid(), conviction, chatAdapter.getLastItemDisplayTime());
+        ChatMessage message = GsonUtil.GsonToBean(send_voice_json, ChatMessage.class);
+        chatAdapter.setData(message);
+        toLastItem();
+        new FileUpLoadManager().upLoadFile(fileAbsPath, new FileUpLoadManager.FileUpLoadCallBack() {
+            @Override
+            public void onError(Throwable e) {
+
+            }
+
+            @Override
+            public void onSuccess(String url) {
+                if (send_voice_json != null){
+                    ChatMessage chatMessage = GsonUtil.GsonToBean(send_voice_json, ChatMessage.class);
+                    VoiceBody voiceBody = GsonUtil.GsonToBean(chatMessage.getBody(), VoiceBody.class);
+                    String toJson = GsonUtil.BeanToJson(new VoiceBody(voiceBody.getFileName(),voiceBody.getFileAbsPath(), url, voiceBody.getTime(), voiceBody.getState(), voiceBody.getVoice_content()));
+                    chatMessage.setBody(toJson);
+                    chatAdapter.notifyChatMessage(chatMessage);
+                    String json = GsonUtil.BeanToJson(chatMessage);
+                    SocketSendJson(json);
+                    send_voice_json = null;
+                }
+            }
+
+            @Override
+            public void onProgress(int pro) {
+
+            }
+        });
     }
 
     public interface key {
@@ -92,6 +153,9 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
 
     @Override
     protected Boolean isRequestMission() {
+        needPermissions = new String[]{Manifest.permission.RECORD_AUDIO,
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE};
         return true;
     }
 
@@ -115,6 +179,7 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
     protected void initKeyBoard(CBEmoticonsKeyBoard keyBoard) {
         mKbView = keyBoard;
         mKbView.addOnFuncKeyBoardListener(this);
+        mKbView.addVoiceChangeListener(this);
         mKbView.getBtnSend().setOnClickListener(this);
         RecordIndicator recordIndicator = new RecordIndicator(this);
         mKbView.setRecordIndicator(recordIndicator);
@@ -129,9 +194,9 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
 
     protected void initOptions() {
         List<AppFuncBean> appFuncBeanList = new ArrayList<>();
-        appFuncBeanList.add(new AppFuncBean(OPTION_TYPE_IMAGE, R.mipmap.ic_launcher_round, "图片"));
-        appFuncBeanList.add(new AppFuncBean(OPTION_TYPE_LOCATION, R.mipmap.ic_launcher_round, "位置"));
-        appFuncBeanList.add(new AppFuncBean(OPTION_TYPE_CARD, R.mipmap.ic_launcher_round, "名片"));
+        appFuncBeanList.add(new AppFuncBean(OPTION_TYPE_IMAGE, R.mipmap.icon_tuku, "图片"));
+        appFuncBeanList.add(new AppFuncBean(OPTION_TYPE_LOCATION, R.mipmap.icon_weizhi, "位置"));
+        appFuncBeanList.add(new AppFuncBean(OPTION_TYPE_CARD, R.mipmap.icon_wodemingpian, "名片"));
         CBAppFuncView appFuncView = new CBAppFuncView(this);
         appFuncView.setRol(3);
         appFuncView.setAppFuncBeanList(appFuncBeanList);
@@ -173,7 +238,7 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
     public void onSuccess(List<ChatMessage> list) {
         dismissDialog();
         mSmart.finishRefresh();
-        Log.i(ImSocketClient.TAG,"请求到的数据大小----" + list.size());
+        Log.i(ImSocketClient.TAG, "请求到的数据大小----" + list.size());
         if (list.size() > 0) {
             chatAdapter.setData(list);
             layoutManager.scrollToPositionWithOffset(list.size(), 0);
@@ -243,14 +308,14 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void EventBus(ChatMessage msg) {
-        if (msg.getType() == ChatMessage.MSG_SEND_CHAT){
+        if (msg.getType() == ChatMessage.MSG_SEND_CHAT) {
             chatAdapter.setData(msg);
             toLastItem();
         }
     }
 
     private void sendText(String text) {
-        if (!to_bean.getUid().isEmpty() && !from_bean.getUid().isEmpty()){
+        if (!to_bean.getUid().isEmpty() && !from_bean.getUid().isEmpty()) {
             String json = ImSendMessageUtils.getChatMessageText(text, from_bean.getUid(), to_bean.getUid(), conviction, chatAdapter.getLastItemDisplayTime());
             ChatMessage message = GsonUtil.GsonToBean(json, ChatMessage.class);
             chatAdapter.setData(message);
@@ -294,12 +359,12 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
     public void onEmoticonClick(EmoticonsBean emoticon, boolean isDel) {
         String uri = (String) emoticon.getIconUri();
         String name = emoticon.getName();
-        Log.i(ImSocketClient.TAG,"uil:" + uri + "-----name:"+name);
+        Log.i(ImSocketClient.TAG, "uil:" + uri + "-----name:" + name);
         sendEmoji(uri);
     }
 
     private void sendEmoji(String uri) {
-        if (!to_bean.getUid().isEmpty() && !from_bean.getUid().isEmpty()){
+        if (!to_bean.getUid().isEmpty() && !from_bean.getUid().isEmpty()) {
             String json = ImSendMessageUtils.getChatMessageEmoji(uri, from_bean.getUid(), to_bean.getUid(), conviction, chatAdapter.getLastItemDisplayTime());
             ChatMessage message = GsonUtil.GsonToBean(json, ChatMessage.class);
             chatAdapter.setData(message);
@@ -336,14 +401,44 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
         super.onActivityResult(requestCode, resultCode, data);
         dismissDialog();
         List<LocalMedia> images;
-        if (resultCode == RESULT_OK){
-            switch (requestCode){
+        if (resultCode == RESULT_OK) {
+            switch (requestCode) {
                 case REQUEST_CODE_IMAGE:
                     images = PictureSelector.obtainMultipleResult(data);
-                    Log.i("main","size:" + images.size());
-                    if (images.size() > 0){
+                    Log.i("TAG", "size:" + images.size());
+                    if (images.size() > 0) {
                         String path = images.get(0).getPath();
+                        Log.i("TAG", "PATH:" + path);
+                        if (!to_bean.getUid().isEmpty() && !from_bean.getUid().isEmpty()) {
+                            send_image_json = ImSendMessageUtils.getChatMessageImage(path, from_bean.getUid(), to_bean.getUid(), conviction, chatAdapter.getLastItemDisplayTime());
+                            ChatMessage message = GsonUtil.GsonToBean(send_image_json, ChatMessage.class);
+                            chatAdapter.setData(message);
+                            toLastItem();
+                        }
+                        new FileUpLoadManager().upLoadFile(path, new FileUpLoadManager.FileUpLoadCallBack(){
 
+                            @Override
+                            public void onError(Throwable e) {
+
+                            }
+
+                            @Override
+                            public void onSuccess(String url) {
+                                if (send_image_json != null ) {
+                                    ChatMessage chatMessage = GsonUtil.GsonToBean(send_image_json, ChatMessage.class);
+                                    chatMessage.setBody(GsonUtil.BeanToJson(new ImageBody(url)));
+                                    chatAdapter.notifyChatMessage(chatMessage);
+                                    String json = GsonUtil.BeanToJson(chatMessage);
+                                    SocketSendJson(json);
+                                    send_image_json = null;
+                                }
+                            }
+
+                            @Override
+                            public void onProgress(int pro) {
+
+                            }
+                        });
                     }
                     break;
                 default:
@@ -351,6 +446,21 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
 
             }
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        chatAdapter.pauseMedia();
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        Log.i("main", "keyCode == " + keyCode);
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            chatAdapter.pauseMedia();
+        }
+        return super.onKeyDown(keyCode, event);
     }
 
     @Override

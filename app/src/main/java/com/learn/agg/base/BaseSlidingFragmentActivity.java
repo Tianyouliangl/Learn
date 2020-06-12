@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.jeremyfeinstein.slidingmenu.lib.app.SlidingFragmentActivity;
 import com.learn.agg.R;
+import com.learn.agg.util.ActivityUtil;
 import com.zyq.easypermission.EasyPermission;
 import com.zyq.easypermission.EasyPermissionHelper;
 import com.zyq.easypermission.EasyPermissionResult;
@@ -29,6 +30,7 @@ public abstract class BaseSlidingFragmentActivity extends SlidingFragmentActivit
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        ActivityUtil.getInstance().addActivity(this);
         setTheme(R.style.AppTheme);
         setContentView(getLayoutId());
         isRequestMission = isRequestMission();
@@ -124,5 +126,11 @@ public abstract class BaseSlidingFragmentActivity extends SlidingFragmentActivit
                 finish();
             }
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        ActivityUtil.getInstance().removeActivity(this);
     }
 }

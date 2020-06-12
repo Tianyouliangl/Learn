@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animation-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:drawable="@drawable/icon_left_voice_one" android:duration="300"/>
+    <item android:drawable="@drawable/icon_left_voice_two" android:duration="300"/>
+    <item android:drawable="@drawable/icon_left_voice_three" android:duration="300"/>
+
+</animation-list>

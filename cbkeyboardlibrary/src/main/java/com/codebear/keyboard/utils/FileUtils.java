@@ -16,7 +16,7 @@ import java.util.zip.ZipInputStream;
  */
 
 public class FileUtils {
-    public static final String DEF_FILEPATH = "/CBEmoticonsKeyboard/";
+    public static final String DEF_FILEPATH = "/.CBEmoticonsKeyboard/";
 
     public static String getFolderPath(String folder) {
         return Environment.getExternalStorageDirectory().getAbsolutePath() + DEF_FILEPATH + folder;

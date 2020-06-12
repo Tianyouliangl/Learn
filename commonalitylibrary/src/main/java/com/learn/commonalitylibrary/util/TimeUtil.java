@@ -21,6 +21,7 @@ public class TimeUtil {
     public final static String FORMAT_MONTH_DAY_TIME = "MM-dd HH:mm";
     public final static String FORMAT_DATE = "yyyy-MM-dd";
     public final static String FORMAT_YEAR = "yyyy";
+    public final static String FORMAT_VOICE_TIME = "mm:ss";
 
     public static String getFormatToday(String dateFormat) {
         Date currentTime = new Date();

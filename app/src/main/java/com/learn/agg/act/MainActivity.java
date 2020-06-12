@@ -1,26 +1,19 @@
 package com.learn.agg.act;
 
-import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.animation.Animation;
-import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
@@ -38,15 +31,13 @@ import com.learn.agg.net.base.BaseObserverTC;
 import com.learn.agg.net.base.IHttpProtocol;
 import com.learn.agg.net.bean.LoginBean;
 import com.learn.agg.util.ActivityUtil;
-import com.learn.agg.util.PhoneUtils;
-import com.learn.agg.video.VideoFragment;
+import com.learn.agg.video.ReadFragment;
 import com.learn.agg.widgets.CustomDialog;
 import com.learn.agg.widgets.TabLayout;
 import com.learn.commonalitylibrary.ChatMessage;
 import com.learn.commonalitylibrary.Constant;
 import com.learn.commonalitylibrary.util.NotificationUtils;
 import com.lib.xiangxiang.im.ImService;
-import com.lib.xiangxiang.im.ImSocketClient;
 import com.lib.xiangxiang.im.SocketManager;
 import com.pgyersdk.update.DownloadFileListener;
 import com.pgyersdk.update.PgyUpdateManager;
@@ -83,6 +74,7 @@ public class MainActivity extends BaseSlidingFragmentActivity implements TabLayo
     private LinearLayout line_top;
     private File file;
     private Boolean isUpdateAPK = false;
+    private Boolean isOffLine = false;
     private Handler mHandle = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -127,7 +119,7 @@ public class MainActivity extends BaseSlidingFragmentActivity implements TabLayo
         NotificationUtils.setSystemPendingIntent(this);
         ArrayList<TabLayout.Tab> list = new ArrayList<>();
         list.add(new TabLayout.Tab(R.drawable.selector_tab_msg, R.string.msg, MessageFragment.class));
-        list.add(new TabLayout.Tab(R.drawable.selector_tab_video, R.string.video, VideoFragment.class));
+        list.add(new TabLayout.Tab(R.drawable.selector_tab_read, R.string.books, ReadFragment.class));
         tab_layout.setUpData(list, this);
         tab_layout.setCurrentTab(0);
     }
@@ -279,14 +271,17 @@ public class MainActivity extends BaseSlidingFragmentActivity implements TabLayo
             if (customDialog != null && !customDialog.isShowing()) {
                 customDialog.show();
             }
-        }else {
+        } else {
             if (customDialog != null && customDialog.isShowing()) {
                 customDialog.dismiss();
             }
-            if (isUpdateAPK){
+            if (isUpdateAPK && !isOffLine) {
+                if (getSlidingMenu().isMenuShowing()){
+                    closeMenu();
+                }
                 showUpdateDialog();
             }
-            if (!ImService.startService){
+            if (!ImService.startService) {
                 loginSocket();
             }
         }
@@ -312,12 +307,16 @@ public class MainActivity extends BaseSlidingFragmentActivity implements TabLayo
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void MessageEvent(ChatMessage msg) {
         if (msg.getType() == ChatMessage.MSG_OFFLINE) {
+            isOffLine = true;
             if (updateDialog != null && updateDialog.isShowing()) {
                 updateDialog.dismiss();
             }
+            if (getSlidingMenu().isMenuShowing()) {
+                getSlidingMenu().isMenuShowing();
+            }
             ActivityUtil.getInstance().finishAllActivityExcept(MainActivity.class);
             SocketManager.logOutSocket(this);
-            if (offLineDialog == null){
+            if (offLineDialog == null) {
                 offLineDialog = new CustomDialog(this, false, R.layout.dialog_offline);
             }
             View view = offLineDialog.getView();
@@ -373,9 +372,6 @@ public class MainActivity extends BaseSlidingFragmentActivity implements TabLayo
             case R.id.tv_notification:
                 goToSetNotification(this);
                 break;
-            case R.id.iv_close:
-
-                break;
             case R.id.tv_update:
                 if (updateDialog != null && updateDialog.isShowing()) {
                     updateDialog.setCancelable(false);
@@ -392,11 +388,13 @@ public class MainActivity extends BaseSlidingFragmentActivity implements TabLayo
                 }
                 break;
             case R.id.tv_exit:
+                isOffLine = false;
                 dismissOffLineDialog();
                 goActivity(LoginActivity.class);
                 finish();
                 break;
             case R.id.tv_again_login:
+                isOffLine = false;
                 dismissOffLineDialog();
                 agaLogin();
                 break;
@@ -415,17 +413,17 @@ public class MainActivity extends BaseSlidingFragmentActivity implements TabLayo
                 .login(map)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new BaseObserverTC<LoginBean>(){
+                .subscribe(new BaseObserverTC<LoginBean>() {
 
                     @Override
                     protected void onNextEx(@NonNull LoginBean data) {
                         EasySP.init(MainActivity.this).put(Constant.SPKey_UID, data.getUid())
                                 .put(Constant.SPKey_phone(MainActivity.this), data.getMobile())
-                                .put(Constant.SPKey_pwd(MainActivity.this),password)
-                                .put(Constant.SPKey_userName(MainActivity.this),data.getUsername())
-                                .put(Constant.SPKey_icon(MainActivity.this),data.getImageUrl())
+                                .put(Constant.SPKey_pwd(MainActivity.this), password)
+                                .put(Constant.SPKey_userName(MainActivity.this), data.getUsername())
+                                .put(Constant.SPKey_icon(MainActivity.this), data.getImageUrl())
                                 .put(Constant.SPKey_info(MainActivity.this), new Gson().toJson(data))
-                                .put(Constant.SPKey_token(MainActivity.this),data.getToken());
+                                .put(Constant.SPKey_token(MainActivity.this), data.getToken());
                         loginSocket();
                     }
 
@@ -443,8 +441,8 @@ public class MainActivity extends BaseSlidingFragmentActivity implements TabLayo
                 });
     }
 
-    public void dismissOffLineDialog(){
-        if (offLineDialog != null && offLineDialog.isShowing()){
+    public void dismissOffLineDialog() {
+        if (offLineDialog != null && offLineDialog.isShowing()) {
             offLineDialog.dismiss();
         }
     }
@@ -477,12 +475,12 @@ public class MainActivity extends BaseSlidingFragmentActivity implements TabLayo
             updateTvContent.setGravity(Gravity.CENTER);
             updateTvContent.setText("新版本:" + appBean.getVersionName() + "\n" + "赶紧下载体验吧~");
         }
-        if (!customDialog.isShowing()){
+        if (!customDialog.isShowing()) {
             showUpdateDialog();
         }
     }
 
-    public void showUpdateDialog(){
+    public void showUpdateDialog() {
         if (updateDialog != null && !updateDialog.isShowing()) {
             updateDialog.show();
         }

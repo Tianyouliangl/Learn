@@ -16,6 +16,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.codebear.keyboard.R;
@@ -111,11 +112,14 @@ public class CBEmoticonAdapter extends BaseAdapter {
 
     private void showData(final ViewHolder viewHolder, final int position) {
         if (mData.getmData().get(position).getIconUri() != null) {
-
+            RequestOptions options = new RequestOptions()
+                    .placeholder(R.drawable.icon_bq_loading)//图片加载出来前，显示的图片
+                    .fallback( R.drawable.icon_bq_error) //url为空的时候,显示的图片
+                    .error(R.drawable.icon_bq_error);//图片加载失败后，显示的图片
             if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT && "gif".equals(mData.getmData().get(position)
                     .getIconType())) {
 
-                Glide.with(mContext).asBitmap().load(mData.getmData().get(position).getIconUri()).into
+                Glide.with(mContext).asBitmap().apply(options).load(mData.getmData().get(position).getIconUri()).into
                         (new SimpleTarget<Bitmap>() {
                             @Override
                             public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
@@ -125,7 +129,7 @@ public class CBEmoticonAdapter extends BaseAdapter {
                             }
                         });
             } else {
-                Glide.with(mContext).asBitmap().load(mData.getmData().get(position).getIconUri()).into(viewHolder.ivIcon);
+                Glide.with(mContext).asBitmap().apply(options).load(mData.getmData().get(position).getIconUri()).into(viewHolder.ivIcon);
             }
 
             viewHolder.rootView.setOnTouchListener(new View.OnTouchListener() {

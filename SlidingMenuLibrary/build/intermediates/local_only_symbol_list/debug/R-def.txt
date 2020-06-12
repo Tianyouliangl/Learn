@@ -1,0 +1,25 @@
+R_DEF: Internal format may change without notice
+local
+attr? behindOffset
+attr? behindScrollScale
+attr? behindWidth
+attr? fadeDegree
+attr? fadeEnabled
+attr? mode
+attr? selectorDrawable
+attr? selectorEnabled
+attr? shadowDrawable
+attr? shadowWidth
+attr? touchModeAbove
+attr? touchModeBehind
+attr? viewAbove
+attr? viewBehind
+id fullscreen
+id left
+id margin
+id none
+id right
+id selected_view
+id slidingmenumain
+layout slidingmenumain
+styleable SlidingMenu mode viewAbove viewBehind behindOffset behindWidth behindScrollScale touchModeAbove touchModeBehind shadowDrawable shadowWidth fadeEnabled fadeDegree selectorEnabled selectorDrawable

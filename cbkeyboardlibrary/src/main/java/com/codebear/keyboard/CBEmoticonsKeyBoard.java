@@ -18,6 +18,7 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import com.codebear.keyboard.emoji.ZsFilter;
+import com.codebear.keyboard.fragment.CBVoice;
 import com.codebear.keyboard.interfaces.IEmoticonsView;
 import com.codebear.keyboard.utils.EmoticonsKeyboardUtils;
 import com.codebear.keyboard.widget.AutoHeightLayout;
@@ -70,6 +71,7 @@ public class CBEmoticonsKeyBoard extends AutoHeightLayout implements View.OnClic
     private View mRlBottomKeyboard;
     private View mVLineBottom;
     public static final String TAG = "CBEmoticonsKeyBoard";
+    private CBVoice cb_voice;
 
     public CBEmoticonsKeyBoard(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -141,6 +143,7 @@ public class CBEmoticonsKeyBoard extends AutoHeightLayout implements View.OnClic
 
     protected void initVoiceFuncView() {
         View keyboardView = inflateVoice();
+        cb_voice = keyboardView.findViewById(R.id.cb_voice);
         funFunction.addFuncView(FUNC_TYPE_VOICE, keyboardView);
     }
 
@@ -283,6 +286,10 @@ public class CBEmoticonsKeyBoard extends AutoHeightLayout implements View.OnClic
 
     public void addOnFuncKeyBoardListener(FuncLayout.OnFuncKeyBoardListener l) {
         funFunction.addOnKeyBoardListener(l);
+    }
+
+    public void addVoiceChangeListener(CBVoice.VoiceStateListener listener){
+        cb_voice.setOnVoiceChangeListener(listener);
     }
 
     @Override

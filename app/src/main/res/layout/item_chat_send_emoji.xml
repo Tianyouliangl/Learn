@@ -42,6 +42,7 @@
             android:layout_centerVertical="true"
             android:minWidth="50dp"
             android:layout_marginTop="10dp"
+            android:adjustViewBounds="true"
             android:layout_toLeftOf="@id/iv_icon"
             android:layout_height="wrap_content"/>
 

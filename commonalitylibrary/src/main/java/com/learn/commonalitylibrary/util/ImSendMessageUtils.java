@@ -1,12 +1,11 @@
 package com.learn.commonalitylibrary.util;
 
-import android.text.TextUtils;
-
 import com.learn.commonalitylibrary.ChatMessage;
 import com.learn.commonalitylibrary.body.EmoticonBody;
 import com.learn.commonalitylibrary.body.ImageBody;
 import com.learn.commonalitylibrary.body.RedEnvelopeBody;
 import com.learn.commonalitylibrary.body.TextBody;
+import com.learn.commonalitylibrary.body.VoiceBody;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -74,6 +73,25 @@ public class ImSendMessageUtils {
         return object.toString();
     }
 
+    public static String getChatMessageImage(String body, String fromId, String toId, String conversation, int displaytime){
+        JSONObject object = new JSONObject();
+        try {
+            object.put("fromId",fromId);
+            object.put("toId",toId);
+            object.put("pid",getPid());
+            object.put("bodyType",ChatMessage.MSG_BODY_TYPE_IMAGE);
+            object.put("body",GsonUtil.BeanToJson(new ImageBody(body)));
+            object.put("msgStatus", ChatMessage.MSG_SEND_LOADING);
+            object.put("time",System.currentTimeMillis());
+            object.put("type", ChatMessage.MSG_SEND_CHAT);
+            object.put("conversation",conversation);
+            object.put("displaytime",displaytime);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return object.toString();
+    }
+
     public static String getChatMessageEmoji(String msg,String fromId,String toId,String conversation,int displaytime){
         JSONObject object = new JSONObject();
         try {
@@ -82,6 +100,25 @@ public class ImSendMessageUtils {
             object.put("pid",getPid());
             object.put("bodyType",ChatMessage.MSG_BODY_TYPE_EMOJI);
             object.put("body",GsonUtil.BeanToJson(new EmoticonBody(msg)));
+            object.put("msgStatus",ChatMessage.MSG_SEND_LOADING);
+            object.put("time",System.currentTimeMillis());
+            object.put("type", ChatMessage.MSG_SEND_CHAT);
+            object.put("conversation",conversation);
+            object.put("displaytime",displaytime);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return object.toString();
+    }
+
+    public static String getChatMessageVoice(String filename,String fileAbsPath,long voiceTime,String fromId,String toId,String conversation,int displaytime){
+        JSONObject object = new JSONObject();
+        try {
+            object.put("fromId",fromId);
+            object.put("toId",toId);
+            object.put("pid",getPid());
+            object.put("bodyType",ChatMessage.MSG_BODY_TYPE_VOICE);
+            object.put("body",GsonUtil.BeanToJson(new VoiceBody(filename,fileAbsPath,"",voiceTime,0,"")));
             object.put("msgStatus",ChatMessage.MSG_SEND_LOADING);
             object.put("time",System.currentTimeMillis());
             object.put("type", ChatMessage.MSG_SEND_CHAT);
