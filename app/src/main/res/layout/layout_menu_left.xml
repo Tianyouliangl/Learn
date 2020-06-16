@@ -173,6 +173,7 @@
 
 
     <LinearLayout
+        android:id="@+id/linear_setting"
         android:layout_width="wrap_content"
         android:orientation="horizontal"
         android:gravity="center"

@@ -25,6 +25,7 @@ import com.learn.agg.R;
 import com.learn.agg.base.BaseSlidingFragmentActivity;
 import com.learn.agg.base.IconOnClickListener;
 import com.learn.agg.fragment.MenuLeftFragment;
+import com.learn.agg.msg.act.ChatActivity;
 import com.learn.agg.msg.fragment.MessageFragment;
 import com.learn.agg.net.NetConfig;
 import com.learn.agg.net.base.BaseObserverTC;
@@ -100,6 +101,7 @@ public class MainActivity extends BaseSlidingFragmentActivity implements TabLayo
     @Override
     protected void initView() {
         super.initView();
+        ActivityUtil.getInstance().addActivity(this);
         EventBus.getDefault().register(this);
         tab_layout = (TabLayout) findViewById(R.id.bottom_tab);
     }
@@ -280,8 +282,9 @@ public class MainActivity extends BaseSlidingFragmentActivity implements TabLayo
                     closeMenu();
                 }
                 showUpdateDialog();
+                return;
             }
-            if (!ImService.startService) {
+            if (!isOffLine && !ImService.startService) {
                 loginSocket();
             }
         }
@@ -307,15 +310,15 @@ public class MainActivity extends BaseSlidingFragmentActivity implements TabLayo
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void MessageEvent(ChatMessage msg) {
         if (msg.getType() == ChatMessage.MSG_OFFLINE) {
+            ActivityUtil.getInstance().finishAllActivityExcept(MainActivity.class);
+            SocketManager.logOutSocket(this);
             isOffLine = true;
             if (updateDialog != null && updateDialog.isShowing()) {
                 updateDialog.dismiss();
             }
             if (getSlidingMenu().isMenuShowing()) {
-                getSlidingMenu().isMenuShowing();
+                getSlidingMenu().toggle();
             }
-            ActivityUtil.getInstance().finishAllActivityExcept(MainActivity.class);
-            SocketManager.logOutSocket(this);
             if (offLineDialog == null) {
                 offLineDialog = new CustomDialog(this, false, R.layout.dialog_offline);
             }
@@ -331,24 +334,13 @@ public class MainActivity extends BaseSlidingFragmentActivity implements TabLayo
     }
 
     @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        Log.i("main", "onBackPressed");
-        Intent intent = new Intent(Intent.ACTION_MAIN);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        intent.addCategory(Intent.CATEGORY_HOME);
-        startActivity(intent);
-    }
-
-    @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        Log.i("main", "keyCode == " + keyCode);
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             if (!getSlidingMenu().isMenuShowing()) {
-                Intent intent = new Intent(Intent.ACTION_MAIN);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                intent.addCategory(Intent.CATEGORY_HOME);
-                startActivity(intent);
+                moveTaskToBack(true);
+                return true;
+            }else {
+                getSlidingMenu().toggle();
                 return true;
             }
         }
@@ -361,6 +353,7 @@ public class MainActivity extends BaseSlidingFragmentActivity implements TabLayo
 //        NetConfig.unRegisterReceiver(this);
         EventBus.getDefault().unregister(this);
         PgyUpdateManager.unRegister();
+        ActivityUtil.getInstance().removeActivity(this);
         mHandle.removeMessages(1);
         mHandle = null;
         offLineDialog = null;

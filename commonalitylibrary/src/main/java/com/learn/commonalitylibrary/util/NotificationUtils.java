@@ -100,10 +100,10 @@ public class NotificationUtils {
         } else {
             builder = new Notification.Builder(context);
         }
-
         builder.setSmallIcon(R.mipmap.icon_logo_round)
                 .setContentTitle(data.getTitle())
                 .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.icon_logo))
+                .setContentIntent(getSystemPendingIntent())
                 .setContentText(data.getContent());
         builder.setNumber(1);
         Notification notification = builder.build();
@@ -125,7 +125,7 @@ public class NotificationUtils {
         Intent mIntent = new Intent(Intent.ACTION_MAIN);
         mIntent.addCategory(Intent.CATEGORY_LAUNCHER);
         mIntent.setComponent(new ComponentName("com.learn.agg", "com.learn.agg.act.MainActivity"));
-        mIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+        mIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
         systemPendingIntent = PendingIntent.getActivity(activity, 0, mIntent, 0);
     }
 

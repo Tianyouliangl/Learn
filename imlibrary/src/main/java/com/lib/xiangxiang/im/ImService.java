@@ -107,9 +107,7 @@ public class ImService extends Service {
                 channel.enableLights(false); //设置开启指示灯，如果设备有的话
                 channel.setLightColor(Color.RED); //设置指示灯颜色
                 channel.setShowBadge(true); //设置是否显示角标
-                if (importance == NotificationManager.IMPORTANCE_LOW) {
-                    channel.setSound(null, null);
-                }
+                channel.setSound(null, null);
                 channel.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);//设置是否应在锁定屏幕上显示此频道的通知
                 channel.setDescription(NotificationUtils.channelDescription);//设置渠道描述
 //                channel.setVibrationPattern(new long[]{100, 200, 300, 400, 500, 600});//设置震动频率

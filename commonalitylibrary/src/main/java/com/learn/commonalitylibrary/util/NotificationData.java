@@ -3,6 +3,7 @@ package com.learn.commonalitylibrary.util;
 public class NotificationData {
     private String Title;
     private String content;
+    private String uid;
     private int id;
 
     public String getTitle() {

@@ -15,7 +15,7 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
     <application
         android:name=".LearnApplication"
@@ -26,6 +26,7 @@
         android:roundIcon="@mipmap/icon_logo_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity android:name=".act.SettingActivity"></activity>
         <activity android:name=".act.QREncodeActivity" />
         <activity android:name=".act.ScannerActivity" />
 
@@ -52,7 +53,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".act.MainActivity" android:launchMode="singleTask"/>
+        <activity
+            android:name=".act.MainActivity"
+            android:launchMode="singleTop" />
 
         <service android:name="com.lib.xiangxiang.im.ImService" />
     </application>

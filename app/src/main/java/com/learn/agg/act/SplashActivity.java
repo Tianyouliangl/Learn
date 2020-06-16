@@ -58,12 +58,12 @@ public class SplashActivity extends BaseAppCompatActivity {
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
-//                if (mobile.isEmpty() || password.isEmpty()){
-//                    goActivity(LoginActivity.class);
-//                }else {
-//                    goActivity(MainActivity.class);
-//                }
-                goActivity(LoginActivity.class);
+                if (mobile.isEmpty() || password.isEmpty()){
+                    goActivity(LoginActivity.class);
+                }else {
+                    goActivity(MainActivity.class);
+                }
+//                goActivity(LoginActivity.class);
                 finish();
             }
         }, 1500);

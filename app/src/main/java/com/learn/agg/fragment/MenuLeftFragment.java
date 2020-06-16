@@ -7,12 +7,14 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.learn.agg.R;
 import com.learn.agg.act.QREncodeActivity;
+import com.learn.agg.act.SettingActivity;
 import com.learn.agg.base.BaseMvpFragment;
 import com.learn.agg.base.IconOnClickListener;
 import com.learn.agg.fragment.contract.MenuLeftContract;
@@ -39,6 +41,7 @@ public class MenuLeftFragment extends BaseMvpFragment<MenuLeftContract.IPresente
     private String json;
     private TextView tv_code;
     private ImageView iv_code;
+    private LinearLayout linear_setting;
 
     @Override
     protected int getLayoutId() {
@@ -62,9 +65,11 @@ public class MenuLeftFragment extends BaseMvpFragment<MenuLeftContract.IPresente
         tv_money = view.findViewById(R.id.tv_money);
         tv_code = view.findViewById(R.id.tv_code);
         iv_code = view.findViewById(R.id.iv_code);
+        linear_setting = view.findViewById(R.id.linear_setting);
         iv_close.setOnClickListener(this);
         rl_info.setOnClickListener(this);
         iv_code.setOnClickListener(this);
+        linear_setting.setOnClickListener(this);
     }
 
     @Override
@@ -127,6 +132,9 @@ public class MenuLeftFragment extends BaseMvpFragment<MenuLeftContract.IPresente
                 Bundle bundleCode = new Bundle();
                 bundleCode.putBoolean("isFinish",false);
                 goActivity(QREncodeActivity.class,bundleCode);
+                break;
+            case R.id.linear_setting:
+                goActivity(SettingActivity.class);
                 break;
             default:
                 break;
