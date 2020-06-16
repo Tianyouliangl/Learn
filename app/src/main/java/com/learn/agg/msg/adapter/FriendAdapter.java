@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.learn.agg.R;
-import com.learn.agg.net.bean.LoginBean;
+import com.learn.commonalitylibrary.LoginBean;
 import com.learn.commonalitylibrary.util.NetState;
 import com.makeramen.roundedimageview.RoundedImageView;
 

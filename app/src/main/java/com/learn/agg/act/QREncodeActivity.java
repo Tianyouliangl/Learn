@@ -1,11 +1,7 @@
 package com.learn.agg.act;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.text.TextUtils;
-import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -13,8 +9,8 @@ import com.bumptech.glide.Glide;
 import com.google.zxing.client.result.ParsedResultType;
 import com.learn.agg.R;
 import com.learn.agg.base.BaseActivity;
-import com.learn.agg.net.bean.LoginBean;
 import com.learn.commonalitylibrary.Constant;
+import com.learn.commonalitylibrary.LoginBean;
 import com.learn.commonalitylibrary.util.GsonUtil;
 import com.learn.commonalitylibrary.util.Utils;
 import com.makeramen.roundedimageview.RoundedImageView;

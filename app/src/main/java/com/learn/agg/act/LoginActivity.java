@@ -1,6 +1,5 @@
 package com.learn.agg.act;
 
-import android.Manifest;
 import android.content.Intent;
 import android.view.KeyEvent;
 import android.view.View;
@@ -16,9 +15,9 @@ import com.learn.agg.R;
 import com.learn.agg.act.contract.LoginContract;
 import com.learn.agg.act.presenter.LoginPresenter;
 import com.learn.agg.base.BaseMvpActivity;
-import com.learn.agg.net.bean.LoginBean;
+import com.learn.commonalitylibrary.LoginBean;
+import com.learn.commonalitylibrary.sqlite.DataBaseHelp;
 import com.learn.commonalitylibrary.Constant;
-import com.lib.xiangxiang.im.SocketManager;
 import com.makeramen.roundedimageview.RoundedImageView;
 import com.white.easysp.EasySP;
 
@@ -121,6 +120,7 @@ public class LoginActivity extends BaseMvpActivity<LoginContract.IPresenter> imp
                 .put(Constant.SPKey_icon(this),data.getImageUrl())
                 .put(Constant.SPKey_info(this), new Gson().toJson(data))
                 .put(Constant.SPKey_token(this),data.getToken());
+        DataBaseHelp.getInstance(this).createSessions();
         goActivity(MainActivity.class);
         finish();
     }

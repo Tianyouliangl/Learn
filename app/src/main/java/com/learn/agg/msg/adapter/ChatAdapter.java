@@ -1,9 +1,7 @@
 package com.learn.agg.msg.adapter;
 
-import android.app.Activity;
 import android.content.Context;
 import android.graphics.drawable.AnimationDrawable;
-import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
 import android.os.Handler;
 import android.os.Message;
@@ -11,7 +9,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -27,9 +24,9 @@ import com.learn.agg.msg.chatHolder.ChatTextReceiveHolder;
 import com.learn.agg.msg.chatHolder.ChatTextSendHolder;
 import com.learn.agg.msg.chatHolder.ChatVoiceReceiveHolder;
 import com.learn.agg.msg.chatHolder.ChatVoiceSendHolder;
-import com.learn.agg.net.bean.LoginBean;
 import com.learn.agg.widgets.FileUpLoadManager;
 import com.learn.commonalitylibrary.ChatMessage;
+import com.learn.commonalitylibrary.LoginBean;
 import com.learn.commonalitylibrary.body.EmoticonBody;
 import com.learn.commonalitylibrary.body.ImageBody;
 import com.learn.commonalitylibrary.body.TextBody;

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@color/white"
+    android:layout_height="wrap_content">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="80dp">
+
+        <com.makeramen.roundedimageview.RoundedImageView
+            android:id="@+id/riv_session"
+            android:layout_width="45dp"
+            android:layout_marginLeft="10dp"
+            app:riv_corner_radius="8dp"
+            android:layout_centerVertical="true"
+            android:layout_height="45dp"/>
+
+        <TextView
+            android:id="@+id/tv_name_session"
+            android:layout_width="match_parent"
+            android:text="好友"
+            android:layout_marginLeft="16dp"
+            android:textSize="17sp"
+            android:layout_marginTop="16dp"
+            android:layout_toLeftOf="@id/tv_time_session"
+            android:layout_marginRight="16dp"
+            android:textColor="@color/darkslategrey"
+            android:textStyle="bold"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:layout_toRightOf="@id/riv_session"
+            android:layout_height="wrap_content"/>
+
+        <TextView
+            android:id="@+id/tv_content_session"
+            android:layout_width="match_parent"
+            android:text="哈喽～"
+            android:layout_toLeftOf="@id/bv_session"
+            android:textSize="15sp"
+            android:layout_marginRight="20dp"
+            android:layout_marginBottom="2dp"
+            android:layout_below="@id/tv_name_session"
+            android:textColor="@color/silver"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:gravity="bottom"
+            android:layout_alignBottom="@id/riv_session"
+            android:layout_toRightOf="@id/pb_state_session"
+            android:layout_height="wrap_content"/>
+
+        <TextView
+            android:id="@+id/tv_time_session"
+            android:layout_width="wrap_content"
+            android:layout_alignTop="@id/tv_name_session"
+            android:layout_alignParentRight="true"
+            android:text="00:00"
+            android:gravity="center_horizontal"
+            android:textSize="14sp"
+            android:layout_marginRight="30dp"
+            android:layout_height="wrap_content"/>
+
+        <com.learn.agg.widgets.BadgeView
+            android:id="@+id/bv_session"
+            android:layout_centerVertical="true"
+            android:layout_width="wrap_content"
+            android:minWidth="60dp"
+            android:paddingTop="6dp"
+            app:badgeAnchorPosition="AnchorLeftBottom"
+            app:badgeBgColor="@color/red"
+            app:badgeBorderColor="@color/white"
+            app:badgeBorderWidth="2dp"
+            android:layout_below="@id/tv_time_session"
+            android:layout_alignParentRight="true"
+            app:badgeText="2"
+            app:badgeMarginVertical="20dp"
+            app:badgeTextColor="@color/white"
+            app:badgeTextSize="14dp"
+            android:layout_height="match_parent">
+
+        </com.learn.agg.widgets.BadgeView>
+
+        <ProgressBar
+            android:id="@+id/pb_state_session"
+            android:layout_width="12dp"
+            android:layout_alignBottom="@id/tv_content_session"
+            android:layout_toRightOf="@id/riv_session"
+            android:layout_centerVertical="true"
+            android:indeterminateBehavior="repeat"
+            android:layout_marginLeft="16dp"
+            android:layout_marginBottom="4dp"
+            android:indeterminateDrawable="@drawable/icon_send_error"
+            android:layout_height="12dp"/>
+
+    </RelativeLayout>
+
+
+
+
+
+</FrameLayout>

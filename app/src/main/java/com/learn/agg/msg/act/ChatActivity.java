@@ -10,7 +10,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.codebear.keyboard.CBEmoticonsKeyBoard;
 import com.learn.agg.R;
-import com.learn.agg.net.bean.LoginBean;
+import com.learn.commonalitylibrary.LoginBean;
 import com.learn.commonalitylibrary.util.NetState;
 import com.scwang.smartrefresh.layout.SmartRefreshLayout;
 

@@ -6,8 +6,8 @@ import com.learn.agg.act.contract.ScannerContract;
 import com.learn.agg.base.BasePresenter;
 import com.learn.agg.net.base.BaseObserverTC;
 import com.learn.agg.net.base.IHttpProtocol;
-import com.learn.agg.net.bean.LoginBean;
 import com.learn.agg.util.PhoneUtils;
+import com.learn.commonalitylibrary.LoginBean;
 import com.learn.commonalitylibrary.util.GsonUtil;
 import com.senyint.ihospital.client.HttpFactory;
 

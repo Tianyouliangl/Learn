@@ -5,8 +5,9 @@ package com.learn.agg.net.base;
 import com.learn.agg.net.bean.AttnBean;
 import com.learn.agg.net.bean.CommonBean;
 import com.learn.agg.net.bean.FriendMsgBean;
-import com.learn.agg.net.bean.LoginBean;
+import com.learn.agg.net.bean.FriendMsgCountBean;
 import com.learn.commonalitylibrary.ChatMessage;
+import com.learn.commonalitylibrary.LoginBean;
 
 import java.util.HashMap;
 import java.util.List;
@@ -36,6 +37,10 @@ public interface IHttpProtocol {
     @FormUrlEncoded
     Observable<BaseResponseTC<List<FriendMsgBean>>> getAllFriendMsg(@FieldMap HashMap<String, String> map);
 
+    @POST("/friend/info")
+    @FormUrlEncoded
+    Observable<BaseResponseTC<LoginBean>> getFriendInfo(@FieldMap HashMap<String, String> map);
+
     @POST("friend/allFriend")
     @FormUrlEncoded
     Observable<BaseResponseTC<List<LoginBean>>> getAllFriend(@FieldMap HashMap<String, String> map);
@@ -46,7 +51,7 @@ public interface IHttpProtocol {
 
     @POST("friend/allAddFriendCount")
     @FormUrlEncoded
-    Observable<BaseResponseTC<List<FriendMsgBean>>> getAllFriendMsgCount(@FieldMap HashMap<String, String> map);
+    Observable<BaseResponseTC<List<FriendMsgCountBean>>> getAllFriendMsgCount(@FieldMap HashMap<String, String> map);
 
     @POST("rgs/user")
     @FormUrlEncoded

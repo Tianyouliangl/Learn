@@ -13,6 +13,9 @@ import com.learn.commonalitylibrary.util.NetState;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import io.socket.client.IO;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
@@ -35,6 +38,7 @@ public class ImSocketClient{
     private static Emitter.Listener mChatListener;        // 消息监听
     private static Context mContext;
     private static NetBroadcastReceiver netBroadcastReceiver;
+    public  static Map<String,String> msgMap = new HashMap<>();
 
    static class NetBroadcastReceiver extends BroadcastReceiver {
 
@@ -116,6 +120,7 @@ public class ImSocketClient{
      * @return
      */
     public static void sendMsg(Context context, String msg, String msgId) {
+        msgMap.put(msgId,msg);
         sendMsgSocket(context, msg, msgId);
     }
 
@@ -135,6 +140,7 @@ public class ImSocketClient{
         } else {
             Log.i(TAG, "Socket Connect Error");
             initSocket(mToken,mContext);
+
         }
     }
 
@@ -214,6 +220,12 @@ public class ImSocketClient{
                 isConnect = true;
                 EventBus.getDefault().postSticky("connect");
                 Log.i(TAG, "socket ---连接成功---" + checkSocket());
+                if (msgMap.size() > 0){
+                    for (Map.Entry<String, String> entry : msgMap.entrySet()) {
+                        sendMsg(mContext,entry.getValue(),entry.getKey());
+                    }
+                }
+
             }
         };
 

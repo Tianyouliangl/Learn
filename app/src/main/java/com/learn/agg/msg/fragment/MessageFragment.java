@@ -1,13 +1,16 @@
 package com.learn.agg.msg.fragment;
 
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -20,10 +23,15 @@ import com.learn.agg.base.BaseMvpFragment;
 import com.learn.agg.base.IconOnClickListener;
 import com.learn.agg.msg.act.FriendActivity;
 import com.learn.agg.msg.act.NewFriendActivity;
+import com.learn.agg.msg.adapter.SessionsAdapter;
 import com.learn.agg.msg.contract.MessageContract;
 import com.learn.agg.msg.presenter.MessagePresenter;
 import com.learn.agg.widgets.BadgeView;
+import com.learn.commonalitylibrary.ChatMessage;
 import com.learn.commonalitylibrary.Constant;
+import com.learn.commonalitylibrary.Session;
+import com.learn.commonalitylibrary.SessionMessage;
+import com.learn.commonalitylibrary.sqlite.DataBaseHelp;
 import com.learn.commonalitylibrary.util.NotificationUtils;
 import com.lib.xiangxiang.im.ImService;
 import com.scwang.smartrefresh.layout.SmartRefreshLayout;
@@ -51,6 +59,7 @@ public class MessageFragment extends BaseMvpFragment<MessageContract.IPresenter>
     private SimpleMarqueeView simpleMarqueeView;
     private RelativeLayout rl_find_friend;
     private SmartRefreshLayout smart_layout;
+    private SessionsAdapter sessionsAdapter;
 
     @Override
     protected int getLayoutId() {
@@ -86,7 +95,9 @@ public class MessageFragment extends BaseMvpFragment<MessageContract.IPresenter>
     protected void initData() {
         super.initData();
         rl_message.setLayoutManager(new LinearLayoutManager(getContext()));
+        sessionsAdapter = new SessionsAdapter(getContext(), new ArrayList<SessionMessage>());
         rl_bv.showBadge(sList.size());
+        rl_message.setAdapter(sessionsAdapter);
         simpleMarqueeView.setOnItemClickListener(this);
         rl_find_friend.setOnClickListener(this);
         smart_layout.setOnRefreshListener(this);
@@ -96,6 +107,7 @@ public class MessageFragment extends BaseMvpFragment<MessageContract.IPresenter>
     public void onResume() {
         super.onResume();
         getPresenter().getAddFriendMsg();
+        getPresenter().getSessionList();
     }
 
     @Override
@@ -154,8 +166,6 @@ public class MessageFragment extends BaseMvpFragment<MessageContract.IPresenter>
     @Override
     public void onSuccess(List<String> list) {
         smart_layout.finishRefresh();
-        HashMap<String, Object> map = new HashMap<>();
-        map.put("FragmentName",MessageFragment.class.getSimpleName());
         if (list != null && list.size() > 0) {
             simpleMarqueeView.setVisibility(View.VISIBLE);
             stopFlipping();
@@ -163,13 +173,36 @@ public class MessageFragment extends BaseMvpFragment<MessageContract.IPresenter>
             sList.addAll(list);
             startFlipping();
             rl_bv.showBadge(list.size());
-            map.put("count",list.size());
         } else {
             simpleMarqueeView.setVisibility(View.GONE);
             rl_bv.showBadge(0);
-            map.put("count",0);
         }
+        sendNumberCount();
+    }
+
+    @Override
+    public void onSession(List<SessionMessage> list) {
+        sessionsAdapter.setData(list);
+        sendNumberCount();
+    }
+
+    public void sendNumberCount(){
+        int n = 0;
+        List<SessionMessage> list = sessionsAdapter.getData();
+        for (int i=0;i<list.size();i++){
+            n += list.get(i).getNumber();
+        }
+        n += sList.size();
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("FragmentName",MessageFragment.class.getSimpleName());
+        map.put("count",n);
         EventBus.getDefault().post(map);
+    }
+
+    @Nullable
+    @Override
+    public Context getContext() {
+        return getActivity();
     }
 
     //事件的 订阅 
@@ -183,6 +216,13 @@ public class MessageFragment extends BaseMvpFragment<MessageContract.IPresenter>
         }
     }
 
+    @Subscribe(threadMode = ThreadMode.MAIN,sticky = true)
+    public void EventBus(ChatMessage chatMessage) {
+        if (chatMessage.getType() == ChatMessage.MSG_SEND_CHAT) {
+           getPresenter().getSessionList();
+        }
+    }
+
     @Override
     public void onError() {
         smart_layout.finishRefresh();
@@ -191,6 +231,7 @@ public class MessageFragment extends BaseMvpFragment<MessageContract.IPresenter>
     @Override
     public void onRefresh(@NonNull RefreshLayout refreshLayout) {
         getPresenter().getAddFriendMsg();
+        getPresenter().getSessionList();
     }
 
     @Override

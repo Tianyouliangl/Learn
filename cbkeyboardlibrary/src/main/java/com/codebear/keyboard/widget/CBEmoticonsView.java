@@ -178,6 +178,7 @@ public class CBEmoticonsView extends FrameLayout implements IEmoticonsView {
     public void addEmoticonsWithName(String[] nameList) {
         for (String name : nameList) {
             addEmoticonsWithName(name);
+            addEmoticonByName(name);
         }
     }
 

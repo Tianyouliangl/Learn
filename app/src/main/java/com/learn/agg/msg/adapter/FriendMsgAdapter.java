@@ -19,8 +19,8 @@ import com.learn.agg.msg.act.FriendInfoActivity;
 import com.learn.agg.net.base.BaseObserverTC;
 import com.learn.agg.net.base.IHttpProtocol;
 import com.learn.agg.net.bean.FriendMsgBean;
-import com.learn.agg.net.bean.LoginBean;
 import com.learn.commonalitylibrary.Constant;
+import com.learn.commonalitylibrary.LoginBean;
 import com.learn.commonalitylibrary.util.GsonUtil;
 import com.makeramen.roundedimageview.RoundedImageView;
 import com.senyint.ihospital.client.HttpFactory;
@@ -48,8 +48,11 @@ public class FriendMsgAdapter extends RecyclerView.Adapter<FriendMsgAdapter.Frie
 
     public interface FriendMsgInterface {
         void showLoading();
+
         void dismissLoading();
+
         void onClickReject(FriendMsgBean bean);
+
         void onClickAgree(FriendMsgBean bean);
     }
 
@@ -72,28 +75,41 @@ public class FriendMsgAdapter extends RecyclerView.Adapter<FriendMsgAdapter.Frie
         final String id = bean.getFrom_id();
         final int friend_type = bean.getFriend_type();
         if (local_uid.equals(id)) {
+            String toUserInfo = bean.getToUserInfo();
+            UserInfo userInfo = GsonUtil.GsonToBean(toUserInfo, UserInfo.class);
+            String imageUrl = userInfo.getData().getImageUrl();
+            String username = userInfo.getData().getUsername();
+            holder.fl_loading.setVisibility(View.GONE);
+            holder.rl_data.setVisibility(View.VISIBLE);
+            Glide.with(mContext).load(imageUrl).into(holder.iv_icon);
+            holder.tv_name.setText(username);
+            holder.tv_wait.setVisibility(View.VISIBLE);
+            holder.tv_reject.setVisibility(View.GONE);
+            holder.tv_agree.setVisibility(View.GONE);
             if (friend_type == 0) {
-                holder.tv_wait.setVisibility(View.VISIBLE);
-                holder.tv_reject.setVisibility(View.GONE);
-                holder.tv_agree.setVisibility(View.GONE);
                 holder.tv_wait.setText("已添加");
+                holder.tv_content.setText("对方已同意");
             }
 
             if (friend_type == 1) {
-                holder.tv_wait.setVisibility(View.VISIBLE);
-                holder.tv_reject.setVisibility(View.GONE);
-                holder.tv_agree.setVisibility(View.GONE);
                 holder.tv_wait.setText("对方拒绝");
+                holder.tv_content.setText("对方拒绝");
             }
 
             if (friend_type == 2) {
-                holder.tv_wait.setVisibility(View.VISIBLE);
-                holder.tv_reject.setVisibility(View.GONE);
-                holder.tv_agree.setVisibility(View.GONE);
+                holder.tv_wait.setText("等待验证");
+                holder.tv_content.setText("已发送验证信息");
             }
-            searUserData(holder, bean.getTo_id());
-            holder.tv_content.setText("已发送验证信息");
+
         } else {
+            String userInfo = bean.getFromUserInfo();
+            UserInfo info = GsonUtil.GsonToBean(userInfo, FriendMsgAdapter.UserInfo.class);
+            String imageUrl = info.getData().getImageUrl();
+            String username = info.getData().getUsername();
+            holder.fl_loading.setVisibility(View.GONE);
+            holder.rl_data.setVisibility(View.VISIBLE);
+            Glide.with(mContext).load(imageUrl).into(holder.iv_icon);
+            holder.tv_name.setText(username);
             if (friend_type == 0) {
                 holder.tv_wait.setVisibility(View.VISIBLE);
                 holder.tv_reject.setVisibility(View.GONE);
@@ -114,20 +130,38 @@ public class FriendMsgAdapter extends RecyclerView.Adapter<FriendMsgAdapter.Frie
                 holder.tv_agree.setVisibility(View.VISIBLE);
             }
             holder.tv_content.setText(bean.getContent());
-            searUserData(holder, bean.getFrom_id());
         }
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mLoadingChangListener != null) {
-                    mLoadingChangListener.showLoading();
-                }
+                Bundle bundle = new Bundle();
                 if (local_uid.equals(id)) {
-                    getInfo(bean.getTo_id(),false, friend_type);
+                    String toUserInfo = bean.getToUserInfo();
+                    String json = GsonUtil.BeanToJson(GsonUtil.GsonToBean(toUserInfo, UserInfo.class).getData());
+                    LoginBean loginBean = GsonUtil.GsonToBean(json, LoginBean.class);
+                    if(friend_type == 0){
+                        loginBean.setFriend(true);
+                    }else {
+                        loginBean.setFriend(false);
+                    }
+                    bundle.putString("data", GsonUtil.BeanToJson(loginBean));
+                    bundle.putBoolean("isGone", true);
                 } else {
-                    getInfo(bean.getFrom_id(), true,friend_type);
+                    String userInfo = bean.getFromUserInfo();
+                    String json = GsonUtil.BeanToJson(GsonUtil.GsonToBean(userInfo, UserInfo.class).getData());
+                    LoginBean loginBean = GsonUtil.GsonToBean(json, LoginBean.class);
+                    if(friend_type == 0){
+                        loginBean.setFriend(true);
+                    }else {
+                        loginBean.setFriend(false);
+                    }
+                    bundle.putString("data", GsonUtil.BeanToJson(loginBean));
+                    bundle.putBoolean("isGone", false);
                 }
+                Intent intent = new Intent(mContext, FriendInfoActivity.class);
+                intent.putExtra("bundle", bundle);
+                mContext.startActivity(intent);
             }
         });
 
@@ -152,71 +186,6 @@ public class FriendMsgAdapter extends RecyclerView.Adapter<FriendMsgAdapter.Frie
         });
     }
 
-    private void getInfo(final String id, final boolean isGone , final int friend_type) {
-        HashMap<String, String> map = new HashMap<>();
-        map.put("uid", id);
-        HttpFactory.INSTANCE.getProtocol(IHttpProtocol.class)
-                .getUserInfo(map)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new BaseObserverTC<LoginBean>() {
-
-                    @Override
-                    protected void onNextEx(@NonNull LoginBean data) {
-                        String mobile = data.getMobile();
-                        HashMap<String, String> map = new HashMap<>();
-                        map.put("phone", mobile);
-                        map.put("uid", local_uid);
-                        HttpFactory.INSTANCE.getProtocol(IHttpProtocol.class)
-                                .findFriend(map)
-                                .subscribeOn(Schedulers.io())
-                                .observeOn(AndroidSchedulers.mainThread())
-                                .subscribe(new BaseObserverTC<LoginBean>() {
-
-                                    @Override
-                                    protected void onNextEx(@NonNull LoginBean data) {
-                                        if (mLoadingChangListener != null) {
-                                            mLoadingChangListener.dismissLoading();
-                                        }
-                                        String json = GsonUtil.BeanToJson(data);
-                                        Bundle bundle = new Bundle();
-                                        bundle.putString("data", json);
-
-                                        if (friend_type == 2) {
-                                            bundle.putBoolean("isGone", isGone);
-                                        } else {
-                                            bundle.putBoolean("isGone", false);
-                                        }
-                                        Intent intent = new Intent(mContext, FriendInfoActivity.class);
-                                        intent.putExtra("bundle", bundle);
-                                        mContext.startActivity(intent);
-                                    }
-
-                                    @Override
-                                    protected void onErrorEx(@NonNull Throwable e) {
-
-                                    }
-
-                                    @Override
-                                    protected void onNextSN(String msg) {
-                                        super.onNextSN(msg);
-                                    }
-                                });
-                    }
-
-                    @Override
-                    protected void onErrorEx(@NonNull Throwable e) {
-
-                    }
-
-                    @Override
-                    protected void onNextSN(String msg) {
-                        super.onNextSN(msg);
-
-                    }
-                });
-    }
-
     public void setData(List<FriendMsgBean> list) {
         mList.clear();
         mList.addAll(list);
@@ -234,12 +203,7 @@ public class FriendMsgAdapter extends RecyclerView.Adapter<FriendMsgAdapter.Frie
 
                     @Override
                     protected void onNextEx(@NonNull LoginBean data) {
-                        holder.fl_loading.setVisibility(View.GONE);
-                        holder.rl_data.setVisibility(View.VISIBLE);
-                        String imageUrl = data.getImageUrl();
-                        String username = data.getUsername();
-                        Glide.with(mContext).load(imageUrl).into(holder.iv_icon);
-                        holder.tv_name.setText(username);
+
 
                     }
 
@@ -287,6 +251,159 @@ public class FriendMsgAdapter extends RecyclerView.Adapter<FriendMsgAdapter.Frie
             tv_agree = itemView.findViewById(R.id.tv_agree);
             tv_wait = itemView.findViewById(R.id.tv_wait);
 
+        }
+    }
+
+    public static class UserInfo {
+
+        /**
+         * msg : 成功
+         * code : 1
+         * data : {"birthday":"2000-01-01","uid":"e02ff4f4-b87d-40ed-afb5-80363500c84f","sex":"男","imageUrl":"https://b-ssl.duitang.com/uploads/item/201804/29/20180429111927_4i2Ks.thumb.700_0.jpeg","mobile":"17600463506","sign":"退一步海阔天空.","online":0,"location":"北京市丰台区公益西桥","age":20,"email":"pipi@qq.com","username":"皮皮"}
+         */
+
+        private String msg;
+        private int code;
+        private DataBean data;
+
+        public String getMsg() {
+            return msg;
+        }
+
+        public void setMsg(String msg) {
+            this.msg = msg;
+        }
+
+        public int getCode() {
+            return code;
+        }
+
+        public void setCode(int code) {
+            this.code = code;
+        }
+
+        public DataBean getData() {
+            return data;
+        }
+
+        public void setData(DataBean data) {
+            this.data = data;
+        }
+
+        public static class DataBean {
+            /**
+             * birthday : 2000-01-01
+             * uid : e02ff4f4-b87d-40ed-afb5-80363500c84f
+             * sex : 男
+             * imageUrl : https://b-ssl.duitang.com/uploads/item/201804/29/20180429111927_4i2Ks.thumb.700_0.jpeg
+             * mobile : 17600463506
+             * sign : 退一步海阔天空.
+             * online : 0
+             * location : 北京市丰台区公益西桥
+             * age : 20
+             * email : pipi@qq.com
+             * username : 皮皮
+             */
+
+            private String birthday;
+            private String uid;
+            private String sex;
+            private String imageUrl;
+            private String mobile;
+            private String sign;
+            private int online;
+            private String location;
+            private int age;
+            private String email;
+            private String username;
+
+            public String getBirthday() {
+                return birthday;
+            }
+
+            public void setBirthday(String birthday) {
+                this.birthday = birthday;
+            }
+
+            public String getUid() {
+                return uid;
+            }
+
+            public void setUid(String uid) {
+                this.uid = uid;
+            }
+
+            public String getSex() {
+                return sex;
+            }
+
+            public void setSex(String sex) {
+                this.sex = sex;
+            }
+
+            public String getImageUrl() {
+                return imageUrl;
+            }
+
+            public void setImageUrl(String imageUrl) {
+                this.imageUrl = imageUrl;
+            }
+
+            public String getMobile() {
+                return mobile;
+            }
+
+            public void setMobile(String mobile) {
+                this.mobile = mobile;
+            }
+
+            public String getSign() {
+                return sign;
+            }
+
+            public void setSign(String sign) {
+                this.sign = sign;
+            }
+
+            public int getOnline() {
+                return online;
+            }
+
+            public void setOnline(int online) {
+                this.online = online;
+            }
+
+            public String getLocation() {
+                return location;
+            }
+
+            public void setLocation(String location) {
+                this.location = location;
+            }
+
+            public int getAge() {
+                return age;
+            }
+
+            public void setAge(int age) {
+                this.age = age;
+            }
+
+            public String getEmail() {
+                return email;
+            }
+
+            public void setEmail(String email) {
+                this.email = email;
+            }
+
+            public String getUsername() {
+                return username;
+            }
+
+            public void setUsername(String username) {
+                this.username = username;
+            }
         }
     }
 }

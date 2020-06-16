@@ -1,4 +1,4 @@
-package com.learn.agg.net.bean;
+package com.learn.commonalitylibrary;
 
 import java.io.Serializable;
 import java.math.BigDecimal;

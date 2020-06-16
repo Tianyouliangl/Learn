@@ -11,7 +11,9 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.learn.commonalitylibrary.ChatMessage;
+import com.learn.commonalitylibrary.SessionMessage;
 import com.learn.commonalitylibrary.body.TextBody;
+import com.learn.commonalitylibrary.sqlite.DataBaseHelp;
 import com.learn.commonalitylibrary.util.GsonUtil;
 import com.learn.commonalitylibrary.util.NotificationUtils;
 
@@ -147,7 +149,19 @@ public class SocketManager {
             if (callBack != null) {
                 callBack.call(result);
             }
+            ChatMessage message = GsonUtil.GsonToBean(result, ChatMessage.class);
+            SessionMessage sessionMessage = new SessionMessage();
+            sessionMessage.setConversation(message.getConversation());
+            sessionMessage.setTo_id(message.getToId());
+            sessionMessage.setBody(message.getBody());
+            sessionMessage.setMsg_status(message.getMsgStatus());
+            sessionMessage.setTime(message.getTime());
+            sessionMessage.setBody_type(message.getBodyType());
+            sessionMessage.setNumber(0);
+            DataBaseHelp.getInstance(context).addOrUpdateSession(sessionMessage);
+            EventBus.getDefault().post(message);
             mCallBackMap.remove(msg_id);
+            ImSocketClient.msgMap.remove(msg_id);
         }
     }
 
@@ -185,13 +199,26 @@ public class SocketManager {
 
         private void sendEvent(Context context, String result) {
             ChatMessage chatMessage = GsonUtil.GsonToBean(result, ChatMessage.class);
+
             if (chatMessage.getType() == ChatMessage.MSG_SEND_SYS) {
                 Map<String, Object> map = new HashMap<>();
                 map.put("notification", "change");
                 EventBus.getDefault().post(map);
             } else {
-                EventBus.getDefault().post(chatMessage);
+
+                int number = DataBaseHelp.getInstance(context).getSessionNumber(chatMessage.getConversation());
+                SessionMessage sessionMessage = new SessionMessage();
+                sessionMessage.setConversation(chatMessage.getConversation());
+                sessionMessage.setTo_id(chatMessage.getFromId());
+                sessionMessage.setBody(chatMessage.getBody());
+                sessionMessage.setMsg_status(chatMessage.getMsgStatus());
+                sessionMessage.setTime(chatMessage.getTime());
+                sessionMessage.setBody_type(chatMessage.getBodyType());
+                sessionMessage.setNumber((number + 1));
+                DataBaseHelp.getInstance(context).addOrUpdateSession(sessionMessage);
+                DataBaseHelp.getInstance(context).addChatMessage(chatMessage);
                 Log.i(ImSocketClient.TAG, "------------" + chatMessage.getBody() + "------------");
+                EventBus.getDefault().post(chatMessage);
             }
             NotificationUtils.showNotificationMessage(context, chatMessage);
         }

@@ -39,7 +39,7 @@ public abstract class BaseObserver<T> implements Observer<BaseResponse<T>> {
         onCompleteEx();
     }
 
-    //Java实现下划线开头的方法
+
     protected void onCompleteEx() {
 
     }

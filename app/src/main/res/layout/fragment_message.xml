@@ -66,7 +66,6 @@
 
                     <com.learn.agg.widgets.BadgeView
                         android:id="@+id/rl_bv"
-                        android:layout_alignParentRight="true"
                         android:layout_centerVertical="true"
                         android:layout_width="wrap_content"
                         android:minWidth="60dp"
@@ -75,23 +74,26 @@
                         app:badgeBgColor="@color/red"
                         app:badgeBorderColor="@color/white"
                         app:badgeBorderWidth="2dp"
+                        android:layout_alignParentRight="true"
+                        android:layout_marginRight="8dp"
                         app:badgeMarginHorizon="4dp"
                         app:badgeMarginVertical="20dp"
                         app:badgeTextColor="@color/white"
                         app:badgeTextSize="10sp"
                         android:layout_height="match_parent">
 
-                        <ImageView
-                            android:layout_width="wrap_content"
-                            android:layout_weight="1"
-                            android:layout_height="wrap_content"
-                            android:gravity="center"
-                            android:src="@mipmap/icon_youjiantou"
-                            android:layout_centerInParent="true"
-                            android:textSize="18sp"
-                            android:textStyle="bold" />
-
                     </com.learn.agg.widgets.BadgeView>
+
+                    <ImageView
+                        android:id="@+id/iv_youjiantou"
+                        android:layout_width="35dp"
+                        android:padding="8dp"
+                        android:layout_height="35dp"
+                        android:gravity="center"
+                        android:layout_marginRight="8dp"
+                        android:src="@mipmap/icon_youjiantou"
+                        android:layout_centerInParent="true"
+                        android:layout_alignParentRight="true" />
 
 
 

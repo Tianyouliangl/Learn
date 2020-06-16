@@ -1,8 +1,8 @@
 package com.learn.agg.msg.act;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
-import android.media.MediaPlayer;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -13,7 +13,6 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.alibaba.sdk.android.oss.model.PutObjectRequest;
 import com.codebear.keyboard.CBEmoticonsKeyBoard;
 import com.codebear.keyboard.data.AppFuncBean;
 import com.codebear.keyboard.data.EmoticonsBean;
@@ -27,14 +26,15 @@ import com.learn.agg.base.BaseMvpActivity;
 import com.learn.agg.msg.adapter.ChatAdapter;
 import com.learn.agg.msg.contract.BaseChatContract;
 import com.learn.agg.msg.presenter.BaseChatPresenter;
-import com.learn.agg.net.bean.LoginBean;
+import com.learn.commonalitylibrary.LoginBean;
+import com.learn.commonalitylibrary.sqlite.DataBaseHelp;
 import com.learn.agg.widgets.FileUpLoadManager;
 import com.learn.commonalitylibrary.ChatMessage;
+import com.learn.commonalitylibrary.SessionMessage;
 import com.learn.commonalitylibrary.body.ImageBody;
 import com.learn.commonalitylibrary.body.VoiceBody;
 import com.learn.commonalitylibrary.util.GsonUtil;
 import com.learn.commonalitylibrary.util.ImSendMessageUtils;
-import com.learn.commonalitylibrary.util.MediaManager;
 import com.learn.commonalitylibrary.util.OfTenUtils;
 import com.lib.xiangxiang.im.ImSocketClient;
 import com.lib.xiangxiang.im.SocketManager;
@@ -50,11 +50,10 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.IPresenter> implements BaseChatContract.IView, View.OnLayoutChangeListener, FuncLayout.OnFuncKeyBoardListener, View.OnClickListener, RecordIndicator.OnRecordListener, CBEmoticonsView.OnEmoticonClickListener, CBAppFuncView.OnAppFuncClickListener, View.OnTouchListener, OnRefreshListener, SocketManager.SendMsgCallBack,CBVoice.VoiceStateListener {
+public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.IPresenter> implements BaseChatContract.IView, View.OnLayoutChangeListener, FuncLayout.OnFuncKeyBoardListener, View.OnClickListener, RecordIndicator.OnRecordListener, CBEmoticonsView.OnEmoticonClickListener, CBAppFuncView.OnAppFuncClickListener, View.OnTouchListener, OnRefreshListener, SocketManager.SendMsgCallBack, CBVoice.VoiceStateListener {
 
 
     private static final int REQUEST_CODE_IMAGE = 1231;
@@ -94,7 +93,10 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
     @Override
     public void call(String msg) {
         ChatMessage bean = GsonUtil.GsonToBean(msg, ChatMessage.class);
-        chatAdapter.notifyChatMessage(bean);
+        DataBaseHelp.getInstance(this).updateChatMessage(bean);
+        if (chatAdapter != null) {
+            chatAdapter.notifyChatMessage(bean);
+        }
     }
 
     // 语音回调
@@ -109,13 +111,13 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
     }
 
     @Override
-    public void onEndVoice(String filePath, String fileAbsPath, long time,String pid) {
-        if (time < 1000){
+    public void onEndVoice(String filePath, String fileAbsPath, long time, String pid) {
+        if (time < 1000) {
             showToast("时间过短");
             return;
         }
         Log.i("TAG", "filePath:" + filePath + "\n" + "fileAbsPath:" + fileAbsPath + "\n" + "time:" + time);
-        send_voice_json = ImSendMessageUtils.getChatMessageVoice(filePath,fileAbsPath, time, from_bean.getUid(), to_bean.getUid(), conviction, chatAdapter.getLastItemDisplayTime());
+        send_voice_json = ImSendMessageUtils.getChatMessageVoice(filePath, fileAbsPath, time, from_bean.getUid(), to_bean.getUid(), conviction, chatAdapter.getLastItemDisplayTime());
         ChatMessage message = GsonUtil.GsonToBean(send_voice_json, ChatMessage.class);
         chatAdapter.setData(message);
         toLastItem();
@@ -127,10 +129,10 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
 
             @Override
             public void onSuccess(String url) {
-                if (send_voice_json != null){
+                if (send_voice_json != null) {
                     ChatMessage chatMessage = GsonUtil.GsonToBean(send_voice_json, ChatMessage.class);
                     VoiceBody voiceBody = GsonUtil.GsonToBean(chatMessage.getBody(), VoiceBody.class);
-                    String toJson = GsonUtil.BeanToJson(new VoiceBody(voiceBody.getFileName(),voiceBody.getFileAbsPath(), url, voiceBody.getTime(), voiceBody.getState(), voiceBody.getVoice_content()));
+                    String toJson = GsonUtil.BeanToJson(new VoiceBody(voiceBody.getFileName(), voiceBody.getFileAbsPath(), url, voiceBody.getTime(), voiceBody.getState(), voiceBody.getVoice_content()));
                     chatMessage.setBody(toJson);
                     chatAdapter.notifyChatMessage(chatMessage);
                     String json = GsonUtil.BeanToJson(chatMessage);
@@ -217,9 +219,13 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
         Intent intent = getIntent();
         from_bean = (LoginBean) intent.getSerializableExtra(key.KEY_FROM);
         to_bean = (LoginBean) intent.getSerializableExtra(key.KEY_TO);
+        if (null == from_bean || null == to_bean.getUid()) {
+            finish();
+        }
         chatAdapter.setFromUserBean(from_bean);
         chatAdapter.setToUserBean(to_bean);
         conviction = OfTenUtils.getConviction(from_bean.getUid(), to_bean.getUid());
+        DataBaseHelp.getInstance(this).setSessionNumber(conviction, 0);
         showLoadingDialog();
         getPresenter().getHistory(pageNo, pageSize);
     }
@@ -232,6 +238,11 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
     @Override
     public String getConversation() {
         return conviction;
+    }
+
+    @Override
+    public Context getContent() {
+        return this;
     }
 
     @Override
@@ -307,10 +318,11 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void EventBus(ChatMessage msg) {
-        if (msg.getType() == ChatMessage.MSG_SEND_CHAT) {
-            chatAdapter.setData(msg);
+    public void EventBus(ChatMessage chatMessage) {
+        if (chatMessage.getType() == ChatMessage.MSG_SEND_CHAT) {
+            chatAdapter.setData(chatMessage);
             toLastItem();
+            DataBaseHelp.getInstance(this).setSessionNumber(chatMessage.getConversation(), 0);
         }
     }
 
@@ -325,7 +337,18 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
     }
 
     private void SocketSendJson(String json) {
+        ChatMessage chatMessage = GsonUtil.GsonToBean(json, ChatMessage.class);
         SocketManager.sendMsgSocket(this, json, this);
+        DataBaseHelp.getInstance(this).addChatMessage(chatMessage);
+        SessionMessage sessionMessage = new SessionMessage();
+        sessionMessage.setConversation(chatMessage.getConversation());
+        sessionMessage.setTo_id(to_bean.getUid());
+        sessionMessage.setBody(chatMessage.getBody());
+        sessionMessage.setMsg_status(chatMessage.getMsgStatus());
+        sessionMessage.setTime(chatMessage.getTime());
+        sessionMessage.setBody_type(chatMessage.getBodyType());
+        sessionMessage.setNumber(0);
+        DataBaseHelp.getInstance(this).addOrUpdateSession(sessionMessage);
     }
 
     // 语音
@@ -415,7 +438,7 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
                             chatAdapter.setData(message);
                             toLastItem();
                         }
-                        new FileUpLoadManager().upLoadFile(path, new FileUpLoadManager.FileUpLoadCallBack(){
+                        new FileUpLoadManager().upLoadFile(path, new FileUpLoadManager.FileUpLoadCallBack() {
 
                             @Override
                             public void onError(Throwable e) {
@@ -424,7 +447,7 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
 
                             @Override
                             public void onSuccess(String url) {
-                                if (send_image_json != null ) {
+                                if (send_image_json != null) {
                                     ChatMessage chatMessage = GsonUtil.GsonToBean(send_image_json, ChatMessage.class);
                                     chatMessage.setBody(GsonUtil.BeanToJson(new ImageBody(url)));
                                     chatAdapter.notifyChatMessage(chatMessage);

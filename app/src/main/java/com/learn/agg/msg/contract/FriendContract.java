@@ -1,6 +1,6 @@
 package com.learn.agg.msg.contract;
 
-import com.learn.agg.net.bean.LoginBean;
+import com.learn.commonalitylibrary.LoginBean;
 import com.senyint.ihospital.contract.IPresenterContract;
 import com.senyint.ihospital.contract.IViewContract;
 

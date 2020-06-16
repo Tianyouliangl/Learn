@@ -184,4 +184,10 @@ public class OfTenUtils {
         }
         return context;
     }
+
+    public static String replace(String msg) {
+        String removeStr = "-";
+        String rpe = msg.replace(removeStr, "");
+        return rpe;
+    }
 }

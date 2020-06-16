@@ -10,8 +10,6 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import androidx.appcompat.view.menu.MenuPresenter;
-
 import com.bumptech.glide.Glide;
 import com.learn.agg.R;
 import com.learn.agg.act.QREncodeActivity;
@@ -20,8 +18,8 @@ import com.learn.agg.base.IconOnClickListener;
 import com.learn.agg.fragment.contract.MenuLeftContract;
 import com.learn.agg.fragment.presenter.MenuLeftPresenter;
 import com.learn.agg.msg.act.FriendInfoActivity;
-import com.learn.agg.net.bean.LoginBean;
 import com.learn.commonalitylibrary.Constant;
+import com.learn.commonalitylibrary.LoginBean;
 import com.learn.commonalitylibrary.util.GsonUtil;
 import com.makeramen.roundedimageview.RoundedImageView;
 import com.white.easysp.EasySP;
