@@ -7,8 +7,8 @@ import com.white.easysp.EasySP;
 import java.util.ArrayList;
 
 public class Constant {
-    public static String BASE_GROUP_URL = "http://172.16.201.143:8082/"; //172.16.201.143  //111.229.231.206   192.168.2.169
-    public static String BASE_CHAT_URL =   "http://172.16.201.143:9092/";   // im连接地址
+    public static String BASE_GROUP_URL = "http://111.229.231.206:8082/"; //172.16.201.143  //111.229.231.206   192.168.2.169
+    public static String BASE_CHAT_URL =   "http://111.229.231.206:9092/";   // im连接地址
     public static String SPKey_UID = "user_uid";
     private static ArrayList<String> list;
 

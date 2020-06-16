@@ -205,18 +205,19 @@ public class SocketManager {
                 map.put("notification", "change");
                 EventBus.getDefault().post(map);
             } else {
-
-                int number = DataBaseHelp.getInstance(context).getSessionNumber(chatMessage.getConversation());
-                SessionMessage sessionMessage = new SessionMessage();
-                sessionMessage.setConversation(chatMessage.getConversation());
-                sessionMessage.setTo_id(chatMessage.getFromId());
-                sessionMessage.setBody(chatMessage.getBody());
-                sessionMessage.setMsg_status(chatMessage.getMsgStatus());
-                sessionMessage.setTime(chatMessage.getTime());
-                sessionMessage.setBody_type(chatMessage.getBodyType());
-                sessionMessage.setNumber((number + 1));
-                DataBaseHelp.getInstance(context).addOrUpdateSession(sessionMessage);
-                DataBaseHelp.getInstance(context).addChatMessage(chatMessage);
+                if (chatMessage.getType() == ChatMessage.MSG_SEND_CHAT){
+                    int number = DataBaseHelp.getInstance(context).getSessionNumber(chatMessage.getConversation());
+                    SessionMessage sessionMessage = new SessionMessage();
+                    sessionMessage.setConversation(chatMessage.getConversation());
+                    sessionMessage.setTo_id(chatMessage.getFromId());
+                    sessionMessage.setBody(chatMessage.getBody());
+                    sessionMessage.setMsg_status(chatMessage.getMsgStatus());
+                    sessionMessage.setTime(chatMessage.getTime());
+                    sessionMessage.setBody_type(chatMessage.getBodyType());
+                    sessionMessage.setNumber((number + 1));
+                    DataBaseHelp.getInstance(context).addOrUpdateSession(sessionMessage);
+                    DataBaseHelp.getInstance(context).addChatMessage(chatMessage);
+                }
                 Log.i(ImSocketClient.TAG, "------------" + chatMessage.getBody() + "------------");
                 EventBus.getDefault().post(chatMessage);
             }
