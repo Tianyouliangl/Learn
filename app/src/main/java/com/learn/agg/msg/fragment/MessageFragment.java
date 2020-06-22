@@ -30,11 +30,8 @@ import com.learn.agg.msg.presenter.MessagePresenter;
 import com.learn.agg.widgets.BadgeView;
 import com.learn.commonalitylibrary.ChatMessage;
 import com.learn.commonalitylibrary.Constant;
-import com.learn.commonalitylibrary.Session;
 import com.learn.commonalitylibrary.SessionMessage;
-import com.learn.commonalitylibrary.sqlite.DataBaseHelp;
 import com.learn.commonalitylibrary.util.NotificationUtils;
-import com.lib.xiangxiang.im.ImService;
 import com.scwang.smartrefresh.layout.SmartRefreshLayout;
 import com.scwang.smartrefresh.layout.api.RefreshLayout;
 import com.scwang.smartrefresh.layout.listener.OnRefreshListener;
@@ -44,15 +41,9 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import org.jetbrains.annotations.NotNull;
-
-import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
-import siney.cn.leftslideview.LeftSlideLinearManager;
-import siney.cn.leftslideview.LeftSlideView;
 
 
 public class MessageFragment extends BaseMvpFragment<MessageContract.IPresenter> implements MessageContract.IView, View.OnClickListener, OnItemClickListener, OnRefreshListener {

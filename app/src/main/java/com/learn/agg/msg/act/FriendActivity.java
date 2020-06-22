@@ -3,6 +3,7 @@ package com.learn.agg.msg.act;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -55,8 +56,13 @@ public class FriendActivity extends BaseMvpActivity<FriendContract.IPresenter> i
 
     @Override
     protected void initView() {
-        initToolbar(true,true,false);
-        initToolbar("联系人");
+        initToolbar(true,true,true);
+        initToolbar("联系人", "添加", new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                goActivity(NewFriendActivity.class);
+            }
+        });
         EventBus.getDefault().register(this);
         rl_friend = findViewById(R.id.rl_friend);
         smart_layout = findViewById(R.id.start_layout);

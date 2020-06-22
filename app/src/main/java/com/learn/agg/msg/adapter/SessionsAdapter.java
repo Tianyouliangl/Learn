@@ -14,6 +14,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.learn.agg.R;
 import com.learn.agg.msg.act.ChatActivity;
 import com.learn.agg.net.base.BaseObserverTC;
@@ -151,8 +152,20 @@ public class SessionsAdapter extends RecyclerView.Adapter<SessionsAdapter.Sessio
                     @Override
                     protected void onNextEx(@NonNull LoginBean data) {
                         super.onNextEx(data);
+                        RequestOptions options;
+                        if (data.getSex().equals("男")){
+                            options = new RequestOptions()
+                                    .placeholder(R.drawable.icon_t_na)//图片加载出来前，显示的图片
+                                    .fallback(R.drawable.icon_t_na) //url为空的时候,显示的图片
+                                    .error(R.drawable.icon_t_na);//图片加载失败后，显示的图片
+                        }else {
+                            options = new RequestOptions()
+                                    .placeholder(R.drawable.icon_t_nv)//图片加载出来前，显示的图片
+                                    .fallback(R.drawable.icon_t_nv) //url为空的时候,显示的图片
+                                    .error(R.drawable.icon_t_nv);//图片加载失败后，显示的图片
+                        }
                         sessionMessage.setInfo(data);
-                        Glide.with(mContext).load(data.getImageUrl()).into(holder.riv_session);
+                        Glide.with(mContext).load(data.getImageUrl()).apply(options).into(holder.riv_session);
                         holder.tv_name_session.setText(data.getRemark());
                     }
                 });

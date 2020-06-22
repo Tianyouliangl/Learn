@@ -79,10 +79,57 @@
         android:layout_height="wrap_content">
 
         <RelativeLayout
+            android:id="@+id/rl_saoyisao"
             android:layout_width="match_parent"
             android:orientation="horizontal"
             android:layout_marginLeft="20dp"
             android:layout_marginTop="40dp"
+            android:layout_marginRight="20dp"
+            android:layout_height="45dp">
+
+            <ImageView
+                android:id="@+id/iv_sao"
+                android:layout_width="35dp"
+                android:padding="2dp"
+                android:src="@drawable/icon_saoyisao"
+                android:layout_centerVertical="true"
+                android:layout_height="35dp"/>
+
+            <TextView
+                android:id="@+id/tv_sao"
+                android:layout_width="wrap_content"
+                android:layout_toRightOf="@id/iv_sao"
+                android:layout_centerVertical="true"
+                android:textSize="14sp"
+                android:text="扫一扫"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:textStyle="bold"
+                android:layout_toLeftOf="@id/iv_sao_right"
+                android:layout_height="wrap_content"/>
+
+            <ImageView
+                android:id="@+id/iv_sao_right"
+                android:layout_width="30dp"
+                android:padding="6dp"
+                android:src="@mipmap/icon_youjiantou"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_height="30dp"/>
+
+        </RelativeLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:background="@color/lightgrey"
+            android:layout_marginLeft="40dp"
+            android:layout_height="1dp"/>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:orientation="horizontal"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="10dp"
             android:layout_marginRight="20dp"
             android:layout_height="45dp">
 
