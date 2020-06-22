@@ -53,7 +53,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.IPresenter> implements BaseChatContract.IView, View.OnLayoutChangeListener, FuncLayout.OnFuncKeyBoardListener, View.OnClickListener, RecordIndicator.OnRecordListener, CBEmoticonsView.OnEmoticonClickListener, CBAppFuncView.OnAppFuncClickListener, View.OnTouchListener, OnRefreshListener, SocketManager.SendMsgCallBack, CBVoice.VoiceStateListener {
+public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.IPresenter> implements BaseChatContract.IView, View.OnLayoutChangeListener, FuncLayout.OnFuncKeyBoardListener, View.OnClickListener, RecordIndicator.OnRecordListener, CBEmoticonsView.OnEmoticonClickListener, CBAppFuncView.OnAppFuncClickListener, View.OnTouchListener, OnRefreshListener, SocketManager.SendMsgCallBack, CBVoice.VoiceStateListener, ChatAdapter.itemClickListener {
 
 
     private static final int REQUEST_CODE_IMAGE = 1231;
@@ -89,7 +89,7 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
         getPresenter().getHistory(pageNo, pageSize);
     }
 
-    // socket 回调
+    // socket发送消息回调
     @Override
     public void call(String msg) {
         ChatMessage bean = GsonUtil.GsonToBean(msg, ChatMessage.class);
@@ -148,6 +148,33 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
         });
     }
 
+    @Override
+    public void onClickItemImage(String image_url) {
+        List<ChatMessage> data = chatAdapter.getData();
+        List<LocalMedia> list = new ArrayList<>();
+        int index = 0;
+        for (int i = 0; i < data.size(); i++) {
+            int bodyType = data.get(i).getBodyType();
+            if (bodyType == ChatMessage.MSG_BODY_TYPE_IMAGE) {
+                LocalMedia media = new LocalMedia();
+                String body = data.get(i).getBody();
+                ImageBody imageBody = GsonUtil.GsonToBean(body, ImageBody.class);
+                media.setPath(imageBody.getImage());
+                list.add(media);
+            }
+        }
+
+        for (int j = 0; j < list.size(); j++) {
+            LocalMedia url = list.get(j);
+            if (image_url.equals(url.getPath())) {
+                index = j;
+                break;
+            }
+        }
+        PictureSelector.create(this).themeStyle(R.style.picture_default_style).openExternalPreview(index, list);
+
+    }
+
     public interface key {
         String KEY_FROM = "key_from_bean";
         String KEY_TO = "key_to_bean";
@@ -176,6 +203,7 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
         recyclerView.setAdapter(chatAdapter);
         recyclerView.setOnTouchListener(this);
         recyclerView.addOnLayoutChangeListener(this);
+        chatAdapter.setOnItemClickListener(this);
     }
 
     protected void initKeyBoard(CBEmoticonsKeyBoard keyBoard) {

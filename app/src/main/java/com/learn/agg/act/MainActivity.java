@@ -298,6 +298,7 @@ public class MainActivity extends BaseSlidingFragmentActivity implements TabLayo
         if (fragmentName != null && !fragmentName.isEmpty()) {
             if (tab_layout != null) {
                 int count = (int) map.get("count");
+                Log.i("chat","更改数量:" + count);
                 int index = tab_layout.findFragmentIndex(fragmentName);
                 if (index != -1) {
                     tab_layout.onDataChanged(index, count);
@@ -305,6 +306,7 @@ public class MainActivity extends BaseSlidingFragmentActivity implements TabLayo
             }
         }
     }
+
 
     //事件的 订阅 
     @Subscribe(threadMode = ThreadMode.MAIN)

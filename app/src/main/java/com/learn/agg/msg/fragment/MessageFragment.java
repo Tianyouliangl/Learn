@@ -11,6 +11,7 @@ import android.widget.RelativeLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -50,6 +51,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import siney.cn.leftslideview.LeftSlideLinearManager;
+import siney.cn.leftslideview.LeftSlideView;
+
 
 public class MessageFragment extends BaseMvpFragment<MessageContract.IPresenter> implements MessageContract.IView, View.OnClickListener, OnItemClickListener, OnRefreshListener {
 
@@ -60,6 +64,8 @@ public class MessageFragment extends BaseMvpFragment<MessageContract.IPresenter>
     private RelativeLayout rl_find_friend;
     private SmartRefreshLayout smart_layout;
     private SessionsAdapter sessionsAdapter;
+    private CardView cv;
+    private RelativeLayout rl_no_msg;
 
     @Override
     protected int getLayoutId() {
@@ -82,6 +88,8 @@ public class MessageFragment extends BaseMvpFragment<MessageContract.IPresenter>
         smart_layout = view.findViewById(R.id.msg_sl);
         simpleMarqueeView = view.findViewById(R.id.simpleMarqueeView);
         rl_find_friend = view.findViewById(R.id.rl_find_friend);
+        cv = view.findViewById(R.id.cv);
+        rl_no_msg = view.findViewById(R.id.rl_no_msg);
     }
 
     private void setToolBarIcon() {
@@ -94,10 +102,11 @@ public class MessageFragment extends BaseMvpFragment<MessageContract.IPresenter>
     @Override
     protected void initData() {
         super.initData();
-        rl_message.setLayoutManager(new LinearLayoutManager(getContext()));
         sessionsAdapter = new SessionsAdapter(getContext(), new ArrayList<SessionMessage>());
-        rl_bv.showBadge(sList.size());
+        LinearLayoutManager manager = new LinearLayoutManager(getContext());
+        rl_message.setLayoutManager(manager);
         rl_message.setAdapter(sessionsAdapter);
+        rl_bv.showBadge(sList.size());
         simpleMarqueeView.setOnItemClickListener(this);
         rl_find_friend.setOnClickListener(this);
         smart_layout.setOnRefreshListener(this);
@@ -166,14 +175,18 @@ public class MessageFragment extends BaseMvpFragment<MessageContract.IPresenter>
     @Override
     public void onSuccess(List<String> list) {
         smart_layout.finishRefresh();
+        sList.clear();
         if (list != null && list.size() > 0) {
+            cv.setVisibility(View.VISIBLE);
+            rl_find_friend.setVisibility(View.VISIBLE);
             simpleMarqueeView.setVisibility(View.VISIBLE);
             stopFlipping();
-            sList.clear();
             sList.addAll(list);
             startFlipping();
             rl_bv.showBadge(list.size());
         } else {
+            cv.setVisibility(View.GONE);
+            rl_find_friend.setVisibility(View.GONE);
             simpleMarqueeView.setVisibility(View.GONE);
             rl_bv.showBadge(0);
         }
@@ -182,11 +195,19 @@ public class MessageFragment extends BaseMvpFragment<MessageContract.IPresenter>
 
     @Override
     public void onSession(List<SessionMessage> list) {
+        if (list.size() > 0){
+            rl_no_msg.setVisibility(View.GONE);
+            rl_message.setVisibility(View.VISIBLE);
+        }else {
+            rl_no_msg.setVisibility(View.VISIBLE);
+            rl_message.setVisibility(View.GONE);
+        }
         sessionsAdapter.setData(list);
         sendNumberCount();
     }
 
     public void sendNumberCount(){
+        Log.i("chat","发送数量");
         int n = 0;
         List<SessionMessage> list = sessionsAdapter.getData();
         for (int i=0;i<list.size();i++){
@@ -206,13 +227,25 @@ public class MessageFragment extends BaseMvpFragment<MessageContract.IPresenter>
     }
 
     //事件的 订阅 
-    @Subscribe(threadMode = ThreadMode.MAIN)
+    @Subscribe(threadMode = ThreadMode.MAIN,sticky = true)
     public void MessageEvent(HashMap<String, Object> map) {
         String name = (String) map.get("notification");
+        Log.i("chat","请求msg");
         if (name != null && !name.isEmpty()) {
             if (name.equals("change")){
                 getPresenter().getAddFriendMsg();
+                EventBus.getDefault().removeStickyEvent(map);
             }
+        }
+    }
+
+    //事件的 订阅 
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void MessageEvent(ChatMessage map) {
+        Log.i("chat","请求msg");
+        if (map.getType() == ChatMessage.MSG_SEND_SYS){
+            getPresenter().getAddFriendMsg();
+            EventBus.getDefault().removeStickyEvent(map);
         }
     }
 

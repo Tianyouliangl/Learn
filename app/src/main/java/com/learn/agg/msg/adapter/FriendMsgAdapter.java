@@ -192,34 +192,6 @@ public class FriendMsgAdapter extends RecyclerView.Adapter<FriendMsgAdapter.Frie
         notifyDataSetChanged();
     }
 
-    private void searUserData(final FriendMsgHolder holder, final String uid) {
-        HashMap<String, String> map = new HashMap<>();
-        map.put("uid", uid);
-        HttpFactory.INSTANCE.getProtocol(IHttpProtocol.class)
-                .getUserInfo(map)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new BaseObserverTC<LoginBean>() {
-
-                    @Override
-                    protected void onNextEx(@NonNull LoginBean data) {
-
-
-                    }
-
-                    @Override
-                    protected void onErrorEx(@NonNull Throwable e) {
-
-                    }
-
-                    @Override
-                    protected void onNextSN(String msg) {
-                        super.onNextSN(msg);
-
-                    }
-                });
-    }
-
 
     @Override
     public int getItemCount() {

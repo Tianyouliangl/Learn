@@ -53,6 +53,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private RecyclerView.ViewHolder viewHolder;
     private String voice_url;
     private ChatMessage mChatMessage;
+    private itemClickListener mClickListener;
     private Handler handler =  new Handler(){
         @Override
         public void handleMessage(Message msg) {
@@ -255,6 +256,12 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                         }
                     }
 
+                }else if (bodyType == ChatMessage.MSG_BODY_TYPE_IMAGE){
+                    if (mClickListener != null){
+                        String body = message.getBody();
+                        ImageBody imageBody = GsonUtil.GsonToBean(body, ImageBody.class);
+                        mClickListener.onClickItemImage(imageBody.getImage());
+                    }
                 }
 
             }
@@ -715,5 +722,13 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             return mList.size();
         }
         return 0;
+    }
+
+    public interface itemClickListener{
+        void onClickItemImage(String image_url);
+    }
+
+    public void setOnItemClickListener(itemClickListener listener){
+        this.mClickListener = listener;
     }
 }

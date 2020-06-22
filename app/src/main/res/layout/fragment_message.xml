@@ -17,11 +17,13 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:orientation="vertical"
+            android:animateLayoutChanges="true"
             android:background="@color/whitesmoke"
             android:layout_height="match_parent">
 
 
             <androidx.cardview.widget.CardView
+                android:id="@+id/cv"
                 android:layout_width="match_parent"
                 android:layout_height="60dp">
 
@@ -102,10 +104,41 @@
 
             </androidx.cardview.widget.CardView>
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rl_message"
+            <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:layout_height="match_parent">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rl_message"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+                <RelativeLayout
+                    android:id="@+id/rl_no_msg"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <ImageView
+                        android:id="@+id/iv_no_msg"
+                        android:layout_width="120dp"
+                        android:src="@drawable/icon_no_msg"
+                        android:layout_centerInParent="true"
+                        android:layout_height="80dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:text="暂时没有新消息"
+                        android:layout_centerHorizontal="true"
+                        android:layout_below="@id/iv_no_msg"
+                        android:layout_marginTop="10dp"
+                        android:textSize="16sp"
+                        android:textColor="@color/darkgrey"
+                        android:layout_height="wrap_content"/>
+
+                </RelativeLayout>
+
+            </FrameLayout>
+
 
         </LinearLayout>
 

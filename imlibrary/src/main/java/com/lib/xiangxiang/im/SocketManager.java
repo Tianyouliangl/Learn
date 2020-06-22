@@ -201,9 +201,9 @@ public class SocketManager {
             ChatMessage chatMessage = GsonUtil.GsonToBean(result, ChatMessage.class);
 
             if (chatMessage.getType() == ChatMessage.MSG_SEND_SYS) {
-                Map<String, Object> map = new HashMap<>();
-                map.put("notification", "change");
-                EventBus.getDefault().post(map);
+//                Map<String, Object> map = new HashMap<>();
+//                map.put("notification", "change");
+                EventBus.getDefault().post(chatMessage);
             } else {
                 if (chatMessage.getType() == ChatMessage.MSG_SEND_CHAT){
                     int number = DataBaseHelp.getInstance(context).getSessionNumber(chatMessage.getConversation());
