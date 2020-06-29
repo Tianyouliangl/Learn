@@ -38,6 +38,8 @@ import com.learn.commonalitylibrary.util.ImSendMessageUtils;
 import com.learn.commonalitylibrary.util.OfTenUtils;
 import com.lib.xiangxiang.im.ImSocketClient;
 import com.lib.xiangxiang.im.SocketManager;
+import com.location.com.SendLocationActivity;
+import com.location.com.ShowLocationActivity;
 import com.luck.picture.lib.PictureSelector;
 import com.luck.picture.lib.config.PictureMimeType;
 import com.luck.picture.lib.entity.LocalMedia;
@@ -440,10 +442,10 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
                     .forResult(REQUEST_CODE_IMAGE);
         }
         if (emoticonId == OPTION_TYPE_LOCATION) {
-
+            goActivity(ShowLocationActivity.class);
         }
         if (emoticonId == OPTION_TYPE_CARD) {
-
+            goActivity(SendLocationActivity.class);
         }
     }
 

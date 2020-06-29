@@ -51,6 +51,10 @@ public class SplashActivity extends BaseAppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        if (!isTaskRoot()) {
+            finish();
+            return;
+        }
         if (timer != null) {
             timer.cancel();
         }

@@ -1,3 +1,3 @@
 rootProject.name='Learn'
-include ':app', ':mvplib', ':netlib', ':cbkeyboardlibrary', ':imlibrary', ':SlidingMenuLibrary'
+include ':app', ':mvplib', ':netlib', ':cbkeyboardlibrary', ':imlibrary', ':SlidingMenuLibrary', ':locationlibrary'
 include ':commonalitylibrary'

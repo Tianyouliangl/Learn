@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:orientation="vertical"
+    android:layout_height="match_parent"
+    tools:context=".SendLocationActivity">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="350dp">
+
+        <com.amap.api.maps.MapView
+            android:id="@+id/mapView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+
+        <FrameLayout
+            android:layout_width="40dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginBottom="40dp"
+            android:layout_marginRight="15dp"
+            android:background="@drawable/location_bg"
+            android:layout_height="40dp">
+
+            <ImageView
+                android:id="@+id/iv_location"
+                android:layout_width="match_parent"
+                android:padding="3dp"
+                android:layout_gravity="center"
+                android:src="@drawable/location_local"
+                android:layout_height="match_parent"/>
+
+        </FrameLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_marginTop="20dp"
+            android:layout_height="wrap_content">
+
+            <Button
+                android:id="@+id/btn_send"
+                android:layout_width="45dp"
+                android:layout_alignParentRight="true"
+                android:text="发送"
+                android:layout_marginRight="15dp"
+                android:textColor="#ffffff"
+                android:layout_centerVertical="true"
+                android:background="@drawable/selector_send"
+                android:layout_height="30dp"/>
+
+            <TextView
+                android:id="@+id/tv_cancel"
+                android:layout_width="wrap_content"
+                android:textSize="16sp"
+                android:text="取消"
+                android:layout_centerVertical="true"
+                android:textColor="#1E90FF"
+                android:layout_marginLeft="15dp"
+                android:clickable="true"
+                android:layout_height="wrap_content"/>
+
+        </RelativeLayout>
+
+
+
+    </RelativeLayout>
+
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_address"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+        </androidx.recyclerview.widget.RecyclerView>
+
+        <ProgressBar
+            android:id="@+id/pb_bar"
+            android:layout_width="30dp"
+            android:layout_gravity="center"
+            android:indeterminateBehavior="repeat"
+            android:indeterminateDrawable="@drawable/progressbar"
+            android:layout_height="30dp"/>
+
+    </FrameLayout>
+
+
+
+
+</LinearLayout>
