@@ -10,8 +10,8 @@
 <img src="https://learn-com-earn-agg.oss-cn-beijing.aliyuncs.com/file/other/08.png" width="200" height="400" alt="08"/><br/>
 <img src="https://learn-com-earn-agg.oss-cn-beijing.aliyuncs.com/file/other/09.png" width="200" height="400" alt="09"/><br/>
 
-##### 再来个视频:
-<video src="https://learn-com-earn-agg.oss-cn-beijing.aliyuncs.com/file/other/video.mp4" controls="controls" width="500" height="300">您的浏览器不支持播放该视频！</video>
+##### 再来个动图:
+![image](https://learn-com-earn-agg.oss-cn-beijing.aliyuncs.com/file/other/video.gif)
 ##### 目前已有的功能:
 * 1.登录，注册
 * 2.自动登录，退出登录，单点登录
