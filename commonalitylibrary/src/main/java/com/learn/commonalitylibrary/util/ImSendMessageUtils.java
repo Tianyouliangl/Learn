@@ -92,6 +92,25 @@ public class ImSendMessageUtils {
         return object.toString();
     }
 
+    public static String getChatMessageLocation(String body, String fromId, String toId, String conversation, int displaytime){
+        JSONObject object = new JSONObject();
+        try {
+            object.put("fromId",fromId);
+            object.put("toId",toId);
+            object.put("pid",getPid());
+            object.put("bodyType",ChatMessage.MSG_BODY_TYPE_LOCATION);
+            object.put("body",body);
+            object.put("msgStatus", ChatMessage.MSG_SEND_LOADING);
+            object.put("time",System.currentTimeMillis());
+            object.put("type", ChatMessage.MSG_SEND_CHAT);
+            object.put("conversation",conversation);
+            object.put("displaytime",displaytime);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return object.toString();
+    }
+
     public static String getChatMessageEmoji(String msg,String fromId,String toId,String conversation,int displaytime){
         JSONObject object = new JSONObject();
         try {
@@ -154,7 +173,7 @@ public class ImSendMessageUtils {
         int type = message.getType();
         String body = message.getBody();
         if (type == ChatMessage.MSG_SEND_CHAT){
-            if (bodyType == ChatMessage.MSG_BODY_TYPE_TEXT){
+            if (bodyType == ChatMessage.MSG_BODY_TYPE_TEXT || bodyType == ChatMessage.MSG_BODY_TYPE_TEXT_HELLO){
                 TextBody content = GsonUtil.GsonToBean(body, TextBody.class);
                 return content.getMsg();
             }
@@ -173,9 +192,9 @@ public class ImSendMessageUtils {
             if (bodyType == ChatMessage.MSG_BODY_TYPE_EMOJI){
                 return "[表情]";
             }
-            if (bodyType == ChatMessage.MSG_BODY_TYPE_RED_ENVELOPE){
-                return "[红包]";
-            }
+//            if (bodyType == ChatMessage.MSG_BODY_TYPE_RED_ENVELOPE){
+//                return "[红包]";
+//            }
         }else {
             return body;
         }

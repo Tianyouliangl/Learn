@@ -71,7 +71,6 @@
                     android:layout_gravity="center"
                     android:layout_weight="1"
                     android:gravity="center"
-                    android:text="5'"
                     android:textColor="@color/deepskyblue"
                     android:textSize="18sp" />
 
@@ -96,8 +95,7 @@
             android:layout_centerVertical="true"
             android:layout_toRightOf="@id/rl_voice"
             android:indeterminateBehavior="repeat"
-            android:indeterminateDrawable="@drawable/anim"
-            android:visibility="gone" />
+            android:indeterminateDrawable="@drawable/shape_unread" />
 
     </RelativeLayout>
 

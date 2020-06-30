@@ -1,5 +1,8 @@
 package com.location.com;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.amap.api.services.core.LatLonPoint;
 
 import java.io.Serializable;

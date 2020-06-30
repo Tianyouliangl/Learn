@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -19,6 +20,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.amap.api.location.AMapLocation;
 import com.amap.api.location.AMapLocationClient;
@@ -42,6 +44,7 @@ import com.amap.api.services.core.LatLonPoint;
 import com.amap.api.services.core.PoiItem;
 import com.amap.api.services.poisearch.PoiResult;
 import com.amap.api.services.poisearch.PoiSearch;
+import com.autonavi.amap.mapcore.Inner_3dMap_locationManagerBase;
 import com.gyf.barlibrary.BarHide;
 import com.gyf.barlibrary.ImmersionBar;
 import com.zyq.easypermission.EasyPermission;
@@ -530,7 +533,14 @@ public class SendLocationActivity extends AppCompatActivity implements AMapLocat
         }
         if (v.getId() == R.id.btn_send) {
             showDialog();
-            getMapPng();
+            new Thread(){
+                @Override
+                public void run() {
+                    super.run();
+                    getMapPng();
+                }
+            }.start();
+
         }
     }
 
@@ -561,6 +571,8 @@ public class SendLocationActivity extends AppCompatActivity implements AMapLocat
             public void onMapScreenShot(Bitmap bitmap, int status) {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
                 if (null == bitmap) {
+                    dismissDialog();
+                    Toast.makeText(SendLocationActivity.this,"请重试",Toast.LENGTH_SHORT).show();
                     return;
                 }
                 try {
@@ -596,18 +608,34 @@ public class SendLocationActivity extends AppCompatActivity implements AMapLocat
                         buffer.append("地图未渲染完成，截屏有网格");
                         path = null;
                     }
-//                    Toast.makeText(SendLocationActivity.this,buffer.toString(),Toast.LENGTH_SHORT).show();
                     PoiltemBean bean = addressAdapter.getChecked();
                     if (path != null && bean != null) {
+                        LocationBody body = new LocationBody();
                         bean.setMapPng(path);
                         dismissDialog();
                         Log.i("gd", "\n-------" + buffer.toString() + "\n------path:" + path + "\n-----addressTitle:" + bean.getTitle() +
                                 "\n-----address:" + bean.getAddress() + "\n-----经度:" + bean.getLatLonPoint().getLongitude() + "\n-----纬度:" +
                                 bean.getLatLonPoint().getLatitude());
-
+                        body.setContent(bean.getAddress());
+                        body.setTitle(bean.getTitle());
+                        body.setLatitude(bean.getLatLonPoint().getLatitude());
+                        body.setLongitude(bean.getLatLonPoint().getLongitude());
+                        body.setLocation_url(path);
+                        body.setUrl("");
+                        Bundle bundle = new Bundle();
+                        bundle.putSerializable("bean",body);
+                        Intent intent = new Intent();
+                        intent.putExtra("bundle",bundle);
+                        setResult(RESULT_OK, intent);
+                        finish();
+                    }else {
+                        dismissDialog();
+                        Toast.makeText(SendLocationActivity.this,"请重试",Toast.LENGTH_SHORT).show();
                     }
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
+                    dismissDialog();
+                    Toast.makeText(SendLocationActivity.this,"请重试",Toast.LENGTH_SHORT).show();
                 }
 
             }

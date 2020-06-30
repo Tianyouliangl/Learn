@@ -4,12 +4,14 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.Manifest;
+import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.view.View;
 import android.view.animation.Interpolator;
+import android.widget.TextView;
 
 import com.amap.api.location.AMapLocationClient;
 import com.amap.api.location.AMapLocationClientOption;
@@ -31,6 +33,7 @@ import com.amap.api.maps.model.animation.TranslateAnimation;
 import com.zyq.easypermission.EasyPermission;
 import com.zyq.easypermission.EasyPermissionResult;
 
+import java.io.Serializable;
 import java.util.List;
 
 public class ShowLocationActivity extends AppCompatActivity {
@@ -41,18 +44,24 @@ public class ShowLocationActivity extends AppCompatActivity {
     private UiSettings mSettings;
     private float local_zoom = 17;
     // 116.419949  39.899498
-    private double latitude = 39.899618;  // 纬度
-    private double longitude = 116.41964; //经度
+    private double latitude = 0;  // 纬度
+    private double longitude = 0; //经度
+    private LocationBody bean;
+    private TextView tv_address_title;
+    private TextView tv_address_msg;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_show_location);
         getPersission(savedInstanceState);
+
     }
 
     private void initView(Bundle savedInstanceState) {
         mMapView = findViewById(R.id.mapView);
+        tv_address_title = findViewById(R.id.tv_address_title);
+        tv_address_msg = findViewById(R.id.tv_address_msg);
         mMapView.onCreate(savedInstanceState);
         if (mAMap == null) {
             mAMap = mMapView.getMap();
@@ -95,8 +104,8 @@ public class ShowLocationActivity extends AppCompatActivity {
     public void drawMarkers(LatLng latLng) {
         MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.position(latLng);
-        markerOptions.title("北京");
-        markerOptions.snippet("崇文门外大街");
+        markerOptions.title(bean.getTitle());
+        markerOptions.snippet(bean.getContent());
         BitmapDescriptor bitmapDescriptor = BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.location));
         markerOptions.icon(bitmapDescriptor);
         markerOptions.visible(true);
@@ -133,6 +142,12 @@ public class ShowLocationActivity extends AppCompatActivity {
 
 
     private void initData() {
+        Bundle bundle = getIntent().getBundleExtra("bundle");
+        bean = (LocationBody) bundle.getSerializable("bean");
+        latitude = bean.getLatitude();
+        longitude = bean.getLongitude();
+        tv_address_title.setText(bean.getTitle());
+        tv_address_msg.setText(bean.getContent());
         myLocationStyle = new MyLocationStyle();
         //初始化定位蓝点样式类myLocationStyle.myLocationType(MyLocationStyle.LOCATION_TYPE_LOCATION_ROTATE);//连续定位、且将视角移动到地图中心点，定位点依照设备方向旋转，并且会跟随设备移动。（1秒1次定位）如果不设置myLocationType，默认也会执行此种模式。
         myLocationStyle.myLocationType(MyLocationStyle.LOCATION_TYPE_SHOW);

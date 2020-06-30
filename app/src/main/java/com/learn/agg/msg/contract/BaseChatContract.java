@@ -20,5 +20,6 @@ public interface BaseChatContract {
 
     interface IPresenter extends IPresenterContract {
         void getHistory(final int pageNo, int pageSize);
+        void updateHistory(String pid);
     }
 }

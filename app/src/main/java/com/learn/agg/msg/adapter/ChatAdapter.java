@@ -2,6 +2,7 @@ package com.learn.agg.msg.adapter;
 
 import android.content.Context;
 import android.graphics.drawable.AnimationDrawable;
+import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
 import android.os.Handler;
 import android.os.Message;
@@ -20,6 +21,9 @@ import com.learn.agg.msg.chatHolder.ChatEmojiReceiveHolder;
 import com.learn.agg.msg.chatHolder.ChatEmojiSendHolder;
 import com.learn.agg.msg.chatHolder.ChatImageReceiveHolder;
 import com.learn.agg.msg.chatHolder.ChatImageSendHolder;
+import com.learn.agg.msg.chatHolder.ChatLocationReceiveHolder;
+import com.learn.agg.msg.chatHolder.ChatLocationSendHolder;
+import com.learn.agg.msg.chatHolder.ChatTextHelloHolder;
 import com.learn.agg.msg.chatHolder.ChatTextReceiveHolder;
 import com.learn.agg.msg.chatHolder.ChatTextSendHolder;
 import com.learn.agg.msg.chatHolder.ChatVoiceReceiveHolder;
@@ -31,11 +35,14 @@ import com.learn.commonalitylibrary.body.EmoticonBody;
 import com.learn.commonalitylibrary.body.ImageBody;
 import com.learn.commonalitylibrary.body.TextBody;
 import com.learn.commonalitylibrary.body.VoiceBody;
+import com.learn.commonalitylibrary.sqlite.DataBaseHelp;
 import com.learn.commonalitylibrary.util.GsonUtil;
 import com.learn.commonalitylibrary.util.MediaManager;
 import com.learn.commonalitylibrary.util.TimeUtil;
 import com.lib.xiangxiang.im.ImSocketClient;
+import com.location.com.LocationBody;
 
+import java.io.File;
 import java.util.List;
 
 public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
@@ -54,22 +61,22 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private String voice_url;
     private ChatMessage mChatMessage;
     private itemClickListener mClickListener;
-    private Handler handler =  new Handler(){
+    private Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
-            int what =  msg.what;
+            int what = msg.what;
             if (viewType == TYPE_VOICE_SEND) {
                 ((ChatVoiceSendHolder) viewHolder).pb_state.setVisibility(View.GONE);
             }
-            if (viewType == TYPE_VOICE_RECEIVE){
+            if (viewType == TYPE_VOICE_RECEIVE) {
                 ((ChatVoiceReceiveHolder) viewHolder).pb_state.setVisibility(View.GONE);
             }
-            if (what == 1){
-                play(viewType,voice_url,viewHolder,mChatMessage);
+            if (what == 1) {
+                play(viewType, voice_url, viewHolder, mChatMessage);
                 handler.removeMessages(1);
             }
-            if (what == 0){
+            if (what == 0) {
                 handler.removeMessages(0);
             }
         }
@@ -78,6 +85,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     // 文本
     private final int TYPE_TEXT_SEND = 1;
     private final int TYPE_TEXT_RECEIVE = 2;
+    private final int TYPE_TEXT_HELLO = 9;
 
     //表情
     private final int TYPE_FACE_SEND = 3;
@@ -90,6 +98,10 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     // 语音
     private final int TYPE_VOICE_SEND = 7;
     private final int TYPE_VOICE_RECEIVE = 8;
+
+    //位置
+    private final int TYPE_LOCATION_SEND = 10;
+    private final int TYPE_LOCATION_RECEIVE = 11;
 
 
     public ChatAdapter(Context context, List<ChatMessage> list) {
@@ -117,6 +129,12 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 if (bodyType == ChatMessage.MSG_BODY_TYPE_VOICE) {
                     return TYPE_VOICE_SEND;
                 }
+                if (bodyType == ChatMessage.MSG_BODY_TYPE_TEXT_HELLO) {
+                    return TYPE_TEXT_HELLO;
+                }
+                if (bodyType == ChatMessage.MSG_BODY_TYPE_LOCATION) {
+                    return TYPE_LOCATION_SEND;
+                }
             } else {
                 if (bodyType == ChatMessage.MSG_BODY_TYPE_TEXT) {
                     return TYPE_TEXT_RECEIVE;
@@ -129,6 +147,12 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 }
                 if (bodyType == ChatMessage.MSG_BODY_TYPE_VOICE) {
                     return TYPE_VOICE_RECEIVE;
+                }
+                if (bodyType == ChatMessage.MSG_BODY_TYPE_TEXT_HELLO) {
+                    return TYPE_TEXT_HELLO;
+                }
+                if (bodyType == ChatMessage.MSG_BODY_TYPE_LOCATION) {
+                    return TYPE_LOCATION_RECEIVE;
                 }
             }
         }
@@ -145,6 +169,10 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 view = LayoutInflater.from(mContext).inflate(R.layout.item_chat_send_text, parent, false);
                 viewHolder = new ChatTextSendHolder(view);
                 break;
+            case TYPE_TEXT_HELLO:
+                view = LayoutInflater.from(mContext).inflate(R.layout.item_chat_hello_text, parent, false);
+                viewHolder = new ChatTextHelloHolder(view);
+                break;
             case TYPE_FACE_SEND:
                 view = LayoutInflater.from(mContext).inflate(R.layout.item_chat_send_emoji, parent, false);
                 viewHolder = new ChatEmojiSendHolder(view);
@@ -156,6 +184,10 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             case TYPE_VOICE_SEND:
                 view = LayoutInflater.from(mContext).inflate(R.layout.item_chat_send_voice, parent, false);
                 viewHolder = new ChatVoiceSendHolder(view);
+                break;
+            case TYPE_LOCATION_SEND:
+                view = LayoutInflater.from(mContext).inflate(R.layout.item_chat_send_location, parent, false);
+                viewHolder = new ChatLocationSendHolder(view);
                 break;
             case TYPE_TEXT_RECEIVE:
                 view = LayoutInflater.from(mContext).inflate(R.layout.item_chat_receive_text, parent, false);
@@ -172,6 +204,10 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             case TYPE_VOICE_RECEIVE:
                 view = LayoutInflater.from(mContext).inflate(R.layout.item_chat_receive_voice, parent, false);
                 viewHolder = new ChatVoiceReceiveHolder(view);
+                break;
+            case TYPE_LOCATION_RECEIVE:
+                view = LayoutInflater.from(mContext).inflate(R.layout.item_chat_receive_location, parent, false);
+                viewHolder = new ChatLocationReceiveHolder(view);
                 break;
         }
         return viewHolder;
@@ -191,7 +227,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         showEmoji(holder, message);
         showImage(holder, message);
         showVoice(holder, message);
-
+        shoeImageLocation(holder, message);
         onItemClick(holder, message);
     }
 
@@ -200,6 +236,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             @Override
             public void onClick(View v) {
                 int bodyType = message.getBodyType();
+                int msgStatus = message.getMsgStatus();
                 mChatMessage = message;
                 if (bodyType == ChatMessage.MSG_BODY_TYPE_VOICE) {
                     viewType = holder.getItemViewType();
@@ -210,60 +247,76 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     String fileName = bean.getFileName();
                     String url = bean.getUrl();
                     Boolean exists = FileUpLoadManager.whereExists(path);
-                    if (exists) {
-                       play(viewType,path,holder,message);
-                    } else {
+                    if (msgStatus == ChatMessage.MSG_VOICE_UNREAD) {
+                        if (mClickListener != null) {
+                            mClickListener.onVoiceRead(message);
+                        }
+                        message.setMsgStatus(2);
                         switch (viewType) {
                             case TYPE_VOICE_SEND:
-                                ((ChatVoiceSendHolder) holder).pb_state.setVisibility(View.VISIBLE);
-                                Log.i("mmm","不存在，，，开始下载。。。");
-                                new FileUpLoadManager().downloadFile(url, fileName, new FileUpLoadManager.FileDownloadCallBack() {
-                                    @Override
-                                    public void onError(Throwable e) {
-//                                        Toast.makeText(mContext, "下载失败!", Toast.LENGTH_SHORT).show();
-                                        Log.i("mmm","下载失败---" + e.toString());
-                                        handler.sendEmptyMessage(0);
-                                    }
-
-                                    @Override
-                                    public void onSuccess(String url) {
-                                        Log.i("mmm","下载成功---" + url);
-                                        voice_url = url;
-                                        handler.sendEmptyMessage(1);
-                                    }
-                                });
+                                ((ChatVoiceSendHolder) holder).pb_state.setVisibility(View.GONE);
                                 break;
                             case TYPE_VOICE_RECEIVE:
+                                ((ChatVoiceReceiveHolder) holder).pb_state.setVisibility(View.GONE);
+                                break;
+                            default:
+                                break;
+                        }
+                        DataBaseHelp.getInstance(mContext).updateChatMessage(message);
+                    }
+                    if (exists) {
+                        play(viewType, path, holder, message);
+                    } else {
+                        Drawable drawable = mContext.getResources().getDrawable(R.drawable.anim);
+                        switch (viewType) {
+                            case TYPE_VOICE_SEND:
+                                ((ChatVoiceSendHolder) holder).pb_state.setIndeterminateDrawable(drawable);
+                                ((ChatVoiceSendHolder) holder).pb_state.setVisibility(View.VISIBLE);
+                                Log.i("mmm", "不存在，，，开始下载。。。");
+                                downLoadFile(url, fileName);
+                                break;
+                            case TYPE_VOICE_RECEIVE:
+                                ((ChatVoiceReceiveHolder) holder).pb_state.setIndeterminateDrawable(drawable);
                                 ((ChatVoiceReceiveHolder) holder).pb_state.setVisibility(View.VISIBLE);
-                                Log.i("mmm","不存在，，，开始下载。。。");
-                                new FileUpLoadManager().downloadFile(url, fileName, new FileUpLoadManager.FileDownloadCallBack() {
-                                    @Override
-                                    public void onError(Throwable e) {
-                                        Log.i("mmm","下载失败---" + e.toString());
-                                        handler.sendEmptyMessage(0);
-                                    }
-
-                                    @Override
-                                    public void onSuccess(String url) {
-                                        Log.i("mmm","下载成功---" + url);
-                                        voice_url = url;
-                                        handler.sendEmptyMessage(1);
-                                    }
-                                });
+                                Log.i("mmm", "不存在，，，开始下载。。。");
+                                downLoadFile(url, fileName);
                                 break;
                             default:
                                 break;
                         }
                     }
 
-                }else if (bodyType == ChatMessage.MSG_BODY_TYPE_IMAGE){
-                    if (mClickListener != null){
+                } else if (bodyType == ChatMessage.MSG_BODY_TYPE_IMAGE) {
+                    if (mClickListener != null) {
                         String body = message.getBody();
                         ImageBody imageBody = GsonUtil.GsonToBean(body, ImageBody.class);
                         mClickListener.onClickItemImage(imageBody.getImage());
                     }
+                } else if (bodyType == ChatMessage.MSG_BODY_TYPE_LOCATION){
+                    if (mClickListener != null){
+                        String body = message.getBody();
+                        LocationBody locationBody = GsonUtil.GsonToBean(body, LocationBody.class);
+                        mClickListener.onClickLocation(locationBody);
+                    }
                 }
 
+            }
+        });
+    }
+
+    private void downLoadFile(String url, String fileName) {
+        new FileUpLoadManager().downloadFile(url, fileName, new FileUpLoadManager.FileDownloadCallBack() {
+            @Override
+            public void onError(Throwable e) {
+                Log.i("mmm", "下载失败---" + e.toString());
+                handler.sendEmptyMessage(0);
+            }
+
+            @Override
+            public void onSuccess(String url) {
+                Log.i("mmm", "下载成功---" + url);
+                voice_url = url;
+                handler.sendEmptyMessage(1);
             }
         });
     }
@@ -324,6 +377,36 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
     }
 
+    private void shoeImageLocation(RecyclerView.ViewHolder holder, ChatMessage message) {
+        int bodyType = message.getBodyType();
+        String body = message.getBody();
+        if (bodyType == ChatMessage.MSG_BODY_TYPE_LOCATION) {
+            LocationBody locationBody = GsonUtil.GsonToBean(body, LocationBody.class);
+            String location_url = locationBody.getLocation_url();
+            Log.i("ssss","----location_url----" + location_url);
+            String url = locationBody.getUrl();
+            switch (holder.getItemViewType()) {
+
+                case TYPE_LOCATION_SEND:
+                    File file_send = new File(location_url);
+                    if (file_send.exists()) {
+                        Glide.with(mContext).load(location_url).into(((ChatLocationSendHolder) holder).iv_iv);
+                    } else {
+                        Glide.with(mContext).load(url).into(((ChatLocationSendHolder) holder).iv_iv);
+                    }
+                    break;
+                case TYPE_LOCATION_RECEIVE:
+                    File file_receive = new File(location_url);
+                    if (file_receive.exists()) {
+                        Glide.with(mContext).load(location_url).into(((ChatLocationReceiveHolder) holder).iv_iv);
+                    } else {
+                        Glide.with(mContext).load(url).into(((ChatLocationReceiveHolder) holder).iv_iv);
+                    }
+                    break;
+            }
+        }
+    }
+
     private void showEmoji(RecyclerView.ViewHolder holder, ChatMessage message) {
         int bodyType = message.getBodyType();
         RequestOptions options = new RequestOptions()
@@ -350,13 +433,33 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         String body = message.getBody();
         int bodyType = message.getBodyType();
         if (bodyType == ChatMessage.MSG_BODY_TYPE_TEXT) {
-            TextBody content = GsonUtil.GsonToBean(body, TextBody.class);
             switch (holder.getItemViewType()) {
                 case TYPE_TEXT_SEND:
-                    ((ChatTextSendHolder) holder).tv_content.setText(content.getMsg());
+                    TextBody content_text_send = GsonUtil.GsonToBean(body, TextBody.class);
+                    ((ChatTextSendHolder) holder).tv_content.setText(content_text_send.getMsg());
+                    break;
+                case TYPE_TEXT_HELLO:
+                    TextBody content_text_hello = GsonUtil.GsonToBean(body, TextBody.class);
+                    ((ChatTextHelloHolder) holder).tv_content.setText(content_text_hello.getMsg());
                     break;
                 case TYPE_TEXT_RECEIVE:
-                    ((ChatTextReceiveHolder) holder).tv_content.setText(content.getMsg());
+                    TextBody content_text_receive = GsonUtil.GsonToBean(body, TextBody.class);
+                    ((ChatTextReceiveHolder) holder).tv_content.setText(content_text_receive.getMsg());
+                    break;
+                default:
+                    break;
+            }
+        }else if (bodyType == ChatMessage.MSG_BODY_TYPE_LOCATION){
+            switch (holder.getItemViewType()){
+                case TYPE_LOCATION_SEND:
+                    LocationBody locationBody_send = GsonUtil.GsonToBean(body, LocationBody.class);
+                    ((ChatLocationSendHolder) holder).location_title.setText(locationBody_send.getTitle());
+                    ((ChatLocationSendHolder) holder).location_address.setText(locationBody_send.getContent());
+                    break;
+                case TYPE_LOCATION_RECEIVE:
+                    LocationBody locationBody_receive = GsonUtil.GsonToBean(body, LocationBody.class);
+                    ((ChatLocationReceiveHolder) holder).location_title.setText(locationBody_receive.getTitle());
+                    ((ChatLocationReceiveHolder) holder).location_address.setText(locationBody_receive.getContent());
                     break;
                 default:
                     break;
@@ -395,6 +498,20 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     ((ChatVoiceSendHolder) holder).pb_state.setVisibility(View.VISIBLE);
                 }
                 break;
+            case TYPE_LOCATION_SEND:
+                if (msgStatus == ChatMessage.MSG_SEND_SUCCESS) {
+                    ((ChatLocationSendHolder) holder).pb_state.setVisibility(View.GONE);
+                } else if (msgStatus == ChatMessage.MSG_SEND_LOADING) {
+                    ((ChatLocationSendHolder) holder).pb_state.setVisibility(View.VISIBLE);
+                }
+                break;
+            case TYPE_VOICE_RECEIVE:
+                if (msgStatus == ChatMessage.MSG_VOICE_UNREAD) {
+                    ((ChatVoiceReceiveHolder) holder).pb_state.setVisibility(View.VISIBLE);
+                } else {
+                    ((ChatVoiceReceiveHolder) holder).pb_state.setVisibility(View.GONE);
+                }
+                break;
             default:
                 break;
         }
@@ -410,6 +527,14 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     ((ChatTextSendHolder) holder).tv_time.setText(chatTime);
                 } else {
                     ((ChatTextSendHolder) holder).tv_time.setVisibility(View.GONE);
+                }
+                break;
+            case TYPE_TEXT_HELLO:
+                if (displaytime == ChatMessage.MSG_TIME_TRUE) {
+                    ((ChatTextHelloHolder) holder).tv_time.setVisibility(View.VISIBLE);
+                    ((ChatTextHelloHolder) holder).tv_time.setText(chatTime);
+                } else {
+                    ((ChatTextHelloHolder) holder).tv_time.setVisibility(View.GONE);
                 }
                 break;
             case TYPE_FACE_SEND:
@@ -434,6 +559,14 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     ((ChatVoiceSendHolder) holder).tv_time.setText(chatTime);
                 } else {
                     ((ChatVoiceSendHolder) holder).tv_time.setVisibility(View.GONE);
+                }
+                break;
+            case TYPE_LOCATION_SEND:
+                if (displaytime == ChatMessage.MSG_TIME_TRUE) {
+                    ((ChatLocationSendHolder) holder).tv_time.setVisibility(View.VISIBLE);
+                    ((ChatLocationSendHolder) holder).tv_time.setText(chatTime);
+                } else {
+                    ((ChatLocationSendHolder) holder).tv_time.setVisibility(View.GONE);
                 }
                 break;
             case TYPE_TEXT_RECEIVE:
@@ -468,6 +601,14 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     ((ChatVoiceReceiveHolder) holder).tv_time.setVisibility(View.GONE);
                 }
                 break;
+            case TYPE_LOCATION_RECEIVE:
+                if (displaytime == ChatMessage.MSG_TIME_TRUE) {
+                    ((ChatLocationReceiveHolder) holder).tv_time.setVisibility(View.VISIBLE);
+                    ((ChatLocationReceiveHolder) holder).tv_time.setText(chatTime);
+                } else {
+                    ((ChatLocationReceiveHolder) holder).tv_time.setVisibility(View.GONE);
+                }
+                break;
             default:
                 break;
         }
@@ -489,6 +630,9 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             case TYPE_VOICE_SEND:
                 Glide.with(mContext).load(from_ImageUrl).into(((ChatVoiceSendHolder) holder).iv_icon);
                 break;
+            case TYPE_LOCATION_SEND:
+                Glide.with(mContext).load(from_ImageUrl).into(((ChatLocationSendHolder) holder).iv_icon);
+                break;
             case TYPE_TEXT_RECEIVE:
                 Glide.with(mContext).load(to_imageUrl).into(((ChatTextReceiveHolder) holder).iv_icon);
                 break;
@@ -500,6 +644,9 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 break;
             case TYPE_VOICE_RECEIVE:
                 Glide.with(mContext).load(to_imageUrl).into(((ChatVoiceReceiveHolder) holder).iv_icon);
+                break;
+            case TYPE_LOCATION_RECEIVE:
+                Glide.with(mContext).load(to_imageUrl).into(((ChatLocationReceiveHolder) holder).iv_icon);
                 break;
             default:
                 break;
@@ -530,6 +677,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         Log.i(ImSocketClient.TAG, "是否能添加----" + isAdd);
         if (isAdd) {
             mList.add(message);
+            notifyDataSetChanged();
         }
     }
 
@@ -595,7 +743,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         MediaManager.release();
     }
 
-    private void play(int viewType,String path,RecyclerView.ViewHolder holder, final ChatMessage message) {
+    private void play(int viewType, String path, RecyclerView.ViewHolder holder, final ChatMessage message) {
         switch (viewType) {
             case TYPE_VOICE_SEND:
                 if (path == null) {
@@ -609,11 +757,11 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                         playMedia(holder, animation, path, message);
                         break;
                     } else {
-                        if (playPid.equals(message.getPid())){
+                        if (playPid.equals(message.getPid())) {
                             animation.start();
                             MediaManager.resume();
                             break;
-                        }else {
+                        } else {
                             MediaManager.pause();
                             MediaManager.release();
                             animation.start();
@@ -643,11 +791,11 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                         playMedia(holder, animation, path, message);
                         break;
                     } else {
-                        if (playPid.equals(message.getPid())){
+                        if (playPid.equals(message.getPid())) {
                             animation.start();
                             MediaManager.resume();
                             break;
-                        }else {
+                        } else {
                             MediaManager.pause();
                             MediaManager.release();
                             animation.start();
@@ -701,7 +849,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 isPlay = false;
                 isPause = false;
                 int viewType = holder.getItemViewType();
-                switch (viewType){
+                switch (viewType) {
                     case TYPE_VOICE_SEND:
                         ((ChatVoiceSendHolder) holder).iv_voice.setImageResource(R.drawable.icon_right_voice_three);
                         break;
@@ -724,11 +872,15 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         return 0;
     }
 
-    public interface itemClickListener{
+    public interface itemClickListener {
         void onClickItemImage(String image_url);
+
+        void onVoiceRead(ChatMessage message);
+
+        void onClickLocation(LocationBody body);
     }
 
-    public void setOnItemClickListener(itemClickListener listener){
+    public void setOnItemClickListener(itemClickListener listener) {
         this.mClickListener = listener;
     }
 }

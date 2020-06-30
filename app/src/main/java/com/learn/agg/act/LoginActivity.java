@@ -89,7 +89,7 @@ public class LoginActivity extends BaseMvpActivity<LoginContract.IPresenter> imp
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            moveTaskToBack(false);
+            moveTaskToBack(true);
         }
         return super.onKeyDown(keyCode, event);
     }

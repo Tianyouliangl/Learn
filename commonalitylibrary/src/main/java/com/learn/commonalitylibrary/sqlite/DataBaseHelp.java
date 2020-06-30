@@ -42,7 +42,8 @@ public class DataBaseHelp {
     }
 
     private void createHistoryTable(String tableName) {
-        String sql = "CREATE TABLE IF NOT EXISTS history_" + tableName + " (" +
+        String uid = OfTenUtils.replace(EasySP.init(mContext).getString(Constant.SPKey_UID));
+        String sql = "CREATE TABLE IF NOT EXISTS history_" + tableName + "_" + uid + " (" +
                 "id INTEGER PRIMARY KEY autoincrement," +
                 "from_id VARCHAR (255)," +
                 "to_id VARCHAR (255)," +
@@ -63,15 +64,17 @@ public class DataBaseHelp {
                 "id INTEGER PRIMARY KEY autoincrement," +
                 "conversation VARCHAR (255)," +
                 "to_id VARCHAR (255)," +
-                "body VARCHAR (255),"+
-                "time BIGINT(20),"+
-                "msg_status INTEGER (11),"+
-                "body_type INTEGER (11),"+
+                "body VARCHAR (255)," +
+                "time BIGINT(20)," +
+                "msg_status INTEGER (11)," +
+                "body_type INTEGER (11)," +
                 "number INTEGER (11)" + ")";
         writableDatabase.execSQL(sql);
     }
 
     public Boolean addChatMessage(ChatMessage chatMessage) {
+        String uid = OfTenUtils.replace(EasySP.init(mContext).getString(Constant.SPKey_UID));
+        String query_sql = "SELECT * FROM history_" + chatMessage.getConversation() + "_" + uid + " where pid = " + "'" + chatMessage.getPid() + "'";
         createHistoryTable(chatMessage.getConversation());
         ContentValues values = new ContentValues();
         values.put("from_id", chatMessage.getFromId());
@@ -84,14 +87,20 @@ public class DataBaseHelp {
         values.put("type", chatMessage.getType());
         values.put("displaytime", chatMessage.getDisplaytime());
         values.put("time", chatMessage.getTime());
-        long l = writableDatabase.insert("history_" + chatMessage.getConversation(), null, values);
-        if (l > 0) {
-            return true;
+        Cursor cursor = writableDatabase.rawQuery(query_sql, null);
+        if (!cursor.moveToNext()) {
+            long l = writableDatabase.insert("history_" + chatMessage.getConversation() + "_" + uid, null, values);
+            if (l > 0) {
+                return true;
+            } else {
+                return false;
+            }
         }
         return false;
     }
 
     public void updateChatMessage(ChatMessage chatMessage) {
+        String uid = OfTenUtils.replace(EasySP.init(mContext).getString(Constant.SPKey_UID));
         createHistoryTable(chatMessage.getConversation());
         ContentValues values = new ContentValues();
         values.put("from_id", chatMessage.getFromId());
@@ -104,22 +113,23 @@ public class DataBaseHelp {
         values.put("type", chatMessage.getType());
         values.put("displaytime", chatMessage.getDisplaytime());
         values.put("time", chatMessage.getTime());
-        writableDatabase.update("history_" + chatMessage.getConversation(), values, "pid =?", new String[]{"" + chatMessage.getPid()});
+        writableDatabase.update("history_" + chatMessage.getConversation() + "_" + uid, values, "pid =?", new String[]{"" + chatMessage.getPid()});
     }
 
     public List<ChatMessage> getChatMessage(String conversation, int pageNo, int pageSize) {
+        String uid = OfTenUtils.replace(EasySP.init(mContext).getString(Constant.SPKey_UID));
         String sql = null;
         List<ChatMessage> chatMessageList = new ArrayList<>();
         createHistoryTable(conversation);
         Long mTime = timeMap.get(conversation); //tableName = conversation
         if (pageNo > 1) {
             if (mTime != null) {
-                sql = "SELECT * FROM ( SELECT * FROM history_" + conversation + " WHERE conversation = " + "'" + conversation + "'" + " AND time <" + mTime + " ORDER BY time DESC LIMIT " + pageSize + ") aa" + " ORDER BY time";
+                sql = "SELECT * FROM ( SELECT * FROM history_" + conversation + "_" + uid + " WHERE conversation = " + "'" + conversation + "'" + " AND time <" + mTime + " ORDER BY time DESC LIMIT " + pageSize + ") aa" + " ORDER BY time";
             } else {
-                sql = "SELECT * FROM ( SELECT * FROM history_" + conversation + " WHERE conversation = " + "'" + conversation + "'" + " ORDER BY time DESC LIMIT " + (pageNo - 1) * pageSize + "," + pageSize + ") aa" + " ORDER BY time";
+                sql = "SELECT * FROM ( SELECT * FROM history_" + conversation + "_" + uid + " WHERE conversation = " + "'" + conversation + "'" + " ORDER BY time DESC LIMIT " + (pageNo - 1) * pageSize + "," + pageSize + ") aa" + " ORDER BY time";
             }
         } else {
-            sql = "SELECT * FROM ( SELECT * FROM history_" + conversation + " WHERE conversation = " + "'" + conversation + "'" + " ORDER BY time DESC LIMIT " + (pageNo - 1) * pageSize + "," + pageSize + ") aa" + " ORDER BY time";
+            sql = "SELECT * FROM ( SELECT * FROM history_" + conversation + "_" + uid + " WHERE conversation = " + "'" + conversation + "'" + " ORDER BY time DESC LIMIT " + (pageNo - 1) * pageSize + "," + pageSize + ") aa" + " ORDER BY time";
         }
 
         Cursor cursor = writableDatabase.rawQuery(sql, null);
@@ -154,12 +164,12 @@ public class DataBaseHelp {
     public void addOrUpdateSession(SessionMessage sessionMessage) {
         ContentValues values = new ContentValues();
         values.put("conversation", sessionMessage.getConversation());
-        values.put("to_id",sessionMessage.getTo_id());
-        values.put("body",sessionMessage.getBody());
-        values.put("time",sessionMessage.getTime());
-        values.put("msg_status",sessionMessage.getMsg_status());
+        values.put("to_id", sessionMessage.getTo_id());
+        values.put("body", sessionMessage.getBody());
+        values.put("time", sessionMessage.getTime());
+        values.put("msg_status", sessionMessage.getMsg_status());
         values.put("number", sessionMessage.getNumber());
-        values.put("body_type",sessionMessage.getBody_type());
+        values.put("body_type", sessionMessage.getBody_type());
         String uid = EasySP.init(mContext).getString(Constant.SPKey_UID);
         String query_sql = "SELECT * FROM sessions_" + OfTenUtils.replace(uid) + " where conversation = " + "'" + sessionMessage.getConversation() + "'";
         Cursor cursor = writableDatabase.rawQuery(query_sql, null);
@@ -174,29 +184,29 @@ public class DataBaseHelp {
         String uid = EasySP.init(mContext).getString(Constant.SPKey_UID);
         String query_sql = "SELECT * FROM sessions_" + OfTenUtils.replace(uid) + " where conversation = " + "'" + conversation + "'";
         Cursor cursor = writableDatabase.rawQuery(query_sql, null);
-        if (cursor.moveToNext()){
+        if (cursor.moveToNext()) {
             return cursor.getInt(cursor.getColumnIndex("number"));
         }
         return 0;
     }
 
-    public void setSessionNumber(String conversation,int number){
+    public void setSessionNumber(String conversation, int number) {
         ContentValues values = new ContentValues();
-        values.put("number",number);
+        values.put("number", number);
         String uid = EasySP.init(mContext).getString(Constant.SPKey_UID);
         String query_sql = "SELECT * FROM sessions_" + OfTenUtils.replace(uid) + " where conversation = " + "'" + conversation + "'";
         Cursor cursor = writableDatabase.rawQuery(query_sql, null);
-        if (cursor.moveToNext()){
+        if (cursor.moveToNext()) {
             writableDatabase.update("sessions_" + OfTenUtils.replace(uid), values, "conversation =?", new String[]{"" + conversation});
         }
     }
 
-    public List<SessionMessage> getSessionList(){
-       List<SessionMessage> list = new ArrayList<>();
+    public List<SessionMessage> getSessionList() {
+        List<SessionMessage> list = new ArrayList<>();
         String uid = EasySP.init(mContext).getString(Constant.SPKey_UID);
         String query_sql = "SELECT * FROM sessions_" + OfTenUtils.replace(uid) + " ORDER BY time DESC";
         Cursor cursor = writableDatabase.rawQuery(query_sql, null);
-        while (cursor.moveToNext()){
+        while (cursor.moveToNext()) {
             SessionMessage sessionMessage = new SessionMessage();
             String conversation = cursor.getString(cursor.getColumnIndex("conversation"));
             String to_id = cursor.getString(cursor.getColumnIndex("to_id"));

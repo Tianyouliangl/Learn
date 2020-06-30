@@ -65,9 +65,9 @@ public interface IHttpProtocol {
     @FormUrlEncoded
     Observable<BaseResponseTC<String>> upUserInfo(@FieldMap HashMap<String, Object> map);
 
-    @POST("updateRedEnvelope/user")
+    @POST("updateHistory/user")
     @FormUrlEncoded
-    Observable<BaseResponseTC<ChatMessage>> upRedEnvelope(@FieldMap HashMap<String, Object> map);
+    Observable<BaseResponseTC<ChatMessage>> updateHistory(@FieldMap HashMap<String, Object> map);
 
     @POST("all/user")
     @FormUrlEncoded

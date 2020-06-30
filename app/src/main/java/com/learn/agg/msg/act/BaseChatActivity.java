@@ -3,10 +3,12 @@ package com.learn.agg.msg.act;
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -38,6 +40,8 @@ import com.learn.commonalitylibrary.util.ImSendMessageUtils;
 import com.learn.commonalitylibrary.util.OfTenUtils;
 import com.lib.xiangxiang.im.ImSocketClient;
 import com.lib.xiangxiang.im.SocketManager;
+import com.location.com.LocationBody;
+import com.location.com.PoiltemBean;
 import com.location.com.SendLocationActivity;
 import com.location.com.ShowLocationActivity;
 import com.luck.picture.lib.PictureSelector;
@@ -46,12 +50,15 @@ import com.luck.picture.lib.entity.LocalMedia;
 import com.scwang.smartrefresh.layout.SmartRefreshLayout;
 import com.scwang.smartrefresh.layout.api.RefreshLayout;
 import com.scwang.smartrefresh.layout.listener.OnRefreshListener;
+import com.zyq.easypermission.EasyPermission;
+import com.zyq.easypermission.EasyPermissionResult;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -59,6 +66,7 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
 
 
     private static final int REQUEST_CODE_IMAGE = 1231;
+    private static final int REQUEST_CODE_LOCATION = 1232;
     private RecyclerView mRecyclerView;
     private ChatAdapter chatAdapter = new ChatAdapter(this, new ArrayList<ChatMessage>());
     public CBEmoticonsKeyBoard mKbView;
@@ -72,8 +80,10 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
     private String conviction;
     private SmartRefreshLayout mSmart;
     private LinearLayoutManager layoutManager;
-    private String send_image_json = null;
-    private String send_voice_json = null;
+    private String send_json = null;
+    private Boolean isLastItem = false;
+    private TextView tv_new_msg;
+    private int new_msg_count = 0;
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
@@ -119,10 +129,11 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
             return;
         }
         Log.i("TAG", "filePath:" + filePath + "\n" + "fileAbsPath:" + fileAbsPath + "\n" + "time:" + time);
-        send_voice_json = ImSendMessageUtils.getChatMessageVoice(filePath, fileAbsPath, time, from_bean.getUid(), to_bean.getUid(), conviction, chatAdapter.getLastItemDisplayTime());
-        ChatMessage message = GsonUtil.GsonToBean(send_voice_json, ChatMessage.class);
+        send_json = ImSendMessageUtils.getChatMessageVoice(filePath, fileAbsPath, time, from_bean.getUid(), to_bean.getUid(), conviction, chatAdapter.getLastItemDisplayTime());
+        ChatMessage message = GsonUtil.GsonToBean(send_json, ChatMessage.class);
         chatAdapter.setData(message);
         toLastItem();
+        upLoadFile(fileAbsPath,2,null);
         new FileUpLoadManager().upLoadFile(fileAbsPath, new FileUpLoadManager.FileUpLoadCallBack() {
             @Override
             public void onError(Throwable e) {
@@ -131,15 +142,15 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
 
             @Override
             public void onSuccess(String url) {
-                if (send_voice_json != null) {
-                    ChatMessage chatMessage = GsonUtil.GsonToBean(send_voice_json, ChatMessage.class);
+                if (send_json != null) {
+                    ChatMessage chatMessage = GsonUtil.GsonToBean(send_json, ChatMessage.class);
                     VoiceBody voiceBody = GsonUtil.GsonToBean(chatMessage.getBody(), VoiceBody.class);
                     String toJson = GsonUtil.BeanToJson(new VoiceBody(voiceBody.getFileName(), voiceBody.getFileAbsPath(), url, voiceBody.getTime(), voiceBody.getState(), voiceBody.getVoice_content()));
                     chatMessage.setBody(toJson);
                     chatAdapter.notifyChatMessage(chatMessage);
                     String json = GsonUtil.BeanToJson(chatMessage);
                     SocketSendJson(json);
-                    send_voice_json = null;
+                    send_json = null;
                 }
             }
 
@@ -174,7 +185,25 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
             }
         }
         PictureSelector.create(this).themeStyle(R.style.picture_default_style).openExternalPreview(index, list);
+    }
 
+    @Override
+    public void onClickLocation(LocationBody body) {
+        Bundle bundle = new Bundle();
+        bundle.putSerializable("bean",body);
+        if (EasyPermission
+                .build()
+                .hasPermission(this,
+                        Manifest.permission.ACCESS_FINE_LOCATION)) {
+            goActivity(ShowLocationActivity.class,bundle);
+        } else {
+            arvixe(2,bundle);
+        }
+    }
+
+    @Override
+    public void onVoiceRead(ChatMessage message) {
+        getPresenter().updateHistory(message.getPid());
     }
 
     public interface key {
@@ -205,6 +234,40 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
         recyclerView.setAdapter(chatAdapter);
         recyclerView.setOnTouchListener(this);
         recyclerView.addOnLayoutChangeListener(this);
+        recyclerView.setOnScrollListener(new RecyclerView.OnScrollListener() {
+            boolean isSlidingToLast = false;
+
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                LinearLayoutManager manager = (LinearLayoutManager) recyclerView.getLayoutManager();
+                // 当不滚动时
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    //获取最后一个完全显示的ItemPosition
+                    int lastVisibleItem = manager.findLastCompletelyVisibleItemPosition();
+                    int totalItemCount = manager.getItemCount();
+                    if (lastVisibleItem >= (totalItemCount - new_msg_count)) {
+                        new_msg_count = 0;
+                        newMsg();
+                    } else if (lastVisibleItem == (totalItemCount - 1) && isSlidingToLast) {
+                        //加载更多功能的代码
+                        isLastItem = true;
+                    } else {
+                        isLastItem = false;
+                    }
+                }
+            }
+
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                if (dy > 0) {
+                    isSlidingToLast = true;
+                } else {
+                    isSlidingToLast = false;
+                }
+            }
+        });
         chatAdapter.setOnItemClickListener(this);
     }
 
@@ -242,6 +305,11 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
         smartRefreshLayout.setOnRefreshListener(this);
     }
 
+    @Override
+    protected void initView() {
+        tv_new_msg = findViewById(R.id.tv_new_msg);
+    }
+
 
     @Override
     protected void initData() {
@@ -258,6 +326,7 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
         DataBaseHelp.getInstance(this).setSessionNumber(conviction, 0);
         showLoadingDialog();
         getPresenter().getHistory(pageNo, pageSize);
+        tv_new_msg.setOnClickListener(this);
     }
 
     @Override
@@ -279,7 +348,6 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
     public void onSuccess(List<ChatMessage> list) {
         dismissDialog();
         mSmart.finishRefresh();
-        Log.i(ImSocketClient.TAG, "请求到的数据大小----" + list.size());
         if (list.size() > 0) {
             chatAdapter.setData(list);
             layoutManager.scrollToPositionWithOffset(list.size(), 0);
@@ -306,9 +374,17 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
     }
 
 
-    private void toLastItem() {
-        chatAdapter.notifyItemChanged(chatAdapter.getItemCount() - 1);
+    private final void toLastItem() {
         mRecyclerView.scrollToPosition(chatAdapter.getItemCount() - 1);
+    }
+
+    private final void newMsg() {
+        if (new_msg_count > 0) {
+            tv_new_msg.setVisibility(View.VISIBLE);
+            tv_new_msg.setText(new_msg_count + "条新消息");
+        } else {
+            tv_new_msg.setVisibility(View.GONE);
+        }
     }
 
 
@@ -320,11 +396,14 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
                 public void run() {
                     if (chatAdapter.getItemCount() > 0) {
                         mRecyclerView.smoothScrollToPosition(chatAdapter.getItemCount() - 1);
+                        new_msg_count = 0;
+                        isLastItem = true;
                     }
                 }
             });
         }
     }
+
 
     @Override
     public void onFuncPop(int height) {
@@ -344,19 +423,32 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
                 mKbView.getEtChat().setText("");
                 sendText(text);
                 break;
+            case R.id.tv_new_msg:
+                toLastItem();
+                new_msg_count = 0;
+                tv_new_msg.setVisibility(View.GONE);
+                break;
         }
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void EventBus(ChatMessage chatMessage) {
         if (chatMessage.getType() == ChatMessage.MSG_SEND_CHAT) {
-            chatAdapter.setData(chatMessage);
-            toLastItem();
-            DataBaseHelp.getInstance(this).setSessionNumber(chatMessage.getConversation(), 0);
+            if (chatMessage.getToId().equals(from_bean.getUid())){
+                chatAdapter.setData(chatMessage);
+                chatAdapter.notifyItemChanged(chatAdapter.getItemCount() - 1);
+                if (isLastItem) {
+                    toLastItem();
+                } else {
+                    new_msg_count += 1;
+                    newMsg();
+                }
+                DataBaseHelp.getInstance(this).setSessionNumber(chatMessage.getConversation(), 0);
+            }
         }
     }
 
-    private void sendText(String text) {
+    private final void sendText(String text) {
         if (!to_bean.getUid().isEmpty() && !from_bean.getUid().isEmpty()) {
             String json = ImSendMessageUtils.getChatMessageText(text, from_bean.getUid(), to_bean.getUid(), conviction, chatAdapter.getLastItemDisplayTime());
             ChatMessage message = GsonUtil.GsonToBean(json, ChatMessage.class);
@@ -366,7 +458,7 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
         }
     }
 
-    private void SocketSendJson(String json) {
+    private final void SocketSendJson(String json) {
         ChatMessage chatMessage = GsonUtil.GsonToBean(json, ChatMessage.class);
         SocketManager.sendMsgSocket(this, json, this);
         DataBaseHelp.getInstance(this).addChatMessage(chatMessage);
@@ -416,7 +508,7 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
         sendEmoji(uri);
     }
 
-    private void sendEmoji(String uri) {
+    private final void sendEmoji(String uri) {
         if (!to_bean.getUid().isEmpty() && !from_bean.getUid().isEmpty()) {
             String json = ImSendMessageUtils.getChatMessageEmoji(uri, from_bean.getUid(), to_bean.getUid(), conviction, chatAdapter.getLastItemDisplayTime());
             ChatMessage message = GsonUtil.GsonToBean(json, ChatMessage.class);
@@ -442,11 +534,46 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
                     .forResult(REQUEST_CODE_IMAGE);
         }
         if (emoticonId == OPTION_TYPE_LOCATION) {
-            goActivity(ShowLocationActivity.class);
+            if (EasyPermission
+                    .build()
+                    .hasPermission(this,
+                            Manifest.permission.ACCESS_FINE_LOCATION)) {
+                goActivityForResult(SendLocationActivity.class, REQUEST_CODE_LOCATION);
+            } else {
+                arvixe(1,null);
+            }
         }
         if (emoticonId == OPTION_TYPE_CARD) {
-            goActivity(SendLocationActivity.class);
+
         }
+    }
+
+    /**
+     * 动态申请权限
+     */
+    private final void arvixe(final int code, final Bundle bundle) {
+        EasyPermission.build()
+                .mRequestCode(10010)
+                .mContext(this)
+                .mPerms(Manifest.permission.ACCESS_FINE_LOCATION)
+                .mResult(new EasyPermissionResult() {
+                    @Override
+                    public void onPermissionsAccess(int requestCode) {
+                        super.onPermissionsAccess(requestCode);
+                        if (code == 1){
+                            goActivityForResult(SendLocationActivity.class, REQUEST_CODE_LOCATION);
+                        }
+                       if (code == 2){
+                           goActivity(ShowLocationActivity.class,bundle);
+                       }
+                    }
+
+                    @Override
+                    public void onPermissionsDismiss(int requestCode, @NonNull List<String> permissions) {
+                        super.onPermissionsDismiss(requestCode, permissions);
+
+                    }
+                }).requestPermission();
     }
 
     @Override
@@ -463,35 +590,25 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
                         String path = images.get(0).getPath();
                         Log.i("TAG", "PATH:" + path);
                         if (!to_bean.getUid().isEmpty() && !from_bean.getUid().isEmpty()) {
-                            send_image_json = ImSendMessageUtils.getChatMessageImage(path, from_bean.getUid(), to_bean.getUid(), conviction, chatAdapter.getLastItemDisplayTime());
-                            ChatMessage message = GsonUtil.GsonToBean(send_image_json, ChatMessage.class);
+                            send_json = ImSendMessageUtils.getChatMessageImage(path, from_bean.getUid(), to_bean.getUid(), conviction, chatAdapter.getLastItemDisplayTime());
+                            ChatMessage message = GsonUtil.GsonToBean(send_json, ChatMessage.class);
                             chatAdapter.setData(message);
                             toLastItem();
+                            upLoadFile(path,1,null);
                         }
-                        new FileUpLoadManager().upLoadFile(path, new FileUpLoadManager.FileUpLoadCallBack() {
-
-                            @Override
-                            public void onError(Throwable e) {
-
-                            }
-
-                            @Override
-                            public void onSuccess(String url) {
-                                if (send_image_json != null) {
-                                    ChatMessage chatMessage = GsonUtil.GsonToBean(send_image_json, ChatMessage.class);
-                                    chatMessage.setBody(GsonUtil.BeanToJson(new ImageBody(url)));
-                                    chatAdapter.notifyChatMessage(chatMessage);
-                                    String json = GsonUtil.BeanToJson(chatMessage);
-                                    SocketSendJson(json);
-                                    send_image_json = null;
-                                }
-                            }
-
-                            @Override
-                            public void onProgress(int pro) {
-
-                            }
-                        });
+                    }
+                    break;
+                case REQUEST_CODE_LOCATION:
+                    Bundle bundle = data.getBundleExtra("bundle");
+                    LocationBody locationBean = (LocationBody) bundle.getSerializable("bean");
+                    String location_json = GsonUtil.BeanToJson(locationBean);
+                    String location_url = locationBean.getLocation_url();
+                    if (!to_bean.getUid().isEmpty() && !from_bean.getUid().isEmpty()) {
+                        send_json = ImSendMessageUtils.getChatMessageLocation(location_json, from_bean.getUid(), to_bean.getUid(), conviction, chatAdapter.getLastItemDisplayTime());
+                        ChatMessage chatMessage = GsonUtil.GsonToBean(send_json, ChatMessage.class);
+                        chatAdapter.setData(chatMessage);
+                        toLastItem();
+                        upLoadFile(location_url,3,locationBean);
                     }
                     break;
                 default:
@@ -499,6 +616,46 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
 
             }
         }
+    }
+
+    private final void upLoadFile(String path, final int code, final LocationBody body) {
+        new FileUpLoadManager().upLoadFile(path, new FileUpLoadManager.FileUpLoadCallBack() {
+
+            @Override
+            public void onError(Throwable e) {
+
+            }
+
+            @Override
+            public void onSuccess(String url) {
+                if (send_json != null) {
+                    ChatMessage chatMessage = GsonUtil.GsonToBean(send_json, ChatMessage.class);
+                    if (code == 1){
+                        chatMessage.setBody(GsonUtil.BeanToJson(new ImageBody(url)));
+                    }
+                    if (code == 2){
+                        VoiceBody voiceBody = GsonUtil.GsonToBean(chatMessage.getBody(), VoiceBody.class);
+                        String toJson = GsonUtil.BeanToJson(new VoiceBody(voiceBody.getFileName(), voiceBody.getFileAbsPath(), url, voiceBody.getTime(), voiceBody.getState(), voiceBody.getVoice_content()));
+                        chatMessage.setBody(toJson);
+                    }
+                    if (code == 3){
+                        if (body != null){
+                            body.setUrl(url);
+                            chatMessage.setBody(GsonUtil.BeanToJson(body));
+                        }
+                    }
+                    chatAdapter.notifyChatMessage(chatMessage);
+                    String json = GsonUtil.BeanToJson(chatMessage);
+                    SocketSendJson(json);
+                    send_json = null;
+                }
+            }
+
+            @Override
+            public void onProgress(int pro) {
+
+            }
+        });
     }
 
     @Override
@@ -509,7 +666,6 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        Log.i("main", "keyCode == " + keyCode);
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             chatAdapter.pauseMedia();
         }

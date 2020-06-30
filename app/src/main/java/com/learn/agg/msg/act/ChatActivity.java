@@ -37,6 +37,7 @@ public class ChatActivity extends BaseChatActivity {
 
     @Override
     protected void initView() {
+        super.initView();
         RecyclerView rv_chat = findViewById(R.id.rv_chat);
         CBEmoticonsKeyBoard cb_kb = findViewById(R.id.cb_kb);
         iv_back = findViewById(R.id.iv_back);

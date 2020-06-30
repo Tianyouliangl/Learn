@@ -73,8 +73,9 @@ public class SocketManager {
     public static void logOutSocket(Context context) {
         Context appContext = context.getApplicationContext();
         Intent intent = new Intent(appContext, ImService.class);
-        intent.putExtra(ImService.SOCKET_CMD, ImService.SOCKET_RESET);
-        startService(appContext, intent);
+        ImService.startService = false;
+        ImSocketClient.release();
+        appContext.stopService(intent);
         // 注销广播
         if (brCallReceiver != null) {
             appContext.unregisterReceiver(brCallReceiver);
@@ -206,6 +207,9 @@ public class SocketManager {
                 EventBus.getDefault().post(chatMessage);
             } else {
                 if (chatMessage.getType() == ChatMessage.MSG_SEND_CHAT){
+                    if (chatMessage.getBodyType() == ChatMessage.MSG_BODY_TYPE_VOICE){
+                        chatMessage.setMsgStatus(ChatMessage.MSG_VOICE_UNREAD);
+                    }
                     int number = DataBaseHelp.getInstance(context).getSessionNumber(chatMessage.getConversation());
                     SessionMessage sessionMessage = new SessionMessage();
                     sessionMessage.setConversation(chatMessage.getConversation());

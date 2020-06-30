@@ -155,9 +155,7 @@ public class ImService extends Service {
     }
 
     private void releaseSocket() {
-        startService = false;
-        ImSocketClient.release();
-        stopSelf();
+
     }
 
     private void callChatMsg2UI(Intent intent) {
@@ -193,7 +191,7 @@ public class ImService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        stopForeground(true);
+        
     }
 
 }
