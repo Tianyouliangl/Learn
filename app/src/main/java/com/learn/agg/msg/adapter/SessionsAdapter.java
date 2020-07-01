@@ -5,6 +5,7 @@ import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -28,6 +29,7 @@ import com.learn.commonalitylibrary.sqlite.DataBaseHelp;
 import com.learn.commonalitylibrary.util.ImSendMessageUtils;
 import com.learn.commonalitylibrary.util.TimeUtil;
 import com.makeramen.roundedimageview.RoundedImageView;
+import com.mcxtzhang.swipemenulib.SwipeMenuLayout;
 import com.senyint.ihospital.client.HttpFactory;
 import com.white.easysp.EasySP;
 
@@ -41,6 +43,9 @@ public class SessionsAdapter extends RecyclerView.Adapter<SessionsAdapter.Sessio
     private Context mContext;
     private List<SessionMessage> mList;
     private long lastClickTime = 0;
+    private Boolean isOpenMenu = false;
+    private int openPosition =0;
+    private MenuClickListener mListener;
 
     public SessionsAdapter(Context context, List<SessionMessage> list) {
         mContext = context;
@@ -70,6 +75,15 @@ public class SessionsAdapter extends RecyclerView.Adapter<SessionsAdapter.Sessio
 
     @Override
     public void onBindViewHolder(@NonNull final SessionsHolder holder, final int position) {
+        holder.sw_menu_layout.setOnMenuOpenListener(new SwipeMenuLayout.OpenListener() {
+            @Override
+            public void onMenuIsOpen(Boolean isOpen) {
+                isOpenMenu = isOpen;
+                if (isOpen){
+                    openPosition = position;
+                }
+            }
+        });
         ChatMessage chatMessage = new ChatMessage();
         final SessionMessage sessionMessage = mList.get(position);
         String to_id = mList.get(position).getTo_id();
@@ -85,6 +99,11 @@ public class SessionsAdapter extends RecyclerView.Adapter<SessionsAdapter.Sessio
         holder.tv_content_session.setText(ImSendMessageUtils.getChatBodyType(chatMessage));
         holder.tv_time_session.setText(TimeUtil.getTimeString(time));
         holder.bv_session.showBadge(number);
+        if (number > 0){
+            holder.btnUnRead.setText("标记已读");
+        }else {
+            holder.btnUnRead.setText("标记未读");
+        }
         if (msg_status == ChatMessage.MSG_SEND_LOADING){
             Drawable drawable = mContext.getResources().getDrawable(R.drawable.anim);
             holder.pb_state_session.setIndeterminateDrawable(drawable);
@@ -113,28 +132,65 @@ public class SessionsAdapter extends RecyclerView.Adapter<SessionsAdapter.Sessio
             params.leftMargin = layoutParams.leftMargin;
             holder.tv_content_session.setLayoutParams(params);
         }
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
+        holder.rl_chat.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                long time = System.currentTimeMillis();
-                long timeD = time - lastClickTime;
-                LoginBean loginBean = sessionMessage.getInfo();
-                if (timeD <= 1000){
+                if (!isOpenMenu){
+                    long time = System.currentTimeMillis();
+                    long timeD = time - lastClickTime;
+                    LoginBean loginBean = sessionMessage.getInfo();
+                    if (timeD <= 1000){
+                        lastClickTime = time;
+                        return;
+                    }
+                    if ( null == loginBean){
+                        Toast.makeText(mContext,"请刷新列表",Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    String from_uid = EasySP.init(mContext).getString(Constant.SPKey_UID);
+                    String from_icon = EasySP.init(mContext).getString(Constant.SPKey_icon(mContext));
+                    LoginBean from_bean = new LoginBean();
+                    from_bean.setUid(from_uid);
+                    from_bean.setImageUrl(from_icon);
+                    ChatActivity.startActivity(mContext,from_bean,loginBean);
+                    DataBaseHelp.getInstance(mContext).setSessionNumber(sessionMessage.getConversation(),0);
                     lastClickTime = time;
                     return;
-                }
-                if ( null == loginBean){
-                    Toast.makeText(mContext,"请刷新列表",Toast.LENGTH_SHORT).show();
+                }else {
+                    holder.sw_menu_layout.smoothClose();
                     return;
                 }
-                String from_uid = EasySP.init(mContext).getString(Constant.SPKey_UID);
-                String from_icon = EasySP.init(mContext).getString(Constant.SPKey_icon(mContext));
-                LoginBean from_bean = new LoginBean();
-                from_bean.setUid(from_uid);
-                from_bean.setImageUrl(from_icon);
-                ChatActivity.startActivity(mContext,from_bean,loginBean);
-                DataBaseHelp.getInstance(mContext).setSessionNumber(sessionMessage.getConversation(),0);
-                lastClickTime = time;
+
+            }
+        });
+
+        holder.btnDelete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                holder.sw_menu_layout.smoothClose();
+                if (mListener != null){
+                    mListener.onDeleteListener(position);
+                }
+            }
+        });
+
+        holder.btnUnRead.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                holder.sw_menu_layout.smoothClose();
+                if (mListener != null){
+                    String text = holder.btnUnRead.getText().toString().trim();
+                    if (text.contains("已读")){
+                        DataBaseHelp.getInstance(mContext).setSessionNumber(sessionMessage.getConversation(),0);
+                        mListener.onRedListener();
+                        return;
+                    }
+                    if (text.contains("未读")){
+                        DataBaseHelp.getInstance(mContext).setSessionNumber(sessionMessage.getConversation(),1);
+                        mListener.onRedListener();
+                        return;
+                    }
+                }
             }
         });
 
@@ -179,6 +235,19 @@ public class SessionsAdapter extends RecyclerView.Adapter<SessionsAdapter.Sessio
         return mList.size();
     }
 
+    public Boolean getIsOpenMenu(){
+        return isOpenMenu;
+    }
+
+    public interface MenuClickListener{
+        void onDeleteListener(int position);
+        void onRedListener();
+    }
+
+    public void setOnMenuClickListener(MenuClickListener listener){
+        this.mListener = listener;
+    }
+
     public class SessionsHolder extends RecyclerView.ViewHolder {
 
         public RoundedImageView riv_session;
@@ -187,6 +256,10 @@ public class SessionsAdapter extends RecyclerView.Adapter<SessionsAdapter.Sessio
         public TextView tv_time_session;
         public BadgeView bv_session;
         public ProgressBar pb_state_session;
+        public RelativeLayout rl_chat;
+        public SwipeMenuLayout sw_menu_layout;
+        public Button btnDelete;
+        public Button btnUnRead;
 
         public SessionsHolder(@NonNull View itemView) {
             super(itemView);
@@ -196,6 +269,10 @@ public class SessionsAdapter extends RecyclerView.Adapter<SessionsAdapter.Sessio
             tv_time_session = itemView.findViewById(R.id.tv_time_session);
             bv_session = itemView.findViewById(R.id.bv_session);
             pb_state_session = itemView.findViewById(R.id.pb_state_session);
+            rl_chat = itemView.findViewById(R.id.rl_chat);
+            sw_menu_layout = itemView.findViewById(R.id.sw_menu_layout);
+            btnDelete = itemView.findViewById(R.id.btnDelete);
+            btnUnRead = itemView.findViewById(R.id.btnUnRead);
         }
     }
 }

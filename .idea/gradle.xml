@@ -11,7 +11,6 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/SlidingMenuLibrary" />
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/cbkeyboardlibrary" />
             <option value="$PROJECT_DIR$/commonalitylibrary" />
@@ -19,6 +18,8 @@
             <option value="$PROJECT_DIR$/locationlibrary" />
             <option value="$PROJECT_DIR$/mvplib" />
             <option value="$PROJECT_DIR$/netlib" />
+            <option value="$PROJECT_DIR$/slidingMenuLibrary" />
+            <option value="$PROJECT_DIR$/swipemenulibrary" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />

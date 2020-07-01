@@ -43,6 +43,7 @@
 * [SlidingMenu测滑菜单](https://github.com/jfeinstein10/SlidingMenu)
 * [沉浸式状态栏](https://p.codekk.com/detail/Android/gyf-dev/ImmersionBar)
 * [高德地图](https://lbs.amap.com/)
+* [侧滑删除](https://github.com/mcxtzhang/SwipeDelMenuLayout)
 
 
 ##### 感觉有用的话，非常感谢大家star🙏。(注:app内所用图片素材均来自百度,阿里巴巴矢量图,千图网)

@@ -55,7 +55,8 @@ dependencies {
     implementation project(path: ':commonalitylibrary')
     implementation project(path: ':mvplib')
     implementation project(path: ':netlib')
-    implementation project(path: ':SlidingMenuLibrary')
+    implementation project(path: ':slidingMenuLibrary')
+    implementation project(path: ':swipemenulibrary')
     implementation project(path: ':locationlibrary')
     // net
     //retrofit

@@ -201,6 +201,12 @@ public class DataBaseHelp {
         }
     }
 
+    public void deleteSessionConversation(String conversation){
+        String uid = EasySP.init(mContext).getString(Constant.SPKey_UID);
+        String query_sql = "DELETE FROM sessions_" + OfTenUtils.replace(uid) + " where conversation = " + "'" + conversation + "'";
+        writableDatabase.execSQL(query_sql);
+    }
+
     public List<SessionMessage> getSessionList() {
         List<SessionMessage> list = new ArrayList<>();
         String uid = EasySP.init(mContext).getString(Constant.SPKey_UID);

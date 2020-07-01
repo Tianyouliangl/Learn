@@ -1,11 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.mcxtzhang.swipemenulib.SwipeMenuLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@color/white"
+    android:clickable="true"
+    app:ios="false"
+    android:id="@+id/sw_menu_layout"
+    app:leftSwipe="true"
+    android:paddingBottom="1dp"
     android:layout_height="wrap_content">
 
     <RelativeLayout
+        android:id="@+id/rl_chat"
         android:layout_width="match_parent"
         android:layout_height="80dp">
 
@@ -96,7 +102,26 @@
     </RelativeLayout>
 
 
+    <Button
+        android:id="@+id/btnUnRead"
+        android:layout_width="120dp"
+        android:layout_height="match_parent"
+        android:background="#ecd50a"
+        android:clickable="true"
+        android:text="标记未读"
+        android:textColor="@android:color/white"/>
+
+    <Button
+        android:id="@+id/btnDelete"
+        android:layout_width="80dp"
+        android:layout_height="match_parent"
+        android:background="@color/red"
+        android:text="删除"
+        android:gravity="center"
+        android:textColor="@android:color/white"/>
 
 
 
-</FrameLayout>
+
+
+</com.mcxtzhang.swipemenulib.SwipeMenuLayout>
