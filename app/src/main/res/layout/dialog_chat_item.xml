@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="100dp">
+
+    <Button
+        android:id="@+id/btn_long_item"
+        android:layout_width="match_parent"
+        android:text="撤回"
+        android:textSize="16sp"
+        android:textColor="@color/black"
+        android:textStyle="bold"
+        android:background="@drawable/shape_chat_item_dialog"
+        android:layout_height="match_parent"/>
+
+</FrameLayout>

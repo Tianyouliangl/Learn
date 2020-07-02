@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_marginTop="10dp"
+    android:orientation="vertical"
+    android:layout_height="wrap_content">
+
+    <TextView
+        android:id="@+id/tv_chat_time"
+        android:layout_width="wrap_content"
+        android:text="19:23"
+        android:paddingTop="1dp"
+        android:paddingBottom="1dp"
+        android:paddingRight="6dp"
+        android:layout_gravity="center_horizontal"
+        android:paddingLeft="6dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/shape_chat_time"
+        android:layout_height="wrap_content"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="60dp">
+
+        <TextView
+            android:id="@+id/tv_content"
+            android:layout_width="wrap_content"
+            android:text="对方撤回来一条消息"
+            android:textSize="16sp"
+            android:layout_centerInParent="true"
+            android:layout_height="wrap_content"/>
+
+        <ImageView
+            android:id="@+id/iv_iv"
+            android:layout_width="30dp"
+            android:src="@mipmap/icon_close"
+            android:layout_toRightOf="@id/tv_content"
+            android:layout_marginLeft="6dp"
+            android:padding="4dp"
+            android:layout_centerVertical="true"
+            android:layout_height="30dp"/>
+
+    </RelativeLayout>
+
+</LinearLayout>

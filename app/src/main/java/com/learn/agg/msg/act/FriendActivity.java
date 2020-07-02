@@ -16,6 +16,7 @@ import com.learn.agg.msg.contract.FriendContract;
 import com.learn.agg.msg.presenter.FriendPresenter;
 import com.learn.commonalitylibrary.Constant;
 import com.learn.commonalitylibrary.LoginBean;
+import com.learn.commonalitylibrary.sqlite.DataBaseHelp;
 import com.learn.commonalitylibrary.util.GsonUtil;
 import com.scwang.smartrefresh.layout.SmartRefreshLayout;
 import com.scwang.smartrefresh.layout.api.RefreshLayout;
@@ -56,7 +57,7 @@ public class FriendActivity extends BaseMvpActivity<FriendContract.IPresenter> i
 
     @Override
     protected void initView() {
-        initToolbar(true,true,true);
+        initToolbar(true, true, true);
         initToolbar("联系人", "添加", new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -88,8 +89,8 @@ public class FriendActivity extends BaseMvpActivity<FriendContract.IPresenter> i
     @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
     public void MessageEvent(HashMap<String, Object> map) {
         String name = (String) map.get("notification");
-        if (name != null && !name.isEmpty()){
-            if (name.equals("change")){
+        if (name != null && !name.isEmpty()) {
+            if (name.equals("change")) {
                 getPresenter().getAllFriend();
             }
         }
@@ -109,6 +110,9 @@ public class FriendActivity extends BaseMvpActivity<FriendContract.IPresenter> i
     public void onSuccess(List<LoginBean> list) {
         smart_layout.finishRefresh();
         adapter.setData(list);
+        for (int i = 0; i < list.size(); i++) {
+            DataBaseHelp.getInstance(this).addOrUpdateUser(list.get(i).getUid(), GsonUtil.BeanToJson(list.get(i)));
+        }
     }
 
     @Override

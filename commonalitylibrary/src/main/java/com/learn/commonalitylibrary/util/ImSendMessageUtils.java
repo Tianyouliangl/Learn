@@ -1,11 +1,16 @@
 package com.learn.commonalitylibrary.util;
 
+import android.content.Context;
+import android.util.Log;
+
 import com.learn.commonalitylibrary.ChatMessage;
+import com.learn.commonalitylibrary.Constant;
 import com.learn.commonalitylibrary.body.EmoticonBody;
 import com.learn.commonalitylibrary.body.ImageBody;
 import com.learn.commonalitylibrary.body.RedEnvelopeBody;
 import com.learn.commonalitylibrary.body.TextBody;
 import com.learn.commonalitylibrary.body.VoiceBody;
+import com.white.easysp.EasySP;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -197,6 +202,41 @@ public class ImSendMessageUtils {
 //            }
         }else {
             return body;
+        }
+        return "未知消息类型";
+    }
+
+    public static String getChatBodyType(Context context,String from_id,int bodyType, String body){
+        if (bodyType == ChatMessage.MSG_BODY_TYPE_TEXT || bodyType == ChatMessage.MSG_BODY_TYPE_TEXT_HELLO){
+            TextBody content = GsonUtil.GsonToBean(body, TextBody.class);
+            return content.getMsg();
+        }
+        if (bodyType == ChatMessage.MSG_BODY_TYPE_IMAGE){
+            return "[图片]";
+        }
+        if (bodyType == ChatMessage.MSG_BODY_TYPE_VOICE){
+            return "[语音]";
+        }
+        if (bodyType == ChatMessage.MSG_BODY_TYPE_VOIDE){
+            return "[视频]";
+        }
+        if (bodyType == ChatMessage.MSG_BODY_TYPE_LOCATION){
+            return "[位置]";
+        }
+        if (bodyType == ChatMessage.MSG_BODY_TYPE_EMOJI){
+            return "[表情]";
+        }
+        if (bodyType == ChatMessage.MSG_BODY_TYPE_CANCEL){
+
+        }
+        if (bodyType == ChatMessage.MSG_BODY_TYPE_CANCEL){
+            String uid = EasySP.init(context).getString(Constant.SPKey_UID);
+            Log.i("chat","to_id:" + from_id + "\n" + "uid:" + uid);
+            if (!from_id.equals(uid)){
+                return "你撤回一条消息";
+            }else {
+                return "对方撤回一条消息";
+            }
         }
         return "未知消息类型";
     }

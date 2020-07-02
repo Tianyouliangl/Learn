@@ -121,6 +121,7 @@ public class LoginActivity extends BaseMvpActivity<LoginContract.IPresenter> imp
                 .put(Constant.SPKey_info(this), new Gson().toJson(data))
                 .put(Constant.SPKey_token(this),data.getToken());
         DataBaseHelp.getInstance(this).createSessions();
+        DataBaseHelp.getInstance(this).createUserTable();
         goActivity(MainActivity.class);
         finish();
     }

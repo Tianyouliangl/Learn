@@ -6,8 +6,10 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -28,6 +30,7 @@ import com.learn.agg.base.BaseMvpActivity;
 import com.learn.agg.msg.adapter.ChatAdapter;
 import com.learn.agg.msg.contract.BaseChatContract;
 import com.learn.agg.msg.presenter.BaseChatPresenter;
+import com.learn.agg.widgets.CustomDialog;
 import com.learn.commonalitylibrary.LoginBean;
 import com.learn.commonalitylibrary.sqlite.DataBaseHelp;
 import com.learn.agg.widgets.FileUpLoadManager;
@@ -38,10 +41,10 @@ import com.learn.commonalitylibrary.body.VoiceBody;
 import com.learn.commonalitylibrary.util.GsonUtil;
 import com.learn.commonalitylibrary.util.ImSendMessageUtils;
 import com.learn.commonalitylibrary.util.OfTenUtils;
+import com.learn.commonalitylibrary.util.TimeUtil;
 import com.lib.xiangxiang.im.ImSocketClient;
 import com.lib.xiangxiang.im.SocketManager;
 import com.location.com.LocationBody;
-import com.location.com.PoiltemBean;
 import com.location.com.SendLocationActivity;
 import com.location.com.ShowLocationActivity;
 import com.luck.picture.lib.PictureSelector;
@@ -52,13 +55,13 @@ import com.scwang.smartrefresh.layout.api.RefreshLayout;
 import com.scwang.smartrefresh.layout.listener.OnRefreshListener;
 import com.zyq.easypermission.EasyPermission;
 import com.zyq.easypermission.EasyPermissionResult;
+import com.zyyoona7.popup.EasyPopup;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -133,7 +136,7 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
         ChatMessage message = GsonUtil.GsonToBean(send_json, ChatMessage.class);
         chatAdapter.setData(message);
         toLastItem();
-        upLoadFile(fileAbsPath,2,null);
+        upLoadFile(fileAbsPath, 2, null);
         new FileUpLoadManager().upLoadFile(fileAbsPath, new FileUpLoadManager.FileUpLoadCallBack() {
             @Override
             public void onError(Throwable e) {
@@ -176,7 +179,6 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
                 list.add(media);
             }
         }
-
         for (int j = 0; j < list.size(); j++) {
             LocalMedia url = list.get(j);
             if (image_url.equals(url.getPath())) {
@@ -190,15 +192,51 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
     @Override
     public void onClickLocation(LocationBody body) {
         Bundle bundle = new Bundle();
-        bundle.putSerializable("bean",body);
+        bundle.putSerializable("bean", body);
         if (EasyPermission
                 .build()
                 .hasPermission(this,
                         Manifest.permission.ACCESS_FINE_LOCATION)) {
-            goActivity(ShowLocationActivity.class,bundle);
+            goActivity(ShowLocationActivity.class, bundle);
         } else {
-            arvixe(2,bundle);
+            arvixe(2, bundle);
         }
+    }
+
+    @Override
+    public void onLongClick(final ChatMessage message) {
+        if (message.getBodyType() != ChatMessage.MSG_BODY_TYPE_CANCEL) {
+            String fromId = message.getFromId();
+            String uid = from_bean.getUid();
+            final CustomDialog dialog = new CustomDialog(this, true, R.layout.dialog_chat_long);
+            View view = dialog.getView();
+            final Button btn_cancel = view.findViewById(R.id.btn_cancel);
+            btn_cancel.setVisibility(fromId.equals(uid) ? View.VISIBLE : View.GONE);
+            if (TimeUtil.getTimeExpend3(System.currentTimeMillis(), message.getTime())) {
+                btn_cancel.setText("撤回");
+                btn_cancel.setClickable(true);
+            } else {
+                btn_cancel.setText("撤回(超出3分钟)");
+                btn_cancel.setClickable(false);
+            }
+            btn_cancel.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (btn_cancel.getText().toString().contains("超出")) {
+                        dialog.dismiss();
+                    } else {
+                        dialog.dismiss();
+                        message.setMsgStatus(ChatMessage.MSG_SEND_LOADING);
+                        chatAdapter.setData(message);
+                        message.setBodyType(ChatMessage.MSG_BODY_TYPE_CANCEL);
+                        String json = GsonUtil.BeanToJson(message);
+                        SocketSendJson(json);
+                    }
+                }
+            });
+            dialog.show();
+        }
+
     }
 
     @Override
@@ -434,7 +472,7 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void EventBus(ChatMessage chatMessage) {
         if (chatMessage.getType() == ChatMessage.MSG_SEND_CHAT) {
-            if (chatMessage.getToId().equals(from_bean.getUid())){
+            if (chatMessage.getToId().equals(from_bean.getUid())) {
                 chatAdapter.setData(chatMessage);
                 chatAdapter.notifyItemChanged(chatAdapter.getItemCount() - 1);
                 if (isLastItem) {
@@ -465,6 +503,7 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
         SessionMessage sessionMessage = new SessionMessage();
         sessionMessage.setConversation(chatMessage.getConversation());
         sessionMessage.setTo_id(to_bean.getUid());
+        sessionMessage.setFrom_id(from_bean.getUid());
         sessionMessage.setBody(chatMessage.getBody());
         sessionMessage.setMsg_status(chatMessage.getMsgStatus());
         sessionMessage.setTime(chatMessage.getTime());
@@ -540,7 +579,7 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
                             Manifest.permission.ACCESS_FINE_LOCATION)) {
                 goActivityForResult(SendLocationActivity.class, REQUEST_CODE_LOCATION);
             } else {
-                arvixe(1,null);
+                arvixe(1, null);
             }
         }
         if (emoticonId == OPTION_TYPE_CARD) {
@@ -560,12 +599,12 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
                     @Override
                     public void onPermissionsAccess(int requestCode) {
                         super.onPermissionsAccess(requestCode);
-                        if (code == 1){
+                        if (code == 1) {
                             goActivityForResult(SendLocationActivity.class, REQUEST_CODE_LOCATION);
                         }
-                       if (code == 2){
-                           goActivity(ShowLocationActivity.class,bundle);
-                       }
+                        if (code == 2) {
+                            goActivity(ShowLocationActivity.class, bundle);
+                        }
                     }
 
                     @Override
@@ -594,7 +633,7 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
                             ChatMessage message = GsonUtil.GsonToBean(send_json, ChatMessage.class);
                             chatAdapter.setData(message);
                             toLastItem();
-                            upLoadFile(path,1,null);
+                            upLoadFile(path, 1, null);
                         }
                     }
                     break;
@@ -608,7 +647,7 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
                         ChatMessage chatMessage = GsonUtil.GsonToBean(send_json, ChatMessage.class);
                         chatAdapter.setData(chatMessage);
                         toLastItem();
-                        upLoadFile(location_url,3,locationBean);
+                        upLoadFile(location_url, 3, locationBean);
                     }
                     break;
                 default:
@@ -630,16 +669,16 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
             public void onSuccess(String url) {
                 if (send_json != null) {
                     ChatMessage chatMessage = GsonUtil.GsonToBean(send_json, ChatMessage.class);
-                    if (code == 1){
+                    if (code == 1) {
                         chatMessage.setBody(GsonUtil.BeanToJson(new ImageBody(url)));
                     }
-                    if (code == 2){
+                    if (code == 2) {
                         VoiceBody voiceBody = GsonUtil.GsonToBean(chatMessage.getBody(), VoiceBody.class);
                         String toJson = GsonUtil.BeanToJson(new VoiceBody(voiceBody.getFileName(), voiceBody.getFileAbsPath(), url, voiceBody.getTime(), voiceBody.getState(), voiceBody.getVoice_content()));
                         chatMessage.setBody(toJson);
                     }
-                    if (code == 3){
-                        if (body != null){
+                    if (code == 3) {
+                        if (body != null) {
                             body.setUrl(url);
                             chatMessage.setBody(GsonUtil.BeanToJson(body));
                         }

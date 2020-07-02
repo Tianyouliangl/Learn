@@ -154,6 +154,7 @@ public class SocketManager {
             SessionMessage sessionMessage = new SessionMessage();
             sessionMessage.setConversation(message.getConversation());
             sessionMessage.setTo_id(message.getToId());
+            sessionMessage.setFrom_id(message.getFromId());
             sessionMessage.setBody(message.getBody());
             sessionMessage.setMsg_status(message.getMsgStatus());
             sessionMessage.setTime(message.getTime());
@@ -206,23 +207,24 @@ public class SocketManager {
 //                map.put("notification", "change");
                 EventBus.getDefault().post(chatMessage);
             } else {
-                if (chatMessage.getType() == ChatMessage.MSG_SEND_CHAT){
-                    if (chatMessage.getBodyType() == ChatMessage.MSG_BODY_TYPE_VOICE){
+                if (chatMessage.getType() == ChatMessage.MSG_SEND_CHAT) {
+                    if (chatMessage.getBodyType() == ChatMessage.MSG_BODY_TYPE_VOICE) {
                         chatMessage.setMsgStatus(ChatMessage.MSG_VOICE_UNREAD);
                     }
                     int number = DataBaseHelp.getInstance(context).getSessionNumber(chatMessage.getConversation());
                     SessionMessage sessionMessage = new SessionMessage();
                     sessionMessage.setConversation(chatMessage.getConversation());
-                    sessionMessage.setTo_id(chatMessage.getFromId());
+                    sessionMessage.setTo_id(chatMessage.getToId());
+                    sessionMessage.setFrom_id(chatMessage.getFromId());
                     sessionMessage.setBody(chatMessage.getBody());
                     sessionMessage.setMsg_status(chatMessage.getMsgStatus());
                     sessionMessage.setTime(chatMessage.getTime());
                     sessionMessage.setBody_type(chatMessage.getBodyType());
-                    sessionMessage.setNumber((number + 1));
+                    sessionMessage.setNumber(DataBaseHelp.getInstance(context).isAddChatMessage(chatMessage) ? (number > 0 ? number : (number + 1)) : (number + 1));
                     DataBaseHelp.getInstance(context).addOrUpdateSession(sessionMessage);
                     DataBaseHelp.getInstance(context).addChatMessage(chatMessage);
                 }
-                Log.i(ImSocketClient.TAG, "------------" + chatMessage.getBody() + "------------");
+                Log.i(ImSocketClient.TAG, "------------" + chatMessage.getBody() + "------------" + chatMessage.getToId());
                 EventBus.getDefault().post(chatMessage);
             }
             NotificationUtils.showNotificationMessage(context, chatMessage);

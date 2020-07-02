@@ -9,10 +9,12 @@ import com.learn.agg.msg.contract.MessageContract;
 import com.learn.agg.net.base.BaseObserverTC;
 import com.learn.agg.net.base.IHttpProtocol;
 import com.learn.agg.net.bean.FriendMsgCountBean;
+import com.learn.commonalitylibrary.Constant;
 import com.learn.commonalitylibrary.sqlite.DataBaseHelp;
 import com.learn.commonalitylibrary.SessionMessage;
 import com.learn.commonalitylibrary.util.GsonUtil;
 import com.senyint.ihospital.client.HttpFactory;
+import com.white.easysp.EasySP;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -70,7 +72,6 @@ public class MessagePresenter extends BasePresenter<MessageContract.IView> imple
         for (int i=0;i<sessionList.size();i++){
             String json = GsonUtil.BeanToJson(sessionList.get(i));
             Log.i("chat","会话"+(i+1) + "----" + json);
-
         }
         getMvpView().onSession(sessionList);
     }

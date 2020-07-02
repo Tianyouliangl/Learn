@@ -26,6 +26,7 @@ import com.learn.agg.msg.chatHolder.ChatLocationSendHolder;
 import com.learn.agg.msg.chatHolder.ChatTextHelloHolder;
 import com.learn.agg.msg.chatHolder.ChatTextReceiveHolder;
 import com.learn.agg.msg.chatHolder.ChatTextSendHolder;
+import com.learn.agg.msg.chatHolder.ChatTextWithdrawHolder;
 import com.learn.agg.msg.chatHolder.ChatVoiceReceiveHolder;
 import com.learn.agg.msg.chatHolder.ChatVoiceSendHolder;
 import com.learn.agg.widgets.FileUpLoadManager;
@@ -103,6 +104,9 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private final int TYPE_LOCATION_SEND = 10;
     private final int TYPE_LOCATION_RECEIVE = 11;
 
+    //撤回
+    private final int TYPE_TEXT_WITHDRAW = 12;
+
 
     public ChatAdapter(Context context, List<ChatMessage> list) {
         this.mContext = context;
@@ -116,7 +120,9 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             String fromId = message.getFromId();
             String uid = from_bean.getUid();
             int bodyType = message.getBodyType();
-            if (fromId.equals(uid)) {
+            if (bodyType == ChatMessage.MSG_BODY_TYPE_CANCEL){
+                return TYPE_TEXT_WITHDRAW;
+            }else if (fromId.equals(uid)) {
                 if (bodyType == ChatMessage.MSG_BODY_TYPE_TEXT) {
                     return TYPE_TEXT_SEND;
                 }
@@ -165,6 +171,10 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         RecyclerView.ViewHolder viewHolder = null;
         View view;
         switch (viewType) {
+            case TYPE_TEXT_WITHDRAW:
+                view = LayoutInflater.from(mContext).inflate(R.layout.item_chat_withdraw, parent, false);
+                viewHolder = new ChatTextWithdrawHolder(view);
+                break;
             case TYPE_TEXT_SEND:
                 view = LayoutInflater.from(mContext).inflate(R.layout.item_chat_send_text, parent, false);
                 viewHolder = new ChatTextSendHolder(view);
@@ -214,7 +224,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     @Override
-    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, final int position) {
 
         final ChatMessage message = mList.get(position);
 
@@ -300,6 +310,16 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     }
                 }
 
+            }
+        });
+
+        holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                if (mClickListener != null){
+                    mClickListener.onLongClick(message);
+                }
+                return true;
             }
         });
     }
@@ -432,7 +452,17 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private void showContent(RecyclerView.ViewHolder holder, ChatMessage message) {
         String body = message.getBody();
         int bodyType = message.getBodyType();
-        if (bodyType == ChatMessage.MSG_BODY_TYPE_TEXT) {
+        if (bodyType == ChatMessage.MSG_BODY_TYPE_CANCEL){
+            String fromId = message.getFromId();
+            String uid = from_bean.getUid();
+            if (fromId.equals(uid)){
+                ((ChatTextWithdrawHolder)holder).tv_content.setText("你撤回一条消息");
+                ((ChatTextWithdrawHolder)holder).iv_close.setVisibility(View.VISIBLE);
+            }else {
+                ((ChatTextWithdrawHolder)holder).tv_content.setText("对方撤回一条消息");
+                ((ChatTextWithdrawHolder)holder).iv_close.setVisibility(View.GONE);
+            }
+        }else if (bodyType == ChatMessage.MSG_BODY_TYPE_TEXT) {
             switch (holder.getItemViewType()) {
                 case TYPE_TEXT_SEND:
                     TextBody content_text_send = GsonUtil.GsonToBean(body, TextBody.class);
@@ -521,6 +551,14 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         String chatTime = TimeUtil.getTimeString(message.getTime());
         int displaytime = message.getDisplaytime();
         switch (holder.getItemViewType()) {
+            case TYPE_TEXT_WITHDRAW:
+                if (displaytime == ChatMessage.MSG_TIME_TRUE) {
+                    ((ChatTextWithdrawHolder) holder).tv_time.setVisibility(View.VISIBLE);
+                    ((ChatTextWithdrawHolder) holder).tv_time.setText(chatTime);
+                } else {
+                    ((ChatTextWithdrawHolder) holder).tv_time.setVisibility(View.GONE);
+                }
+                break;
             case TYPE_TEXT_SEND:
                 if (displaytime == ChatMessage.MSG_TIME_TRUE) {
                     ((ChatTextSendHolder) holder).tv_time.setVisibility(View.VISIBLE);
@@ -655,7 +693,6 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     public void setData(List<ChatMessage> list) {
         mList.addAll(0, list);
-        Log.i(ImSocketClient.TAG, "add到的数据大小----" + mList.size());
         notifyDataSetChanged();
     }
 
@@ -674,10 +711,11 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 return;
             }
         }
-        Log.i(ImSocketClient.TAG, "是否能添加----" + isAdd);
         if (isAdd) {
             mList.add(message);
             notifyDataSetChanged();
+        }else {
+            notifyChatMessage(message);
         }
     }
 
@@ -713,12 +751,9 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             for (int i = mList.size() - 1; i >= 0; i--) {
                 String pid1 = mList.get(i).getPid();
                 int msgStatus = mList.get(i).getMsgStatus();
-                String body1 = mList.get(i).getBody();
                 if (pid1.equals(pid) && status != msgStatus) {
                     mList.get(i).setMsgStatus(status);
-                    if (!body.equals(body1)) {
-                        mList.get(i).setBody(body);
-                    }
+                    mList.get(i).setBody(body);
                     notifyItemChanged(i);
                     return;
                 }
@@ -878,6 +913,8 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         void onVoiceRead(ChatMessage message);
 
         void onClickLocation(LocationBody body);
+
+        void onLongClick(ChatMessage message);
     }
 
     public void setOnItemClickListener(itemClickListener listener) {

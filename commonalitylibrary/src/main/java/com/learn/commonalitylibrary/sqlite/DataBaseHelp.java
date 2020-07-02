@@ -7,7 +7,9 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.learn.commonalitylibrary.ChatMessage;
 import com.learn.commonalitylibrary.Constant;
+import com.learn.commonalitylibrary.LoginBean;
 import com.learn.commonalitylibrary.SessionMessage;
+import com.learn.commonalitylibrary.util.GsonUtil;
 import com.learn.commonalitylibrary.util.OfTenUtils;
 import com.white.easysp.EasySP;
 
@@ -64,11 +66,20 @@ public class DataBaseHelp {
                 "id INTEGER PRIMARY KEY autoincrement," +
                 "conversation VARCHAR (255)," +
                 "to_id VARCHAR (255)," +
+                "from_id VARCHAR (255)," +
                 "body VARCHAR (255)," +
                 "time BIGINT(20)," +
                 "msg_status INTEGER (11)," +
                 "body_type INTEGER (11)," +
                 "number INTEGER (11)" + ")";
+        writableDatabase.execSQL(sql);
+    }
+
+    public void createUserTable() {
+        String uid = EasySP.init(mContext).getString(Constant.SPKey_UID);
+        String sql = "CREATE TABLE IF NOT EXISTS user_" + OfTenUtils.replace(uid) + " (" +
+                "id INTEGER PRIMARY KEY autoincrement," +
+                "data TEXT," + "uid TEXT" + ")";
         writableDatabase.execSQL(sql);
     }
 
@@ -95,8 +106,22 @@ public class DataBaseHelp {
             } else {
                 return false;
             }
+        } else {
+            int update = writableDatabase.update("history_" + chatMessage.getConversation() + "_" + uid, values, "pid = ?", new String[]{"" + chatMessage.getPid()});
+            if (update > 0) {
+                return true;
+            } else {
+                return false;
+            }
         }
-        return false;
+    }
+
+    public Boolean isAddChatMessage(ChatMessage chatMessage){
+        createHistoryTable(chatMessage.getConversation());
+        String uid = OfTenUtils.replace(EasySP.init(mContext).getString(Constant.SPKey_UID));
+        String query_sql = "SELECT * FROM history_" + chatMessage.getConversation() + "_" + uid + " where pid = " + "'" + chatMessage.getPid() + "'";
+        Cursor cursor = writableDatabase.rawQuery(query_sql, null);
+        return cursor.moveToNext();
     }
 
     public void updateChatMessage(ChatMessage chatMessage) {
@@ -165,6 +190,7 @@ public class DataBaseHelp {
         ContentValues values = new ContentValues();
         values.put("conversation", sessionMessage.getConversation());
         values.put("to_id", sessionMessage.getTo_id());
+        values.put("from_id",sessionMessage.getFrom_id());
         values.put("body", sessionMessage.getBody());
         values.put("time", sessionMessage.getTime());
         values.put("msg_status", sessionMessage.getMsg_status());
@@ -178,6 +204,32 @@ public class DataBaseHelp {
         } else {
             writableDatabase.insert("sessions_" + OfTenUtils.replace(uid), null, values);
         }
+    }
+
+    public void addOrUpdateUser(String id, String json) {
+        ContentValues values = new ContentValues();
+        values.put("data", json);
+        values.put("uid", id);
+        String uid = EasySP.init(mContext).getString(Constant.SPKey_UID);
+        String query_sql = "SELECT * FROM user_" + OfTenUtils.replace(uid) + " where uid = " + "'" + id + "'";
+        Cursor cursor = writableDatabase.rawQuery(query_sql, null);
+        if (cursor.moveToNext()) {
+            writableDatabase.update("user_" + OfTenUtils.replace(uid), values, "uid =?", new String[]{"" + id});
+        } else {
+            writableDatabase.insert("user_" + OfTenUtils.replace(uid), null, values);
+        }
+    }
+
+    public LoginBean getUserData(String id) {
+        String uid = EasySP.init(mContext).getString(Constant.SPKey_UID);
+        String query_sql = "SELECT * FROM user_" + OfTenUtils.replace(uid) + " where uid = " + "'" + id + "'";
+        Cursor cursor = writableDatabase.rawQuery(query_sql, null);
+        if (cursor.moveToNext()) {
+            String json = cursor.getString(cursor.getColumnIndex("data"));
+            LoginBean loginBean = GsonUtil.GsonToBean(json, LoginBean.class);
+            return loginBean;
+        }
+        return null;
     }
 
     public int getSessionNumber(String conversation) {
@@ -201,7 +253,7 @@ public class DataBaseHelp {
         }
     }
 
-    public void deleteSessionConversation(String conversation){
+    public void deleteSessionConversation(String conversation) {
         String uid = EasySP.init(mContext).getString(Constant.SPKey_UID);
         String query_sql = "DELETE FROM sessions_" + OfTenUtils.replace(uid) + " where conversation = " + "'" + conversation + "'";
         writableDatabase.execSQL(query_sql);
@@ -216,6 +268,7 @@ public class DataBaseHelp {
             SessionMessage sessionMessage = new SessionMessage();
             String conversation = cursor.getString(cursor.getColumnIndex("conversation"));
             String to_id = cursor.getString(cursor.getColumnIndex("to_id"));
+            String from_id = cursor.getString(cursor.getColumnIndex("from_id"));
             String body = cursor.getString(cursor.getColumnIndex("body"));
             long time = cursor.getLong(cursor.getColumnIndex("time"));
             int msg_status = cursor.getInt(cursor.getColumnIndex("msg_status"));
@@ -223,6 +276,7 @@ public class DataBaseHelp {
             int body_type = cursor.getInt(cursor.getColumnIndex("body_type"));
             sessionMessage.setConversation(conversation);
             sessionMessage.setTo_id(to_id);
+            sessionMessage.setFrom_id(from_id);
             sessionMessage.setBody(body);
             sessionMessage.setTime(time);
             sessionMessage.setMsg_status(msg_status);

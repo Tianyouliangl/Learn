@@ -108,6 +108,23 @@ public class TimeUtil {
         return true;
     }
 
+    /**
+     * 判断是否在3分钟之内
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+    public static Boolean getTimeExpend3(Long startTime, Long endTime){
+        long longExpend = startTime - endTime;  //获取时间差
+
+        long longHours = longExpend / (60 * 60 * 1000); //根据时间差来计算小时数
+        int longMinutes = (int) ((longExpend - longHours * (60 * 60 * 1000)) / (60 * 1000));   //根据时间差来计算分钟数
+        if (longMinutes >= 3){
+            return false;
+        }
+        return true;
+    }
+
     public static String getTime(long time, String pattern) {
         Date date = new Date(time);
         return dateFormat(date, pattern);

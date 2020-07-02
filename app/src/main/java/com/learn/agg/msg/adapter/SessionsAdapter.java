@@ -25,7 +25,9 @@ import com.learn.commonalitylibrary.ChatMessage;
 import com.learn.commonalitylibrary.Constant;
 import com.learn.commonalitylibrary.LoginBean;
 import com.learn.commonalitylibrary.SessionMessage;
+import com.learn.commonalitylibrary.body.TextBody;
 import com.learn.commonalitylibrary.sqlite.DataBaseHelp;
+import com.learn.commonalitylibrary.util.GsonUtil;
 import com.learn.commonalitylibrary.util.ImSendMessageUtils;
 import com.learn.commonalitylibrary.util.TimeUtil;
 import com.makeramen.roundedimageview.RoundedImageView;
@@ -39,30 +41,30 @@ import java.util.List;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
-public class SessionsAdapter extends RecyclerView.Adapter<SessionsAdapter.SessionsHolder>{
+public class SessionsAdapter extends RecyclerView.Adapter<SessionsAdapter.SessionsHolder> {
     private Context mContext;
     private List<SessionMessage> mList;
     private long lastClickTime = 0;
     private Boolean isOpenMenu = false;
-    private int openPosition =0;
     private MenuClickListener mListener;
 
     public SessionsAdapter(Context context, List<SessionMessage> list) {
         mContext = context;
         mList = list;
     }
-    public void setData(List<SessionMessage> list){
+
+    public void setData(List<SessionMessage> list) {
         mList.clear();
         mList.addAll(list);
         notifyDataSetChanged();
     }
 
-    public void setData(SessionMessage message){
+    public void setData(SessionMessage message) {
         mList.add(message);
         notifyDataSetChanged();
     }
 
-    public List<SessionMessage> getData(){
+    public List<SessionMessage> getData() {
         return mList;
     }
 
@@ -75,36 +77,57 @@ public class SessionsAdapter extends RecyclerView.Adapter<SessionsAdapter.Sessio
 
     @Override
     public void onBindViewHolder(@NonNull final SessionsHolder holder, final int position) {
-        holder.sw_menu_layout.setOnMenuOpenListener(new SwipeMenuLayout.OpenListener() {
-            @Override
-            public void onMenuIsOpen(Boolean isOpen) {
-                isOpenMenu = isOpen;
-                if (isOpen){
-                    openPosition = position;
-                }
-            }
-        });
-        ChatMessage chatMessage = new ChatMessage();
+        String uid = EasySP.init(mContext).getString(Constant.SPKey_UID);
         final SessionMessage sessionMessage = mList.get(position);
+        DataBaseHelp.getInstance(mContext).setSessionNumber(sessionMessage.getConversation(), 0);
+        final String from_id = mList.get(position).getFrom_id();
         String to_id = mList.get(position).getTo_id();
-        getFriendInfo(holder,to_id,sessionMessage);
+        LoginBean userData;
+        if (uid.equals(from_id)){
+            userData = DataBaseHelp.getInstance(mContext).getUserData(to_id);
+        }else {
+            userData = DataBaseHelp.getInstance(mContext).getUserData(from_id);
+        }
+
+        if (null != userData) {
+            sessionMessage.setInfo(userData);
+            RequestOptions options;
+            String remark = userData.getRemark();
+            holder.tv_name_session.setText(remark);
+            if (userData.getSex().equals("男")) {
+                options = new RequestOptions()
+                        .placeholder(R.drawable.icon_t_na)//图片加载出来前，显示的图片
+                        .fallback(R.drawable.icon_t_na) //url为空的时候,显示的图片
+                        .error(R.drawable.icon_t_na);//图片加载失败后，显示的图片
+            } else {
+                options = new RequestOptions()
+                        .placeholder(R.drawable.icon_t_nv)//图片加载出来前，显示的图片
+                        .fallback(R.drawable.icon_t_nv) //url为空的时候,显示的图片
+                        .error(R.drawable.icon_t_nv);//图片加载失败后，显示的图片
+            }
+            Glide.with(mContext).load(userData.getImageUrl()).apply(options).into(holder.riv_session);
+        } else {
+            if (uid.equals(from_id)){
+                getFriendInfo(holder, to_id, sessionMessage);
+            }else {
+                getFriendInfo(holder,from_id, sessionMessage);
+            }
+
+        }
         String body = mList.get(position).getBody();
         int body_type = mList.get(position).getBody_type();
         int msg_status = mList.get(position).getMsg_status();
         int number = mList.get(position).getNumber();
         Long time = mList.get(position).getTime();
-        chatMessage.setType(ChatMessage.MSG_SEND_CHAT);
-        chatMessage.setBodyType(body_type);
-        chatMessage.setBody(body);
-        holder.tv_content_session.setText(ImSendMessageUtils.getChatBodyType(chatMessage));
+        holder.tv_content_session.setText(ImSendMessageUtils.getChatBodyType(mContext,sessionMessage.getTo_id(),body_type, body));
         holder.tv_time_session.setText(TimeUtil.getTimeString(time));
         holder.bv_session.showBadge(number);
-        if (number > 0){
+        if (number > 0) {
             holder.btnUnRead.setText("标记已读");
-        }else {
+        } else {
             holder.btnUnRead.setText("标记未读");
         }
-        if (msg_status == ChatMessage.MSG_SEND_LOADING){
+        if (msg_status == ChatMessage.MSG_SEND_LOADING) {
             Drawable drawable = mContext.getResources().getDrawable(R.drawable.anim);
             holder.pb_state_session.setIndeterminateDrawable(drawable);
             holder.pb_state_session.setVisibility(View.VISIBLE);
@@ -112,20 +135,20 @@ public class SessionsAdapter extends RecyclerView.Adapter<SessionsAdapter.Sessio
             params.leftMargin = 0;
             holder.tv_content_session.setLayoutParams(params);
 
-        }else if (msg_status == ChatMessage.MSG_SEND_SUCCESS){
+        } else if (msg_status == ChatMessage.MSG_SEND_SUCCESS) {
             holder.pb_state_session.setVisibility(View.GONE);
             RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) holder.pb_state_session.getLayoutParams();
             RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) holder.tv_content_session.getLayoutParams();
             params.leftMargin = layoutParams.leftMargin;
             holder.tv_content_session.setLayoutParams(params);
-        }else if (msg_status == ChatMessage.MSG_SEND_ERROR){
+        } else if (msg_status == ChatMessage.MSG_SEND_ERROR) {
             Drawable drawable = mContext.getResources().getDrawable(R.drawable.icon_send_error);
             holder.pb_state_session.setIndeterminateDrawable(drawable);
             holder.pb_state_session.setVisibility(View.VISIBLE);
             RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) holder.tv_content_session.getLayoutParams();
             params.leftMargin = 0;
             holder.tv_content_session.setLayoutParams(params);
-        }else {
+        } else {
             holder.pb_state_session.setVisibility(View.GONE);
             RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) holder.pb_state_session.getLayoutParams();
             RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) holder.tv_content_session.getLayoutParams();
@@ -135,16 +158,15 @@ public class SessionsAdapter extends RecyclerView.Adapter<SessionsAdapter.Sessio
         holder.rl_chat.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!isOpenMenu){
-                    long time = System.currentTimeMillis();
+                if (!isOpenMenu) {
+                    final long time = System.currentTimeMillis();
                     long timeD = time - lastClickTime;
-                    LoginBean loginBean = sessionMessage.getInfo();
-                    if (timeD <= 1000){
+                    final LoginBean loginBean = sessionMessage.getInfo();
+                    if (timeD <= 1000) {
                         lastClickTime = time;
                         return;
                     }
-                    if ( null == loginBean){
-                        Toast.makeText(mContext,"请刷新列表",Toast.LENGTH_SHORT).show();
+                    if (null == loginBean) {
                         return;
                     }
                     String from_uid = EasySP.init(mContext).getString(Constant.SPKey_UID);
@@ -152,11 +174,11 @@ public class SessionsAdapter extends RecyclerView.Adapter<SessionsAdapter.Sessio
                     LoginBean from_bean = new LoginBean();
                     from_bean.setUid(from_uid);
                     from_bean.setImageUrl(from_icon);
-                    ChatActivity.startActivity(mContext,from_bean,loginBean);
-                    DataBaseHelp.getInstance(mContext).setSessionNumber(sessionMessage.getConversation(),0);
+                    ChatActivity.startActivity(mContext, from_bean, loginBean);
+                    DataBaseHelp.getInstance(mContext).setSessionNumber(sessionMessage.getConversation(), 0);
                     lastClickTime = time;
                     return;
-                }else {
+                } else {
                     holder.sw_menu_layout.smoothClose();
                     return;
                 }
@@ -168,7 +190,7 @@ public class SessionsAdapter extends RecyclerView.Adapter<SessionsAdapter.Sessio
             @Override
             public void onClick(View v) {
                 holder.sw_menu_layout.smoothClose();
-                if (mListener != null){
+                if (mListener != null) {
                     mListener.onDeleteListener(position);
                 }
             }
@@ -178,19 +200,26 @@ public class SessionsAdapter extends RecyclerView.Adapter<SessionsAdapter.Sessio
             @Override
             public void onClick(View v) {
                 holder.sw_menu_layout.smoothClose();
-                if (mListener != null){
+                if (mListener != null) {
                     String text = holder.btnUnRead.getText().toString().trim();
-                    if (text.contains("已读")){
-                        DataBaseHelp.getInstance(mContext).setSessionNumber(sessionMessage.getConversation(),0);
+                    if (text.contains("已读")) {
+                        DataBaseHelp.getInstance(mContext).setSessionNumber(sessionMessage.getConversation(), 0);
                         mListener.onRedListener();
                         return;
                     }
-                    if (text.contains("未读")){
-                        DataBaseHelp.getInstance(mContext).setSessionNumber(sessionMessage.getConversation(),1);
+                    if (text.contains("未读")) {
+                        DataBaseHelp.getInstance(mContext).setSessionNumber(sessionMessage.getConversation(), 1);
                         mListener.onRedListener();
                         return;
                     }
                 }
+            }
+        });
+
+        holder.sw_menu_layout.setOnMenuOpenListener(new SwipeMenuLayout.OpenListener() {
+            @Override
+            public void onMenuIsOpen(Boolean isOpen) {
+                isOpenMenu = isOpen;
             }
         });
 
@@ -204,17 +233,17 @@ public class SessionsAdapter extends RecyclerView.Adapter<SessionsAdapter.Sessio
                 .getFriendInfo(map)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new BaseObserverTC<LoginBean>(){
+                .subscribe(new BaseObserverTC<LoginBean>() {
                     @Override
                     protected void onNextEx(@NonNull LoginBean data) {
                         super.onNextEx(data);
                         RequestOptions options;
-                        if (data.getSex().equals("男")){
+                        if (data.getSex().equals("男")) {
                             options = new RequestOptions()
                                     .placeholder(R.drawable.icon_t_na)//图片加载出来前，显示的图片
                                     .fallback(R.drawable.icon_t_na) //url为空的时候,显示的图片
                                     .error(R.drawable.icon_t_na);//图片加载失败后，显示的图片
-                        }else {
+                        } else {
                             options = new RequestOptions()
                                     .placeholder(R.drawable.icon_t_nv)//图片加载出来前，显示的图片
                                     .fallback(R.drawable.icon_t_nv) //url为空的时候,显示的图片
@@ -223,6 +252,7 @@ public class SessionsAdapter extends RecyclerView.Adapter<SessionsAdapter.Sessio
                         sessionMessage.setInfo(data);
                         Glide.with(mContext).load(data.getImageUrl()).apply(options).into(holder.riv_session);
                         holder.tv_name_session.setText(data.getRemark());
+                        DataBaseHelp.getInstance(mContext).addOrUpdateUser(data.getUid(), GsonUtil.BeanToJson(data));
                     }
                 });
     }
@@ -235,16 +265,17 @@ public class SessionsAdapter extends RecyclerView.Adapter<SessionsAdapter.Sessio
         return mList.size();
     }
 
-    public Boolean getIsOpenMenu(){
+    public Boolean getIsOpenMenu() {
         return isOpenMenu;
     }
 
-    public interface MenuClickListener{
+    public interface MenuClickListener {
         void onDeleteListener(int position);
+
         void onRedListener();
     }
 
-    public void setOnMenuClickListener(MenuClickListener listener){
+    public void setOnMenuClickListener(MenuClickListener listener) {
         this.mListener = listener;
     }
 

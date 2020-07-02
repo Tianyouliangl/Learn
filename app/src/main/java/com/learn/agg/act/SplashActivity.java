@@ -6,6 +6,7 @@ import android.view.View;
 import com.learn.agg.R;
 import com.learn.agg.base.BaseAppCompatActivity;
 import com.learn.commonalitylibrary.Constant;
+import com.learn.commonalitylibrary.sqlite.DataBaseHelp;
 import com.white.easysp.EasySP;
 
 import java.util.Timer;
@@ -65,9 +66,10 @@ public class SplashActivity extends BaseAppCompatActivity {
                 if (mobile.isEmpty() || password.isEmpty()){
                     goActivity(LoginActivity.class);
                 }else {
+                    DataBaseHelp.getInstance(SplashActivity.this).createSessions();
+                    DataBaseHelp.getInstance(SplashActivity.this).createUserTable();
                     goActivity(MainActivity.class);
                 }
-//                goActivity(LoginActivity.class);
                 finish();
             }
         }, 1500);

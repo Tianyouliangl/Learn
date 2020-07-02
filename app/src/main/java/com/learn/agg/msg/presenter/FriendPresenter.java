@@ -7,6 +7,8 @@ import com.learn.agg.msg.contract.FriendContract;
 import com.learn.agg.net.base.BaseObserverTC;
 import com.learn.agg.net.base.IHttpProtocol;
 import com.learn.commonalitylibrary.LoginBean;
+import com.learn.commonalitylibrary.sqlite.DataBaseHelp;
+import com.learn.commonalitylibrary.util.GsonUtil;
 import com.senyint.ihospital.client.HttpFactory;
 
 import java.util.HashMap;

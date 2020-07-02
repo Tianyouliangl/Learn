@@ -3,12 +3,21 @@ package com.learn.commonalitylibrary;
 public class SessionMessage {
     private String conversation;
     private String to_id;
+    private String from_id;
     private String body;
     private Long time;
     private int msg_status;
     private int number;
     private int body_type;
     private LoginBean info;
+
+    public String getFrom_id() {
+        return from_id;
+    }
+
+    public void setFrom_id(String from_id) {
+        this.from_id = from_id;
+    }
 
     public LoginBean getInfo() {
         return info;
