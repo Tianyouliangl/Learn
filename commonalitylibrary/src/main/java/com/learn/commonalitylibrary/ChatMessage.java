@@ -1,10 +1,12 @@
 package com.learn.commonalitylibrary;
 
+import java.io.Serializable;
+
 /**
  * author : fengzhangwei
  * date : 2019/12/19
  */
-public class ChatMessage {
+public class ChatMessage implements Serializable {
 
 
     // 消息类型
@@ -23,9 +25,10 @@ public class ChatMessage {
     public static int MSG_SEND_ERROR = 3;    // 失败
     public static int MSG_VOICE_UNREAD = 4;  // 语音 未读
 
-    public static int MSG_SEND_CHAT = 1;   // 聊天
-    public static int MSG_SEND_SYS = 2;    // 通知
+    public static int MSG_SEND_CHAT = 1;   // 聊天 1v1
+    public static int MSG_SEND_SYS = 2;    // 上线/下线 通知
     public static int MSG_OFFLINE = 3;    // 其他设备登录
+    public static int MSG_ADD_FRIEND = 4; // 请求添加好友
 
     // 是否显示时间
     public static int MSG_TIME_FALSE = 0;

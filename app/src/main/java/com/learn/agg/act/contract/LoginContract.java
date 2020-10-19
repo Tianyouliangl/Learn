@@ -1,5 +1,7 @@
 package com.learn.agg.act.contract;
 
+import android.content.Context;
+
 import com.learn.commonalitylibrary.LoginBean;
 import com.senyint.ihospital.contract.IPresenterContract;
 import com.senyint.ihospital.contract.IViewContract;
@@ -15,5 +17,6 @@ public interface LoginContract {
 
     interface IPresenter extends IPresenterContract {
         void login();
+        void getAllFriend(Context context,String uid);
     }
 }

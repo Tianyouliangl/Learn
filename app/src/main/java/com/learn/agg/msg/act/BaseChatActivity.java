@@ -6,10 +6,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -31,31 +33,30 @@ import com.learn.agg.msg.adapter.ChatAdapter;
 import com.learn.agg.msg.contract.BaseChatContract;
 import com.learn.agg.msg.presenter.BaseChatPresenter;
 import com.learn.agg.widgets.CustomDialog;
+import com.learn.commonalitylibrary.Constant;
 import com.learn.commonalitylibrary.LoginBean;
 import com.learn.commonalitylibrary.sqlite.DataBaseHelp;
-import com.learn.agg.widgets.FileUpLoadManager;
 import com.learn.commonalitylibrary.ChatMessage;
-import com.learn.commonalitylibrary.SessionMessage;
 import com.learn.commonalitylibrary.body.ImageBody;
 import com.learn.commonalitylibrary.body.VoiceBody;
 import com.learn.commonalitylibrary.util.GsonUtil;
 import com.learn.commonalitylibrary.util.ImSendMessageUtils;
-import com.learn.commonalitylibrary.util.OfTenUtils;
 import com.learn.commonalitylibrary.util.TimeUtil;
 import com.lib.xiangxiang.im.ImSocketClient;
 import com.lib.xiangxiang.im.SocketManager;
-import com.location.com.LocationBody;
+import com.learn.commonalitylibrary.body.LocationBody;
 import com.location.com.SendLocationActivity;
 import com.location.com.ShowLocationActivity;
 import com.luck.picture.lib.PictureSelector;
 import com.luck.picture.lib.config.PictureMimeType;
 import com.luck.picture.lib.entity.LocalMedia;
+import com.orhanobut.logger.Logger;
 import com.scwang.smartrefresh.layout.SmartRefreshLayout;
 import com.scwang.smartrefresh.layout.api.RefreshLayout;
 import com.scwang.smartrefresh.layout.listener.OnRefreshListener;
+import com.white.easysp.EasySP;
 import com.zyq.easypermission.EasyPermission;
 import com.zyq.easypermission.EasyPermissionResult;
-import com.zyyoona7.popup.EasyPopup;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -64,8 +65,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ListIterator;
 
-public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.IPresenter> implements BaseChatContract.IView, View.OnLayoutChangeListener, FuncLayout.OnFuncKeyBoardListener, View.OnClickListener, RecordIndicator.OnRecordListener, CBEmoticonsView.OnEmoticonClickListener, CBAppFuncView.OnAppFuncClickListener, View.OnTouchListener, OnRefreshListener, SocketManager.SendMsgCallBack, CBVoice.VoiceStateListener, ChatAdapter.itemClickListener {
+public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.IPresenter> implements BaseChatContract.IView, FuncLayout.OnFuncKeyBoardListener, View.OnClickListener, RecordIndicator.OnRecordListener, CBEmoticonsView.OnEmoticonClickListener, CBAppFuncView.OnAppFuncClickListener, View.OnTouchListener, OnRefreshListener, SocketManager.SendMsgCallBack, CBVoice.VoiceStateListener, ChatAdapter.itemClickListener {
 
 
     private static final int REQUEST_CODE_IMAGE = 1231;
@@ -73,20 +75,25 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
     private RecyclerView mRecyclerView;
     private ChatAdapter chatAdapter = new ChatAdapter(this, new ArrayList<ChatMessage>());
     public CBEmoticonsKeyBoard mKbView;
-    private LoginBean from_bean;
     private int OPTION_TYPE_CARD = 1;
     private int OPTION_TYPE_IMAGE = 2;
     private int OPTION_TYPE_LOCATION = 3;
     private int pageNo = 1;
     private int pageSize = 30;
-    public LoginBean to_bean;
-    private String conviction;
+    private String conversation;
     private SmartRefreshLayout mSmart;
     private LinearLayoutManager layoutManager;
-    private String send_json = null;
-    private Boolean isLastItem = false;
+    private Boolean isLastItem = true;
     private TextView tv_new_msg;
     private int new_msg_count = 0;
+    private String to_id;
+    public LoginBean to_bean;
+
+    public interface key {
+        String KEY_TO = "key_to_bean";
+        String KEY_ID = "key_to_id";
+        String KEY_CONVERSATION = "key_conversation";
+    }
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
@@ -101,89 +108,73 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
         if (chatAdapter.getData().size() > 0) {
             pageNo++;
         }
-        getPresenter().getHistory(pageNo, pageSize);
+        getPresenter().getHistory(pageNo, pageSize, to_id);
     }
 
     // socket发送消息回调
     @Override
     public void call(String msg) {
-        ChatMessage bean = GsonUtil.GsonToBean(msg, ChatMessage.class);
-        DataBaseHelp.getInstance(this).updateChatMessage(bean);
+        ChatMessage chatMessage = GsonUtil.GsonToBean(msg, ChatMessage.class);
         if (chatAdapter != null) {
-            chatAdapter.notifyChatMessage(bean);
+            chatAdapter.notifyChatMessage(chatMessage);
         }
     }
 
     // 语音回调
     @Override
     public void onStartVoice(String pid) {
-
+        String send_json = ImSendMessageUtils.getChatMessageVoice("", "", 0, getUid(), getTo_Id(), pid, conversation, chatAdapter.getLastItemDisplayTime());
+        ChatMessage message = GsonUtil.GsonToBean(send_json, ChatMessage.class);
+        chatAdapter.setData(message);
+        toLastItem();
     }
 
     @Override
     public void onCancelVoice(String pid) {
         showToast("取消");
+        chatAdapter.removeItem(pid);
+        toLastItem();
+        chatAdapter.notifyDataSetChanged();
     }
 
     @Override
     public void onEndVoice(String filePath, String fileAbsPath, long time, String pid) {
         if (time < 1000) {
             showToast("时间过短");
+            chatAdapter.removeItem(pid);
+            toLastItem();
+            chatAdapter.notifyDataSetChanged();
             return;
         }
         Log.i("TAG", "filePath:" + filePath + "\n" + "fileAbsPath:" + fileAbsPath + "\n" + "time:" + time);
-        send_json = ImSendMessageUtils.getChatMessageVoice(filePath, fileAbsPath, time, from_bean.getUid(), to_bean.getUid(), conviction, chatAdapter.getLastItemDisplayTime());
+        String send_json = ImSendMessageUtils.getChatMessageVoice(filePath, fileAbsPath, time, getUid(), getTo_Id(), pid, conversation, chatAdapter.getLastItemDisplayTime());
         ChatMessage message = GsonUtil.GsonToBean(send_json, ChatMessage.class);
         chatAdapter.setData(message);
         toLastItem();
-        upLoadFile(fileAbsPath, 2, null);
-        new FileUpLoadManager().upLoadFile(fileAbsPath, new FileUpLoadManager.FileUpLoadCallBack() {
-            @Override
-            public void onError(Throwable e) {
-
-            }
-
-            @Override
-            public void onSuccess(String url) {
-                if (send_json != null) {
-                    ChatMessage chatMessage = GsonUtil.GsonToBean(send_json, ChatMessage.class);
-                    VoiceBody voiceBody = GsonUtil.GsonToBean(chatMessage.getBody(), VoiceBody.class);
-                    String toJson = GsonUtil.BeanToJson(new VoiceBody(voiceBody.getFileName(), voiceBody.getFileAbsPath(), url, voiceBody.getTime(), voiceBody.getState(), voiceBody.getVoice_content()));
-                    chatMessage.setBody(toJson);
-                    chatAdapter.notifyChatMessage(chatMessage);
-                    String json = GsonUtil.BeanToJson(chatMessage);
-                    SocketSendJson(json);
-                    send_json = null;
-                }
-            }
-
-            @Override
-            public void onProgress(int pro) {
-
-            }
-        });
+        getPresenter().SocketSendJson(send_json, true);
     }
 
     @Override
-    public void onClickItemImage(String image_url) {
+    public void onClickItemImage(String pid) {
+        ArrayList<ChatMessage> arrayList = new ArrayList<>();
         List<ChatMessage> data = chatAdapter.getData();
         List<LocalMedia> list = new ArrayList<>();
         int index = 0;
         for (int i = 0; i < data.size(); i++) {
             int bodyType = data.get(i).getBodyType();
             if (bodyType == ChatMessage.MSG_BODY_TYPE_IMAGE) {
-                LocalMedia media = new LocalMedia();
-                String body = data.get(i).getBody();
-                ImageBody imageBody = GsonUtil.GsonToBean(body, ImageBody.class);
-                media.setPath(imageBody.getImage());
-                list.add(media);
+                arrayList.add(data.get(i));
             }
         }
-        for (int j = 0; j < list.size(); j++) {
-            LocalMedia url = list.get(j);
-            if (image_url.equals(url.getPath())) {
+        for (int j = 0; j < arrayList.size(); j++) {
+            LocalMedia media = new LocalMedia();
+            ChatMessage chatMessage = arrayList.get(j);
+            String body = arrayList.get(j).getBody();
+            ImageBody imageBody = GsonUtil.GsonToBean(body, ImageBody.class);
+            media.setPath(imageBody.getImage());
+            list.add(media);
+            if (chatMessage.getPid().equals(pid)) {
                 index = j;
-                break;
             }
         }
         PictureSelector.create(this).themeStyle(R.style.picture_default_style).openExternalPreview(index, list);
@@ -205,12 +196,14 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
 
     @Override
     public void onLongClick(final ChatMessage message) {
-        if (message.getBodyType() != ChatMessage.MSG_BODY_TYPE_CANCEL) {
+        if (message.getBodyType() != ChatMessage.MSG_BODY_TYPE_CANCEL && message.getBodyType() != ChatMessage.MSG_BODY_TYPE_VOICE) {
             String fromId = message.getFromId();
-            String uid = from_bean.getUid();
+            final List<ChatMessage> data = chatAdapter.getData();
+            String uid = getUid();
             final CustomDialog dialog = new CustomDialog(this, true, R.layout.dialog_chat_long);
             View view = dialog.getView();
             final Button btn_cancel = view.findViewById(R.id.btn_cancel);
+            Button btn_forwarding_item = view.findViewById(R.id.btn_forwarding_item);
             btn_cancel.setVisibility(fromId.equals(uid) ? View.VISIBLE : View.GONE);
             if (TimeUtil.getTimeExpend3(System.currentTimeMillis(), message.getTime())) {
                 btn_cancel.setText("撤回");
@@ -230,8 +223,23 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
                         chatAdapter.setData(message);
                         message.setBodyType(ChatMessage.MSG_BODY_TYPE_CANCEL);
                         String json = GsonUtil.BeanToJson(message);
-                        SocketSendJson(json);
+                        DataBaseHelp.getInstance(BaseChatActivity.this).addChatMessage(message);
+                        if (message.getPid().equals(data.get(data.size() - 1).getPid())) {
+                            getPresenter().SocketSendJson(json, true);
+                        } else {
+                            getPresenter().SocketSendJson(json, false);
+                        }
+
                     }
+                }
+            });
+            btn_forwarding_item.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Bundle bundle = new Bundle();
+                    bundle.putSerializable("msg", message);
+                    goActivity(ForWardingActivity.class, bundle);
+                    dialog.dismiss();
                 }
             });
             dialog.show();
@@ -244,9 +252,38 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
         getPresenter().updateHistory(message.getPid());
     }
 
-    public interface key {
-        String KEY_FROM = "key_from_bean";
-        String KEY_TO = "key_to_bean";
+    @Override
+    public void onClickPb(final ChatMessage message) {
+        final CustomDialog dialog = new CustomDialog(this, false, R.layout.dialog_resend);
+        View view = dialog.getView();
+        if (view != null) {
+            view.findViewById(R.id.tv_cancel).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    dialog.dismiss();
+                }
+            });
+            view.findViewById(R.id.tv_resend).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    dialog.dismiss();
+                    chatAdapter.removeItem(message.getPid());
+                    DataBaseHelp.getInstance(BaseChatActivity.this).deleteChatMessage(message);
+                    toLastItem();
+                    chatAdapter.notifyDataSetChanged();
+                    message.setMsgStatus(ChatMessage.MSG_SEND_LOADING);
+                    message.setDisplaytime(chatAdapter.getLastItemDisplayTime());
+                    message.setTime(System.currentTimeMillis());
+                    message.setPid(ImSendMessageUtils.getPid());
+                    chatAdapter.setData(message);
+                    toLastItem();
+                    chatAdapter.notifyDataSetChanged();
+                    getPresenter().SocketSendJson(GsonUtil.BeanToJson(message), true);
+
+                }
+            });
+            dialog.show();
+        }
     }
 
     @Override
@@ -264,88 +301,15 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
         return BaseChatPresenter.class;
     }
 
-    protected void initRecyclerView(RecyclerView recyclerView) {
-        mRecyclerView = recyclerView;
-        layoutManager = new LinearLayoutManager(this);
-        recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setNestedScrollingEnabled(false);
-        recyclerView.setAdapter(chatAdapter);
-        recyclerView.setOnTouchListener(this);
-        recyclerView.addOnLayoutChangeListener(this);
-        recyclerView.setOnScrollListener(new RecyclerView.OnScrollListener() {
-            boolean isSlidingToLast = false;
-
-            @Override
-            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
-                super.onScrollStateChanged(recyclerView, newState);
-                LinearLayoutManager manager = (LinearLayoutManager) recyclerView.getLayoutManager();
-                // 当不滚动时
-                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    //获取最后一个完全显示的ItemPosition
-                    int lastVisibleItem = manager.findLastCompletelyVisibleItemPosition();
-                    int totalItemCount = manager.getItemCount();
-                    if (lastVisibleItem >= (totalItemCount - new_msg_count)) {
-                        new_msg_count = 0;
-                        newMsg();
-                    } else if (lastVisibleItem == (totalItemCount - 1) && isSlidingToLast) {
-                        //加载更多功能的代码
-                        isLastItem = true;
-                    } else {
-                        isLastItem = false;
-                    }
-                }
-            }
-
-            @Override
-            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
-                if (dy > 0) {
-                    isSlidingToLast = true;
-                } else {
-                    isSlidingToLast = false;
-                }
-            }
-        });
-        chatAdapter.setOnItemClickListener(this);
-    }
-
-    protected void initKeyBoard(CBEmoticonsKeyBoard keyBoard) {
-        mKbView = keyBoard;
-        mKbView.addOnFuncKeyBoardListener(this);
-        mKbView.addVoiceChangeListener(this);
-        mKbView.getBtnSend().setOnClickListener(this);
-        RecordIndicator recordIndicator = new RecordIndicator(this);
-        mKbView.setRecordIndicator(recordIndicator);
-        recordIndicator.setOnRecordListener(this);
-        recordIndicator.setMaxRecordTime(60);
-        CBEmoticonsView cbEmoticonsView = new CBEmoticonsView(this);
-        cbEmoticonsView.init(getSupportFragmentManager());
-        mKbView.setEmoticonFuncView(cbEmoticonsView);
-        cbEmoticonsView.addEmoticonsWithName(new String[]{"emoji"});
-        cbEmoticonsView.setOnEmoticonClickListener(this);
-    }
-
-    protected void initOptions() {
-        List<AppFuncBean> appFuncBeanList = new ArrayList<>();
-        appFuncBeanList.add(new AppFuncBean(OPTION_TYPE_IMAGE, R.mipmap.icon_tuku, "图片"));
-        appFuncBeanList.add(new AppFuncBean(OPTION_TYPE_LOCATION, R.mipmap.icon_weizhi, "位置"));
-        appFuncBeanList.add(new AppFuncBean(OPTION_TYPE_CARD, R.mipmap.icon_wodemingpian, "名片"));
-        CBAppFuncView appFuncView = new CBAppFuncView(this);
-        appFuncView.setRol(3);
-        appFuncView.setAppFuncBeanList(appFuncBeanList);
-        mKbView.setAppFuncView(appFuncView);
-        appFuncView.setOnAppFuncClickListener(this);
-    }
-
-
-    protected void initSmartRefresh(SmartRefreshLayout smartRefreshLayout) {
-        mSmart = smartRefreshLayout;
-        smartRefreshLayout.setOnRefreshListener(this);
+    @Override
+    public SocketManager.SendMsgCallBack callBack() {
+        return this;
     }
 
     @Override
     protected void initView() {
         tv_new_msg = findViewById(R.id.tv_new_msg);
+        socketConnectState(ImSocketClient.checkSocket());
     }
 
 
@@ -353,28 +317,40 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
     protected void initData() {
         EventBus.getDefault().register(this);
         Intent intent = getIntent();
-        from_bean = (LoginBean) intent.getSerializableExtra(key.KEY_FROM);
+        to_id = intent.getStringExtra(key.KEY_ID);
+        conversation = intent.getStringExtra(key.KEY_CONVERSATION);
         to_bean = (LoginBean) intent.getSerializableExtra(key.KEY_TO);
-        if (null == from_bean || null == to_bean.getUid()) {
-            finish();
-        }
+        String json = EasySP.init(this).getString(Constant.SPKey_info(this));
+        LoginBean from_bean = GsonUtil.GsonToBean(json, LoginBean.class);
         chatAdapter.setFromUserBean(from_bean);
         chatAdapter.setToUserBean(to_bean);
-        conviction = OfTenUtils.getConviction(from_bean.getUid(), to_bean.getUid());
-        DataBaseHelp.getInstance(this).setSessionNumber(conviction, 0);
         showLoadingDialog();
-        getPresenter().getHistory(pageNo, pageSize);
+        if (conversation == null || conversation.isEmpty()) {
+            getPresenter().getConversation();
+        } else {
+            Logger.t("socket").i("chat conversation :" + conversation);
+            DataBaseHelp.getInstance(this).setSessionNumber(conversation, 0);
+            getPresenter().getHistory(pageNo, pageSize, getTo_Id());
+        }
         tv_new_msg.setOnClickListener(this);
+        getUser();
     }
+
+    public abstract void getUser();
 
     @Override
     public String getUid() {
-        return from_bean.getUid();
+        return EasySP.init(this).getString(Constant.SPKey_UID);
+    }
+
+    @Override
+    public String getTo_Id() {
+        return to_id;
     }
 
     @Override
     public String getConversation() {
-        return conviction;
+        return conversation;
     }
 
     @Override
@@ -392,7 +368,45 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
         }
         if (pageNo == 1) {
             toLastItem();
+            for (int i = 0; i < list.size(); i++) {
+                ChatMessage chatMessage = list.get(i);
+                String json = GsonUtil.BeanToJson(chatMessage);
+                if (chatMessage.getMsgStatus() == ChatMessage.MSG_SEND_LOADING) {
+                    Log.i(ImSocketClient.TAG, "发送上次未成功的消息: " + json);
+                    Log.i(ImSocketClient.TAG, "未发送的消息类型: " + chatMessage.getBodyType());
+                    if (chatMessage.getBodyType() == ChatMessage.MSG_BODY_TYPE_VOICE) {
+                        VoiceBody voiceBody = GsonUtil.GsonToBean(chatMessage.getBody(), VoiceBody.class);
+                        String send_json = ImSendMessageUtils.getChatMessageVoice(voiceBody.getFileName(), voiceBody.getFileAbsPath(), voiceBody.getTime(), chatMessage.getFromId(), chatMessage.getToId(), chatMessage.getPid(), chatMessage.getConversation(), ChatMessage.MSG_TIME_TRUE);
+                        getPresenter().SocketSendJson(send_json, true);
+                    } else if (chatMessage.getBodyType() == ChatMessage.MSG_BODY_TYPE_IMAGE) {
+                        ImageBody body = GsonUtil.GsonToBean(chatMessage.getBody(), ImageBody.class);
+                        String send_json = ImSendMessageUtils.getChatMessageImage(body.getImage(), chatMessage.getFromId(), chatMessage.getToId(), chatMessage.getPid(), chatMessage.getConversation(), 1);
+                        ChatMessage message = GsonUtil.GsonToBean(send_json, ChatMessage.class);
+                        chatAdapter.setData(message);
+                        toLastItem();
+                        getPresenter().SocketSendJson(send_json, true);
+                    } else if (chatMessage.getBodyType() == ChatMessage.MSG_BODY_TYPE_LOCATION) {
+                        String send_json = ImSendMessageUtils.getChatMessageLocation(chatMessage.getBody(), chatMessage.getFromId(), chatMessage.getToId(), chatMessage.getPid(), chatMessage.getConversation(), 1);
+                        ChatMessage msg = GsonUtil.GsonToBean(send_json, ChatMessage.class);
+                        chatAdapter.setData(msg);
+                        toLastItem();
+                        getPresenter().SocketSendJson(send_json, true);
+                    } else {
+                        getPresenter().SocketSendJson(json, true);
+                    }
+
+                }
+            }
         }
+
+    }
+
+    @Override
+    public void onSuccessConversation(String con) {
+        conversation = con;
+        getPresenter().getHistory(pageNo, pageSize, getTo_Id());
+        Logger.i("chat conversation :" + con);
+        DataBaseHelp.getInstance(this).setSessionNumber(con, 0);
     }
 
     @Override
@@ -411,41 +425,11 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
         showToast(msg);
     }
 
-
-    private final void toLastItem() {
-        mRecyclerView.scrollToPosition(chatAdapter.getItemCount() - 1);
-    }
-
-    private final void newMsg() {
-        if (new_msg_count > 0) {
-            tv_new_msg.setVisibility(View.VISIBLE);
-            tv_new_msg.setText(new_msg_count + "条新消息");
-        } else {
-            tv_new_msg.setVisibility(View.GONE);
-        }
-    }
-
-
-    @Override
-    public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
-        if (bottom < oldBottom) {
-            mRecyclerView.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (chatAdapter.getItemCount() > 0) {
-                        mRecyclerView.smoothScrollToPosition(chatAdapter.getItemCount() - 1);
-                        new_msg_count = 0;
-                        isLastItem = true;
-                    }
-                }
-            });
-        }
-    }
-
-
     @Override
     public void onFuncPop(int height) {
-
+        if (isLastItem) {
+            toLastItem();
+        }
     }
 
     @Override
@@ -467,49 +451,6 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
                 tv_new_msg.setVisibility(View.GONE);
                 break;
         }
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void EventBus(ChatMessage chatMessage) {
-        if (chatMessage.getType() == ChatMessage.MSG_SEND_CHAT) {
-            if (chatMessage.getToId().equals(from_bean.getUid())) {
-                chatAdapter.setData(chatMessage);
-                chatAdapter.notifyItemChanged(chatAdapter.getItemCount() - 1);
-                if (isLastItem) {
-                    toLastItem();
-                } else {
-                    new_msg_count += 1;
-                    newMsg();
-                }
-                DataBaseHelp.getInstance(this).setSessionNumber(chatMessage.getConversation(), 0);
-            }
-        }
-    }
-
-    private final void sendText(String text) {
-        if (!to_bean.getUid().isEmpty() && !from_bean.getUid().isEmpty()) {
-            String json = ImSendMessageUtils.getChatMessageText(text, from_bean.getUid(), to_bean.getUid(), conviction, chatAdapter.getLastItemDisplayTime());
-            ChatMessage message = GsonUtil.GsonToBean(json, ChatMessage.class);
-            chatAdapter.setData(message);
-            toLastItem();
-            SocketSendJson(json);
-        }
-    }
-
-    private final void SocketSendJson(String json) {
-        ChatMessage chatMessage = GsonUtil.GsonToBean(json, ChatMessage.class);
-        SocketManager.sendMsgSocket(this, json, this);
-        DataBaseHelp.getInstance(this).addChatMessage(chatMessage);
-        SessionMessage sessionMessage = new SessionMessage();
-        sessionMessage.setConversation(chatMessage.getConversation());
-        sessionMessage.setTo_id(to_bean.getUid());
-        sessionMessage.setFrom_id(from_bean.getUid());
-        sessionMessage.setBody(chatMessage.getBody());
-        sessionMessage.setMsg_status(chatMessage.getMsgStatus());
-        sessionMessage.setTime(chatMessage.getTime());
-        sessionMessage.setBody_type(chatMessage.getBodyType());
-        sessionMessage.setNumber(0);
-        DataBaseHelp.getInstance(this).addOrUpdateSession(sessionMessage);
     }
 
     // 语音
@@ -548,12 +489,12 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
     }
 
     private final void sendEmoji(String uri) {
-        if (!to_bean.getUid().isEmpty() && !from_bean.getUid().isEmpty()) {
-            String json = ImSendMessageUtils.getChatMessageEmoji(uri, from_bean.getUid(), to_bean.getUid(), conviction, chatAdapter.getLastItemDisplayTime());
+        if (!getTo_Id().isEmpty() && !getUid().isEmpty()) {
+            String json = ImSendMessageUtils.getChatMessageEmoji(uri, getUid(), getTo_Id(), conversation, chatAdapter.getLastItemDisplayTime());
             ChatMessage message = GsonUtil.GsonToBean(json, ChatMessage.class);
             chatAdapter.setData(message);
             toLastItem();
-            SocketSendJson(json);
+            getPresenter().SocketSendJson(json, true);
         }
     }
 
@@ -628,12 +569,12 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
                     if (images.size() > 0) {
                         String path = images.get(0).getPath();
                         Log.i("TAG", "PATH:" + path);
-                        if (!to_bean.getUid().isEmpty() && !from_bean.getUid().isEmpty()) {
-                            send_json = ImSendMessageUtils.getChatMessageImage(path, from_bean.getUid(), to_bean.getUid(), conviction, chatAdapter.getLastItemDisplayTime());
+                        if (!getTo_Id().isEmpty() && !getUid().isEmpty()) {
+                            String send_json = ImSendMessageUtils.getChatMessageImage(path, getUid(), getTo_Id(), conversation, chatAdapter.getLastItemDisplayTime());
                             ChatMessage message = GsonUtil.GsonToBean(send_json, ChatMessage.class);
                             chatAdapter.setData(message);
                             toLastItem();
-                            upLoadFile(path, 1, null);
+                            getPresenter().SocketSendJson(send_json, true);
                         }
                     }
                     break;
@@ -641,13 +582,12 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
                     Bundle bundle = data.getBundleExtra("bundle");
                     LocationBody locationBean = (LocationBody) bundle.getSerializable("bean");
                     String location_json = GsonUtil.BeanToJson(locationBean);
-                    String location_url = locationBean.getLocation_url();
-                    if (!to_bean.getUid().isEmpty() && !from_bean.getUid().isEmpty()) {
-                        send_json = ImSendMessageUtils.getChatMessageLocation(location_json, from_bean.getUid(), to_bean.getUid(), conviction, chatAdapter.getLastItemDisplayTime());
+                    if (!getTo_Id().isEmpty() && !getUid().isEmpty()) {
+                        String send_json = ImSendMessageUtils.getChatMessageLocation(location_json, getUid(), getTo_Id(), conversation, chatAdapter.getLastItemDisplayTime());
                         ChatMessage chatMessage = GsonUtil.GsonToBean(send_json, ChatMessage.class);
                         chatAdapter.setData(chatMessage);
                         toLastItem();
-                        upLoadFile(location_url, 3, locationBean);
+                        getPresenter().SocketSendJson(send_json, true);
                     }
                     break;
                 default:
@@ -655,46 +595,6 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
 
             }
         }
-    }
-
-    private final void upLoadFile(String path, final int code, final LocationBody body) {
-        new FileUpLoadManager().upLoadFile(path, new FileUpLoadManager.FileUpLoadCallBack() {
-
-            @Override
-            public void onError(Throwable e) {
-
-            }
-
-            @Override
-            public void onSuccess(String url) {
-                if (send_json != null) {
-                    ChatMessage chatMessage = GsonUtil.GsonToBean(send_json, ChatMessage.class);
-                    if (code == 1) {
-                        chatMessage.setBody(GsonUtil.BeanToJson(new ImageBody(url)));
-                    }
-                    if (code == 2) {
-                        VoiceBody voiceBody = GsonUtil.GsonToBean(chatMessage.getBody(), VoiceBody.class);
-                        String toJson = GsonUtil.BeanToJson(new VoiceBody(voiceBody.getFileName(), voiceBody.getFileAbsPath(), url, voiceBody.getTime(), voiceBody.getState(), voiceBody.getVoice_content()));
-                        chatMessage.setBody(toJson);
-                    }
-                    if (code == 3) {
-                        if (body != null) {
-                            body.setUrl(url);
-                            chatMessage.setBody(GsonUtil.BeanToJson(body));
-                        }
-                    }
-                    chatAdapter.notifyChatMessage(chatMessage);
-                    String json = GsonUtil.BeanToJson(chatMessage);
-                    SocketSendJson(json);
-                    send_json = null;
-                }
-            }
-
-            @Override
-            public void onProgress(int pro) {
-
-            }
-        });
     }
 
     @Override
@@ -715,5 +615,140 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
     protected void onDestroy() {
         super.onDestroy();
         chatAdapter = null;
+    }
+
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void EventBus(ChatMessage chatMessage) {
+        if (chatMessage.getType() == ChatMessage.MSG_SEND_CHAT) {
+            if (chatMessage.getConversation().equals(getConversation())) {
+                chatAdapter.setData(chatMessage);
+                if (isLastItem) {
+                    toLastItem();
+                    chatAdapter.notifyItemChanged(chatAdapter.getItemCount() - 1);
+                } else {
+                    if (!chatMessage.getFromId().equals(getUid())) {
+                        new_msg_count += 1;
+                        newMsg();
+                    }
+                }
+                DataBaseHelp.getInstance(this).setSessionNumber(chatMessage.getConversation(), 0);
+            }
+        } else if (chatMessage.getType() == ChatMessage.MSG_SEND_SYS) {
+            LoginBean bean = GsonUtil.GsonToBean(chatMessage.getBody(), LoginBean.class);
+            if (bean.getUid().equals(getTo_Id())) {
+                getPresenter().getUserInfo(bean.getUid());
+                to_bean = bean;
+                getUser();
+            }
+        }
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
+    public void EventBusSocket(String connect) {
+        if (connect.equals("connect")) {
+            socketConnectState(ImSocketClient.checkSocket());
+            EventBus.getDefault().removeStickyEvent(connect);
+        }
+    }
+
+    private final void sendText(String text) {
+        if (!getTo_Id().isEmpty() && !getUid().isEmpty()) {
+            String json = ImSendMessageUtils.getChatMessageText(text, getUid(), getTo_Id(), conversation, chatAdapter.getLastItemDisplayTime());
+            ChatMessage message = GsonUtil.GsonToBean(json, ChatMessage.class);
+            chatAdapter.setData(message);
+            toLastItem();
+            getPresenter().SocketSendJson(json, true);
+        }
+    }
+
+    protected void initRecyclerView(RecyclerView recyclerView) {
+        mRecyclerView = recyclerView;
+        layoutManager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setNestedScrollingEnabled(false);
+        recyclerView.setAdapter(chatAdapter);
+        recyclerView.setOnTouchListener(this);
+        recyclerView.setOnScrollListener(new RecyclerView.OnScrollListener() {
+            boolean isSlidingToLast = false;
+
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                LinearLayoutManager manager = (LinearLayoutManager) recyclerView.getLayoutManager();
+                // 当不滚动时
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    //获取最后一个完全显示的ItemPosition
+                    int lastVisibleItem = manager.findLastCompletelyVisibleItemPosition();
+                    int totalItemCount = manager.getItemCount();
+                    if (lastVisibleItem >= (totalItemCount - new_msg_count)) {
+                        new_msg_count = 0;
+                        newMsg();
+                    } else if (lastVisibleItem == (totalItemCount - 1) && isSlidingToLast) {
+                        //加载更多功能的代码
+                        isLastItem = true;
+                    } else {
+                        isLastItem = false;
+                    }
+                }
+            }
+
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                if (dy > 0) {
+                    isSlidingToLast = true;
+                } else {
+                    isSlidingToLast = false;
+                }
+            }
+        });
+        chatAdapter.setOnItemClickListener(this);
+    }
+
+    protected void initKeyBoard(CBEmoticonsKeyBoard keyBoard) {
+        mKbView = keyBoard;
+        mKbView.addOnFuncKeyBoardListener(this);
+        mKbView.addVoiceChangeListener(this);
+        mKbView.getBtnSend().setOnClickListener(this);
+        RecordIndicator recordIndicator = new RecordIndicator(this);
+        mKbView.setRecordIndicator(recordIndicator);
+        recordIndicator.setOnRecordListener(this);
+        recordIndicator.setMaxRecordTime(60);
+        CBEmoticonsView cbEmoticonsView = new CBEmoticonsView(this);
+        cbEmoticonsView.init(getSupportFragmentManager());
+        mKbView.setEmoticonFuncView(cbEmoticonsView);
+        cbEmoticonsView.addEmoticonsWithName(new String[]{"emoji"});
+        cbEmoticonsView.setOnEmoticonClickListener(this);
+    }
+
+    protected void initOptions() {
+        List<AppFuncBean> appFuncBeanList = new ArrayList<>();
+        appFuncBeanList.add(new AppFuncBean(OPTION_TYPE_IMAGE, R.mipmap.icon_tuku, "图片"));
+        appFuncBeanList.add(new AppFuncBean(OPTION_TYPE_LOCATION, R.mipmap.icon_weizhi, "位置"));
+        appFuncBeanList.add(new AppFuncBean(OPTION_TYPE_CARD, R.mipmap.icon_wodemingpian, "名片"));
+        CBAppFuncView appFuncView = new CBAppFuncView(this);
+        appFuncView.setRol(3);
+        appFuncView.setAppFuncBeanList(appFuncBeanList);
+        mKbView.setAppFuncView(appFuncView);
+        appFuncView.setOnAppFuncClickListener(this);
+    }
+
+    protected void initSmartRefresh(SmartRefreshLayout smartRefreshLayout) {
+        mSmart = smartRefreshLayout;
+        smartRefreshLayout.setOnRefreshListener(this);
+    }
+
+    private final void toLastItem() {
+        mRecyclerView.scrollToPosition(chatAdapter.getItemCount() - 1);
+    }
+
+    private final void newMsg() {
+        if (new_msg_count > 0) {
+            tv_new_msg.setVisibility(View.VISIBLE);
+            tv_new_msg.setText(new_msg_count + "条新消息");
+        } else {
+            tv_new_msg.setVisibility(View.GONE);
+        }
     }
 }

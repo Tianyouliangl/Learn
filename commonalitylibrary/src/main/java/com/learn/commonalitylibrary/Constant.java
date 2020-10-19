@@ -23,10 +23,27 @@ public class Constant {
             list.add("https://b-ssl.duitang.com/uploads/item/201709/10/20170910110429_5J8jt.jpeg");
             list.add("http://img3.imgtn.bdimg.com/it/u=466636099,2440212896&fm=11&gp=0.jpg");
             list.add("https://b-ssl.duitang.com/uploads/item/201808/03/20180803090324_qrygh.thumb.700_0.jpeg");
-            return list.get((int)(0+Math.random()*(list.size()-1)));
-        }else {
-            return list.get((int)(0+Math.random()*(list.size()-1)));
         }
+        return list.get((int)(0+Math.random()*(list.size()-1)));
+    }
+
+    public final static int BOOK_BG_DEFAULT = 0;
+    public final static int BOOK_BG_1 = 1;
+    public final static int BOOK_BG_2 = 2;
+    public final static int BOOK_BG_3 = 3;
+    public final static int BOOK_BG_4 = 4;
+
+    public final static int PAGE_MODE_SIMULATION = 0;
+    public final static int PAGE_MODE_COVER = 1;
+    public final static int PAGE_MODE_SLIDE = 2;
+    public final static int PAGE_MODE_NONE = 3;
+
+    public static final int CLIP_SAVE_FLAG = 0x02;
+
+    public enum Status {
+        OPENING,
+        FINISH,
+        FAIL,
     }
 
     public static String SPKey_phone(Context context){

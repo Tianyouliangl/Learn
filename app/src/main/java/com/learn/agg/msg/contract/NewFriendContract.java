@@ -1,5 +1,7 @@
 package com.learn.agg.msg.contract;
 
+import android.content.Context;
+
 import com.learn.agg.net.bean.FriendMsgBean;
 import com.senyint.ihospital.contract.IPresenterContract;
 import com.senyint.ihospital.contract.IViewContract;
@@ -17,6 +19,7 @@ public interface NewFriendContract {
 
     interface IPresenter extends IPresenterContract {
         void getAllFriendMsg();
-        void setFriend(String to_id,String from_id,String pid,int friend_type,int source);
+        void setFriend(Context context,String to_id,String from_id,String pid,int friend_type,int source);
+        void getFriendInfo(Context context,String id);
     }
 }

@@ -149,7 +149,9 @@ public class NotificationUtils {
                     context.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            view.setImageBitmap(cirleBitmap);
+                            if (view != null){
+                                view.setImageBitmap(cirleBitmap);
+                            }
                         }
                     });
                 } catch (IOException e) {

@@ -70,6 +70,7 @@ public class LoginActivity extends BaseMvpActivity<LoginContract.IPresenter> imp
             LoginBean json = new Gson().fromJson(info, LoginBean.class);
             String password = EasySP.init(this).getString(Constant.SPKey_pwd(this));
             if (json != null) {
+                getPresenter().getAllFriend(this,json.getUid());
                 String mobile = json.getMobile();
                 if (ed_phone != null) {
                     ed_phone.setText(mobile);
@@ -113,6 +114,7 @@ public class LoginActivity extends BaseMvpActivity<LoginContract.IPresenter> imp
     @Override
     public void onSuccess(LoginBean data) {
         dismissDialog();
+        getPresenter().getAllFriend(this,data.getUid());
         EasySP.init(this).put(Constant.SPKey_UID, data.getUid())
                 .put(Constant.SPKey_phone(this), data.getMobile())
                 .put(Constant.SPKey_pwd(this), getPassword())
@@ -122,6 +124,7 @@ public class LoginActivity extends BaseMvpActivity<LoginContract.IPresenter> imp
                 .put(Constant.SPKey_token(this),data.getToken());
         DataBaseHelp.getInstance(this).createSessions();
         DataBaseHelp.getInstance(this).createUserTable();
+        DataBaseHelp.getInstance(this).createTxtTable();
         goActivity(MainActivity.class);
         finish();
     }
@@ -153,9 +156,11 @@ public class LoginActivity extends BaseMvpActivity<LoginContract.IPresenter> imp
                 case 10023:
                     if (!mobile.isEmpty()) {
                         ed_phone.setText(mobile);
+                        ed_phone.setSelection(mobile.length());
                     }
                     if (!password.isEmpty()) {
                         ed_pwd.setText(password);
+                        ed_pwd.setSelection(password.length());
                     }
                     if (!imageUrl.isEmpty()) {
                         Glide.with(this).load(imageUrl).into(iv_nice_icon);

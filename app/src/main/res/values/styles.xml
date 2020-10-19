@@ -8,6 +8,12 @@
         <item name="colorAccent">@color/deepskyblue</item>
     </style>
 
+    <style name="HwTxtFullScreen" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="windowActionBar">false</item>
+    </style>
+
     <style name="SplashTheme" parent="@android:style/Theme.NoTitleBar.Fullscreen">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/deepskyblue</item>
@@ -17,6 +23,13 @@
         <item name="android:windowFullscreen">true</item>
         <item name="windowNoTitle">true</item>
     </style>
+
+    <style name="CheckBox" parent="@android:style/Widget.CompoundButton.CheckBox">
+        <item name="android:button">@drawable/selector_checkbox</item>
+        <item name="android:maxHeight">30dp</item>
+        <item name="android:maxWidth">30dp</item>
+    </style>
+
 
     <style name="Transparent" parent="Theme.AppCompat.Dialog">
         <item name="android:windowBackground">@android:color/transparent</item>

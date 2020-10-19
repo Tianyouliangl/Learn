@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:animateLayoutChanges="true"
+    android:layout_height="60dp">
+
+    <CheckBox
+        android:id="@+id/checkbox"
+        android:layout_width="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="4dp"
+        android:checked="false"
+        android:button="@drawable/selector_checkbox"
+        android:layout_height="wrap_content"/>
+
+    <com.makeramen.roundedimageview.RoundedImageView
+        android:id="@+id/riv_iv"
+        android:layout_toRightOf="@id/checkbox"
+        android:layout_width="45dp"
+        app:riv_corner_radius="8dp"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="6dp"
+        android:layout_height="45dp"/>
+
+    <TextView
+        android:id="@+id/tv_content"
+        android:layout_width="wrap_content"
+        android:textSize="16sp"
+        android:layout_centerVertical="true"
+        android:layout_toRightOf="@id/riv_iv"
+        android:layout_marginLeft="10dp"
+        android:text="我的电脑"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:textColor="@color/black"
+        android:layout_height="wrap_content"/>
+
+</RelativeLayout>

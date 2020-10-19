@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_gravity="center"
+    android:clipChildren="false"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_marginLeft="40dp"
+        android:orientation="vertical"
+        android:background="@drawable/shape_chat_time"
+        android:layout_marginRight="40dp"
+        android:minWidth="300dp"
+        android:layout_gravity="center"
+        android:clipChildren="false"
+        android:minHeight="200dp"
+        android:layout_height="wrap_content">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:orientation="horizontal"
+            android:clipChildren="false"
+            android:layout_height="wrap_content">
+
+            <com.makeramen.roundedimageview.RoundedImageView
+                android:id="@+id/riv_from"
+                android:layout_width="45dp"
+                app:riv_corner_radius="8dp"
+                android:layout_marginTop="40dp"
+                android:src="@drawable/icon_t_na"
+                android:layout_marginLeft="30dp"
+                android:layout_height="45dp"/>
+
+            <pl.droidsonroids.gif.GifImageView
+                android:layout_width="match_parent"
+                android:src="@drawable/msg"
+                android:layout_height="60dp"/>
+
+            <com.makeramen.roundedimageview.RoundedImageView
+                android:layout_width="45dp"
+                app:riv_corner_radius="8dp"
+                android:id="@+id/riv_to"
+                android:layout_alignParentRight="true"
+                android:layout_marginTop="40dp"
+                android:layout_marginRight="30dp"
+                android:src="@drawable/icon_t_nv"
+                android:layout_height="45dp"/>
+
+        </RelativeLayout>
+
+        <TextView
+            android:id="@+id/tv_progress"
+            android:layout_width="wrap_content"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            android:text="1/5"
+            android:layout_marginTop="10dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_height="wrap_content"/>
+        <View
+            android:layout_width="match_parent"
+            android:background="@color/gainsboro"
+            android:layout_marginTop="10dp"
+            android:layout_height="1dp"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_weight="1"
+            android:text="正在发送..."
+            android:gravity="center"
+            android:textSize="18sp"
+            android:textColor="@color/black"
+            android:layout_height="45dp"/>
+
+
+    </LinearLayout>
+
+</FrameLayout>

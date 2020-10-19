@@ -3,9 +3,11 @@ package com.learn.agg.base;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toolbar;
@@ -88,6 +90,22 @@ public abstract class BaseMvpFragment <P extends IPresenterContract> extends Mvp
         title.setVisibility(c ? VISIBLE : GONE);
         right_content.setVisibility(r ? VISIBLE : GONE);
 //        toolbar.setVisibility(l && c && r ? VISIBLE : GONE);
+    }
+
+    protected void socketConnectState(Boolean isConnect){
+        FrameLayout fl = view.findViewById(R.id.fl_connect_state);
+        Toolbar toolbar = view.findViewById(R.id.toolbar);
+        if (fl == null || toolbar == null){
+            throw new MissingResourceException("not find toolbar view", this.getClass().getName(), "toolbar");
+        }
+        getActivity().setActionBar(toolbar);
+        fl.setVisibility( isConnect ? GONE : VISIBLE);
+        fl.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(Settings.ACTION_DATA_ROAMING_SETTINGS));
+            }
+        });
     }
 
     protected void initToolbar(String titleContent) {

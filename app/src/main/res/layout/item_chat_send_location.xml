@@ -22,7 +22,7 @@
     <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_below="@id/tv_chat_time"
-        android:layout_marginLeft="20dp"
+        android:layout_marginLeft="60dp"
         android:layout_height="wrap_content">
         <com.makeramen.roundedimageview.RoundedImageView
             android:id="@+id/iv_icon"
@@ -42,7 +42,7 @@
             android:layout_marginTop="10dp"
             android:scaleType="fitXY"
             android:layout_toLeftOf="@id/iv_icon"
-            android:layout_height="180dp"
+            android:layout_height="165dp"
             app:riv_corner_radius_top_right="8dp"
             app:riv_corner_radius_top_left="8dp"/>
 
@@ -69,28 +69,29 @@
                 android:layout_width="wrap_content"
                 android:maxLines="1"
                 android:ellipsize="end"
-                android:text="dbakjfbajbf"
-                android:textSize="20sp"
-                android:layout_marginTop="8dp"
-                android:layout_marginLeft="10dp"
+                android:text="位置"
+                android:textSize="18sp"
+                android:layout_marginTop="6dp"
+                android:layout_marginLeft="12dp"
                 android:textColor="@color/black"
                 android:layout_height="wrap_content"/>
 
             <TextView
                 android:id="@+id/tv_location_address"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:maxLines="1"
                 android:ellipsize="end"
                 android:text="dbakjfbajbf"
-                android:textSize="16sp"
-                android:layout_marginTop="12dp"
-                android:layout_marginLeft="10dp"
-                android:textColor="@color/lightgrey"
+                android:textSize="14sp"
+                android:layout_marginTop="6dp"
+                android:layout_marginLeft="12dp"
+                android:layout_marginRight="8dp"
+                android:textColor="@color/dimgrey"
                 android:layout_height="wrap_content"/>
 
             <View
                 android:layout_width="match_parent"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="6dp"
                 android:background="@color/lightgrey"
                 android:layout_height="1dp"/>
 
@@ -101,9 +102,9 @@
                 android:text="查看详情"
                 android:textSize="16sp"
                 android:layout_gravity="center"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="10dp"
                 android:textColor="@color/deepskyblue"
-                android:layout_marginBottom="12dp"
+                android:layout_marginBottom="10dp"
                 android:layout_height="wrap_content"/>
 
 

@@ -43,8 +43,6 @@
             android:layout_centerVertical="true"
             android:textColor="@color/white"
             android:autoLink="all"
-            android:clickable="true"
-            android:focusable="true"
             android:lineSpacingExtra="8dp"
             android:minWidth="40dp"
             android:minHeight="20dp"

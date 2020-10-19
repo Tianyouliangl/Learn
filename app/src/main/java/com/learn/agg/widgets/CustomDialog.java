@@ -25,7 +25,7 @@ public class CustomDialog extends Dialog {
         view = View.inflate(getContext(), R.layout.dialog_loading, null);
         setContentView(view);
         setCancelable(mIsBack);
-        setCanceledOnTouchOutside(isBack);
+        setCanceledOnTouchOutside(false);
     }
 
     public CustomDialog(@NonNull Context context, Boolean isBack, int view_id) {
@@ -34,7 +34,7 @@ public class CustomDialog extends Dialog {
         view = View.inflate(getContext(), view_id, null);
         setContentView(view);
         setCancelable(mIsBack);
-        setCanceledOnTouchOutside(isBack);
+        setCanceledOnTouchOutside(false);
     }
 
     public View getView(){

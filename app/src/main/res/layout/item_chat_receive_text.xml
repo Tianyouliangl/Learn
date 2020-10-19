@@ -45,8 +45,6 @@
             android:layout_marginLeft="4dp"
             android:autoLink="all"
             android:background="@drawable/icon_chat_left"
-            android:clickable="true"
-            android:focusable="true"
             android:lineSpacingExtra="10dp"
             android:maxWidth="225dp"
             android:minWidth="40dp"

@@ -131,11 +131,11 @@ public class NewFriendActivity extends BaseMvpActivity<NewFriendContract.IPresen
 
     @Override
     public void onClickReject(FriendMsgBean bean) {
-        getPresenter().setFriend(bean.getTo_id(), bean.getFrom_id(), bean.getPid(), 1, 1);
+        getPresenter().setFriend(this,bean.getTo_id(), bean.getFrom_id(), bean.getPid(), 1, 1);
     }
 
     @Override
     public void onClickAgree(FriendMsgBean bean) {
-        getPresenter().setFriend(bean.getTo_id(), bean.getFrom_id(), bean.getPid(), 0, 1);
+        getPresenter().setFriend(this,bean.getTo_id(), bean.getFrom_id(), bean.getPid(), 0, 1);
     }
 }

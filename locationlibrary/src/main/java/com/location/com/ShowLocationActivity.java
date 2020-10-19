@@ -4,17 +4,10 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.Manifest;
-import android.content.Intent;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
-import android.graphics.Point;
 import android.os.Bundle;
-import android.view.View;
-import android.view.animation.Interpolator;
 import android.widget.TextView;
 
-import com.amap.api.location.AMapLocationClient;
-import com.amap.api.location.AMapLocationClientOption;
 import com.amap.api.maps.AMap;
 import com.amap.api.maps.AMapOptions;
 import com.amap.api.maps.CameraUpdate;
@@ -28,12 +21,10 @@ import com.amap.api.maps.model.LatLng;
 import com.amap.api.maps.model.Marker;
 import com.amap.api.maps.model.MarkerOptions;
 import com.amap.api.maps.model.MyLocationStyle;
-import com.amap.api.maps.model.animation.Animation;
-import com.amap.api.maps.model.animation.TranslateAnimation;
+import com.learn.commonalitylibrary.body.LocationBody;
 import com.zyq.easypermission.EasyPermission;
 import com.zyq.easypermission.EasyPermissionResult;
 
-import java.io.Serializable;
 import java.util.List;
 
 public class ShowLocationActivity extends AppCompatActivity {

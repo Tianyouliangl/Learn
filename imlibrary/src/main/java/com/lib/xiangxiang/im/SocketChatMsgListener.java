@@ -6,6 +6,7 @@ import android.util.Log;
 
 import com.learn.commonalitylibrary.ChatMessage;
 import com.learn.commonalitylibrary.util.GsonUtil;
+import com.orhanobut.logger.Logger;
 
 import io.socket.emitter.Emitter;
 
@@ -34,9 +35,7 @@ public class SocketChatMsgListener implements Emitter.Listener {
         intent.putExtra(ImService.SOCKET_CMD,ImService.SOCKET_RECEIVER_MSG);
         intent.putExtra(ImService.SOCKET_MSG,result);
         startService(mContext,intent);
-        Log.i(ImSocketClient.TAG,
-                "收到消息------"
-                        + "\n" + result);
+        Logger.t("socket").json("{"+"收到消息:"+result+"}");
 
     }
 

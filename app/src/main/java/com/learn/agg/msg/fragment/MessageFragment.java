@@ -2,13 +2,10 @@ package com.learn.agg.msg.fragment;
 
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
 import androidx.annotation.NonNull;
@@ -21,9 +18,7 @@ import com.gongwen.marqueen.SimpleMF;
 import com.gongwen.marqueen.SimpleMarqueeView;
 import com.gongwen.marqueen.util.OnItemClickListener;
 import com.learn.agg.R;
-import com.learn.agg.act.MainActivity;
 import com.learn.agg.base.BaseMvpFragment;
-import com.learn.agg.base.IconOnClickListener;
 import com.learn.agg.msg.act.FriendActivity;
 import com.learn.agg.msg.act.NewFriendActivity;
 import com.learn.agg.msg.adapter.SessionsAdapter;
@@ -35,6 +30,7 @@ import com.learn.commonalitylibrary.Constant;
 import com.learn.commonalitylibrary.SessionMessage;
 import com.learn.commonalitylibrary.sqlite.DataBaseHelp;
 import com.learn.commonalitylibrary.util.NotificationUtils;
+import com.lib.xiangxiang.im.ImSocketClient;
 import com.mcxtzhang.swipemenulib.SwipeMenuLayout;
 import com.scwang.smartrefresh.layout.SmartRefreshLayout;
 import com.scwang.smartrefresh.layout.api.RefreshLayout;
@@ -50,7 +46,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.stream.IntStream;
 
 
 public class MessageFragment extends BaseMvpFragment<MessageContract.IPresenter> implements MessageContract.IView, View.OnClickListener, OnItemClickListener, OnRefreshListener, View.OnTouchListener, SessionsAdapter.MenuClickListener {
@@ -80,7 +75,6 @@ public class MessageFragment extends BaseMvpFragment<MessageContract.IPresenter>
     protected void initView() {
         super.initView();
         EventBus.getDefault().register(this);
-        setToolBarIcon();
         rl_message = view.findViewById(R.id.rl_message);
         rl_bv = view.findViewById(R.id.rl_bv);
         smart_layout = view.findViewById(R.id.msg_sl);
@@ -88,13 +82,6 @@ public class MessageFragment extends BaseMvpFragment<MessageContract.IPresenter>
         rl_find_friend = view.findViewById(R.id.rl_find_friend);
         cv = view.findViewById(R.id.cv);
         rl_no_msg = view.findViewById(R.id.rl_no_msg);
-    }
-
-    private void setToolBarIcon() {
-        initToolbar(true, true, true);
-        final String image_url = EasySP.init(getContext()).getString(Constant.SPKey_icon(getContext()));
-        NotificationUtils.getUserThreadCirBitmap(image_url, (ImageView) getView().findViewById(R.id.toolbar_back), getActivity());
-        initToolbar("消息", "联系人", this, this);
     }
 
     @Override
@@ -153,14 +140,6 @@ public class MessageFragment extends BaseMvpFragment<MessageContract.IPresenter>
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.toolbar_back:
-                if (getActivity() instanceof IconOnClickListener) {
-                    ((IconOnClickListener) getActivity()).showMenu();
-                }
-                break;
-            case R.id.toolbar_action:
-                goActivity(FriendActivity.class);
-                break;
             case R.id.rl_find_friend:
                 goActivity(NewFriendActivity.class);
                 break;
@@ -239,19 +218,15 @@ public class MessageFragment extends BaseMvpFragment<MessageContract.IPresenter>
         }
     }
 
-    //事件的 订阅 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void MessageEvent(ChatMessage map) {
-        if (map.getType() == ChatMessage.MSG_SEND_SYS) {
-            getPresenter().getAddFriendMsg();
-        }
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
     public void EventBus(ChatMessage chatMessage) {
-        if (chatMessage.getType() == ChatMessage.MSG_SEND_CHAT) {
+        if (chatMessage.getType() == ChatMessage.MSG_SEND_CHAT || chatMessage.getType() == ChatMessage.MSG_SEND_SYS) {
             getPresenter().getSessionList();
         }
+        if (chatMessage.getType() == ChatMessage.MSG_ADD_FRIEND) {
+            getPresenter().getAddFriendMsg();
+        }
+
     }
 
     @Override
@@ -294,17 +269,23 @@ public class MessageFragment extends BaseMvpFragment<MessageContract.IPresenter>
     @Override
     public void onDeleteListener(int position) {
         SessionMessage message = sessionsAdapter.getData().get(position);
-        Iterator<SessionMessage> it = sessionsAdapter.getData().iterator();
-        while (it.hasNext()) {
-            SessionMessage next = it.next();
-            if (message.getConversation().equals(next.getConversation())) {
-                DataBaseHelp.getInstance(getContext()).deleteSessionConversation(next.getConversation());
-                it.remove();
-                sendNumberCount();
+        String conversation = message.getConversation();
+        if (conversation != null) {
+            Iterator<SessionMessage> it = sessionsAdapter.getData().iterator();
+            while (it.hasNext()) {
+                SessionMessage next = it.next();
+                String nextConversation = next.getConversation();
+                if (nextConversation != null) {
+                    if (conversation.hashCode() == nextConversation.hashCode()) {
+                        DataBaseHelp.getInstance(getContext()).deleteSessionConversation(next.getConversation());
+                        it.remove();
+                        sendNumberCount();
+                    }
+                }
             }
+            sessionsAdapter.notifyDataSetChanged();
+            showEmpty(sessionsAdapter.getData().size());
         }
-        sessionsAdapter.notifyDataSetChanged();
-        showEmpty(sessionsAdapter.getData().size());
     }
 
     @Override

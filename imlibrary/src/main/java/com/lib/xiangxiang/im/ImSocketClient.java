@@ -8,12 +8,20 @@ import android.net.ConnectivityManager;
 import android.util.Log;
 
 
+import com.learn.commonalitylibrary.ChatMessage;
 import com.learn.commonalitylibrary.Constant;
+import com.learn.commonalitylibrary.SessionMessage;
+import com.learn.commonalitylibrary.body.ImageBody;
+import com.learn.commonalitylibrary.body.VoiceBody;
+import com.learn.commonalitylibrary.sqlite.DataBaseHelp;
+import com.learn.commonalitylibrary.util.GsonUtil;
+import com.learn.commonalitylibrary.util.ImSendMessageUtils;
 import com.learn.commonalitylibrary.util.NetState;
 
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import io.socket.client.IO;
@@ -24,13 +32,13 @@ import io.socket.emitter.Emitter;
  * author : fengzhangwei
  * date : 2019/12/19
  */
-public class ImSocketClient{
+public class ImSocketClient {
 
     private static String SocketEvent = "chat";
     private static Socket mSocket;
     private static String mToken;
     private static String mSocketUrl = Constant.BASE_CHAT_URL;
-    public  static String TAG = "socket";
+    public static String TAG = "socket";
     private static Boolean isConnect = false;
     private static Emitter.Listener mDisConnectListener;  // 断开连接监听
     private static Emitter.Listener mConnectListener;     // 连接监听 / 成功
@@ -38,18 +46,18 @@ public class ImSocketClient{
     private static Emitter.Listener mChatListener;        // 消息监听
     private static Context mContext;
     private static NetBroadcastReceiver netBroadcastReceiver;
-    public  static Map<String,String> msgMap = new HashMap<>();
+//    public static Map<String, String> msgMap = new HashMap<>();
 
-   static class NetBroadcastReceiver extends BroadcastReceiver {
+    static class NetBroadcastReceiver extends BroadcastReceiver {
 
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.i(TAG, "NetBroadcastReceiver changed");
             if (intent.getAction().equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
                 Boolean netWorkState = NetState.hasNetWorkConnection(context);
-                Log.i(TAG,"---当前是否有网络---NetBroadcastReceiver:::::::" + netWorkState);
-                if (netWorkState){
-                    if (!checkSocket()){
+                Log.i(TAG, "---当前是否有网络---NetBroadcastReceiver:::::::" + netWorkState);
+                if (netWorkState) {
+                    if (!checkSocket()) {
                         openSocket();
                     }
                 }
@@ -120,7 +128,7 @@ public class ImSocketClient{
      * @return
      */
     public static void sendMsg(Context context, String msg, String msgId) {
-        msgMap.put(msgId,msg);
+//        msgMap.put(msgId, msg);
         sendMsgSocket(context, msg, msgId);
     }
 
@@ -139,9 +147,19 @@ public class ImSocketClient{
             }
         } else {
             Log.i(TAG, "Socket Connect Error");
-            initSocket(mToken,mContext);
-
+            sendMsgError(context, msg, msgId);
+            initSocket(mToken, mContext);
         }
+    }
+
+    private static void sendMsgError(Context context, String msg, String msgId) {
+        ChatMessage message = GsonUtil.GsonToBean(msg, ChatMessage.class);
+        message.setMsgStatus(ChatMessage.MSG_SEND_ERROR);
+        Intent intent = new Intent(mContext, ImService.class);
+        intent.putExtra(ImService.SOCKET_CMD, ImService.SOCKET_SEND_MSG_CALLBACK);
+        intent.putExtra(ImService.SOCKET_PID, msgId);
+        intent.putExtra(ImService.SOCKET_DATA, GsonUtil.BeanToJson(message));
+        context.startService(intent);
     }
 
     /**
@@ -190,8 +208,8 @@ public class ImSocketClient{
     private static void initSocketListener(final Context context) {
 
         mChatListener = new SocketChatMsgListener(context);
-        if (netBroadcastReceiver == null){
-            netBroadcastReceiver =  new NetBroadcastReceiver();
+        if (netBroadcastReceiver == null) {
+            netBroadcastReceiver = new NetBroadcastReceiver();
         }
         //实例化IntentFilter对象
         IntentFilter filter = new IntentFilter();
@@ -204,9 +222,9 @@ public class ImSocketClient{
             public void call(Object... args) {
                 isConnect = false;
                 Log.i(TAG, "socket ---断开连接---");
-                if (mToken != null){
+                if (mToken != null) {
                     EventBus.getDefault().postSticky("connect");
-                    if (NetState.hasNetWorkConnection(mContext)){
+                    if (NetState.hasNetWorkConnection(mContext)) {
                         openSocket();
                     }
                 }
@@ -220,9 +238,19 @@ public class ImSocketClient{
                 isConnect = true;
                 EventBus.getDefault().postSticky("connect");
                 Log.i(TAG, "socket ---连接成功---" + checkSocket());
-                if (msgMap.size() > 0){
-                    for (Map.Entry<String, String> entry : msgMap.entrySet()) {
-                        sendMsg(mContext,entry.getValue(),entry.getKey());
+//                for (Map.Entry<String, String> entry : msgMap.entrySet()) {
+//                    sendMsgSocket(mContext, entry.getValue(), entry.getKey());
+//                }
+                List<SessionMessage> list = DataBaseHelp.getInstance(mContext).getSessionList();
+                for (int i = 0; i < list.size(); i++) {
+                    SessionMessage sessionMessage = list.get(i);
+                    String conversation = sessionMessage.getConversation();
+                    List<ChatMessage> messageList = DataBaseHelp.getInstance(mContext).getChatMessage(conversation, 1, 30);
+                    for (int j = 0; j < messageList.size(); j++) {
+                        ChatMessage message = messageList.get(j);
+                        if (message.getMsgStatus() == ChatMessage.MSG_SEND_LOADING){
+                           SocketManager.sendMsgSocket(mContext,GsonUtil.BeanToJson(message),null);
+                        }
                     }
                 }
 
@@ -234,10 +262,9 @@ public class ImSocketClient{
             @Override
             public void call(Object... args) {
                 isConnect = false;
-                if (NetState.hasNetWorkConnection(mContext)){
+                if (NetState.hasNetWorkConnection(mContext)) {
                     openSocket();
                 }
-                EventBus.getDefault().postSticky("connect");
                 if (args.toString().isEmpty()) {
                     Log.i(TAG, "socket ---连接错误---" + args.toString());
                 } else {

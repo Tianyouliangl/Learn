@@ -23,10 +23,11 @@ public class ChatActivity extends BaseChatActivity {
     private TextView tv_name;
     private TextView tv_net_state;
 
-    public static void startActivity(Context context, LoginBean fromBean, LoginBean toBean){
+    public static void startActivity(Context context,String toId,String conversation,LoginBean toBean){
         Intent intent = new Intent(context, ChatActivity.class);
-        intent.putExtra(key.KEY_FROM,fromBean);
+        intent.putExtra(key.KEY_ID,toId);
         intent.putExtra(key.KEY_TO,toBean);
+        intent.putExtra(key.KEY_CONVERSATION,conversation);
         context.startActivity(intent);
     }
 
@@ -54,6 +55,11 @@ public class ChatActivity extends BaseChatActivity {
     protected void initData() {
         super.initData();
         iv_back.setOnClickListener(this);
+
+    }
+
+    @Override
+    public void getUser() {
         String username = to_bean.getUsername();
         int online = to_bean.getOnline();
         tv_name.setText(username);

@@ -13,6 +13,7 @@
     <RelativeLayout
         android:id="@+id/rl_chat"
         android:layout_width="match_parent"
+        android:animateLayoutChanges="true"
         android:layout_height="80dp">
 
         <com.makeramen.roundedimageview.RoundedImageView
@@ -26,7 +27,7 @@
         <TextView
             android:id="@+id/tv_name_session"
             android:layout_width="match_parent"
-            android:text="获取失败"
+            android:text="好友名字"
             android:layout_marginLeft="16dp"
             android:textSize="17sp"
             android:layout_marginTop="16dp"
@@ -39,22 +40,39 @@
             android:layout_toRightOf="@id/riv_session"
             android:layout_height="wrap_content"/>
 
-        <TextView
-            android:id="@+id/tv_content_session"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:text="哈喽～"
-            android:layout_toLeftOf="@id/bv_session"
-            android:textSize="15sp"
-            android:layout_marginRight="20dp"
-            android:layout_marginBottom="2dp"
+            android:layout_toRightOf="@id/riv_session"
             android:layout_below="@id/tv_name_session"
-            android:textColor="@color/silver"
-            android:maxLines="1"
-            android:ellipsize="end"
-            android:gravity="bottom"
+            android:orientation="horizontal"
+            android:layout_toLeftOf="@id/bv_session"
             android:layout_alignBottom="@id/riv_session"
-            android:layout_toRightOf="@id/pb_state_session"
-            android:layout_height="wrap_content"/>
+            android:layout_marginBottom="2dp"
+            android:layout_marginLeft="16dp"
+            android:layout_height="match_parent">
+
+            <ProgressBar
+                android:id="@+id/pb_state_session"
+                android:layout_width="12dp"
+                android:layout_gravity="center_vertical"
+                android:layout_height="12dp"/>
+
+            <TextView
+                android:id="@+id/tv_content_session"
+                android:layout_width="match_parent"
+                android:text="哈喽～"
+                android:textSize="14sp"
+                android:layout_marginRight="20dp"
+                android:layout_marginLeft="2dp"
+                android:textColor="@color/silver"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:layout_gravity="center_vertical"
+                android:layout_height="wrap_content"/>
+
+        </LinearLayout>
+
+
 
         <TextView
             android:id="@+id/tv_time_session"
@@ -86,18 +104,6 @@
             android:layout_height="match_parent">
 
         </com.learn.agg.widgets.BadgeView>
-
-        <ProgressBar
-            android:id="@+id/pb_state_session"
-            android:layout_width="12dp"
-            android:layout_alignBottom="@id/tv_content_session"
-            android:layout_toRightOf="@id/riv_session"
-            android:layout_centerVertical="true"
-            android:indeterminateBehavior="repeat"
-            android:layout_marginLeft="16dp"
-            android:layout_marginBottom="4dp"
-            android:indeterminateDrawable="@drawable/icon_send_error"
-            android:layout_height="12dp"/>
 
     </RelativeLayout>
 

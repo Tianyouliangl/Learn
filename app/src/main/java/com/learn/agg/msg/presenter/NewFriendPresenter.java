@@ -1,5 +1,7 @@
 package com.learn.agg.msg.presenter;
 
+import android.content.Context;
+
 import androidx.annotation.NonNull;
 
 import com.learn.agg.base.BasePresenter;
@@ -7,6 +9,9 @@ import com.learn.agg.msg.contract.NewFriendContract;
 import com.learn.agg.net.base.BaseObserverTC;
 import com.learn.agg.net.base.IHttpProtocol;
 import com.learn.agg.net.bean.FriendMsgBean;
+import com.learn.commonalitylibrary.LoginBean;
+import com.learn.commonalitylibrary.sqlite.DataBaseHelp;
+import com.learn.commonalitylibrary.util.GsonUtil;
 import com.senyint.ihospital.client.HttpFactory;
 
 import java.util.HashMap;
@@ -47,7 +52,7 @@ public class NewFriendPresenter extends BasePresenter<NewFriendContract.IView> i
     }
 
     @Override
-    public void setFriend(String to_id, String from_id, String pid, int friend_type, int source) {
+    public void setFriend(final Context context, final String to_id, final String from_id, String pid, int friend_type, int source) {
         HashMap<String, Object> map = new HashMap<>();
         map.put("from_id", from_id);
         map.put("to_id", to_id);
@@ -63,6 +68,7 @@ public class NewFriendPresenter extends BasePresenter<NewFriendContract.IView> i
                     protected void onNextEx(@NonNull Object data) {
                         super.onNextEx(data);
                         getMvpView().onSuccessDisposeFriend();
+                        getFriendInfo(context,from_id);
                     }
 
                     @Override
@@ -74,6 +80,24 @@ public class NewFriendPresenter extends BasePresenter<NewFriendContract.IView> i
                     protected void onNextSN(String msg) {
                         super.onNextSN(msg);
                         getMvpView().onError(msg);
+                    }
+                });
+    }
+
+    @Override
+    public void getFriendInfo(final Context context, String id) {
+        HashMap<String, String> map = new HashMap<>();
+        map.put("id", getMvpView().getUid());
+        map.put("uid", id);
+        HttpFactory.INSTANCE.getProtocol(IHttpProtocol.class)
+                .getFriendInfo(map)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new BaseObserverTC<LoginBean>() {
+                    @Override
+                    protected void onNextEx(@NonNull LoginBean data) {
+                        super.onNextEx(data);
+                        DataBaseHelp.getInstance(context).addOrUpdateUser(data.getUid(), GsonUtil.BeanToJson(data));
                     }
                 });
     }

@@ -3,7 +3,9 @@ package com.learn.agg.base;
 import android.Manifest;
 import android.content.Intent;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.Toolbar;
@@ -142,6 +144,20 @@ public abstract class BaseMvpActivity<P extends IPresenterContract> extends MvpA
         mDialogIsBack = b;
     }
 
+    protected void socketConnectState(Boolean isConnect){
+        FrameLayout fl = findViewById(R.id.fl_connect_state);
+        if (fl == null ){
+            throw new MissingResourceException("not find toolbar view", this.getClass().getName(), "toolbar");
+        }
+        fl.setVisibility( isConnect ? GONE : VISIBLE);
+        fl.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(Settings.ACTION_DATA_ROAMING_SETTINGS));
+            }
+        });
+    }
+
     protected void initToolbar(Boolean l, Boolean c, Boolean r) {
         RoundedImageView back = findViewById(R.id.toolbar_back);
         TextView title = findViewById(R.id.toolbar_title);
@@ -154,7 +170,6 @@ public abstract class BaseMvpActivity<P extends IPresenterContract> extends MvpA
         back.setVisibility(l ? VISIBLE : GONE);
         title.setVisibility(c ? VISIBLE : GONE);
         right_content.setVisibility(r ? VISIBLE : GONE);
-//        toolbar.setVisibility(l && c && r ? VISIBLE : GONE);
     }
 
     protected void initToolbar(String titleContent) {

@@ -23,7 +23,7 @@
             android:layout_height="60dp"/>
 
         <Button
-            android:id="@+id/btn_long_item"
+            android:id="@+id/btn_forwarding_item"
             android:layout_width="match_parent"
             android:text="转发"
             android:textSize="16sp"

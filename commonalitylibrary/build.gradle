@@ -35,6 +35,10 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
     //图片加载
     implementation 'com.github.bumptech.glide:glide:3.7.0'
-    // 阿里云对象存储
-    implementation 'com.aliyun.dpa:oss-android-sdk:+'
+
+    implementation 'com.squareup.okhttp3:logging-interceptor:3.8.1'
+    implementation 'io.reactivex.rxjava2:rxandroid:2.0.2'
+    implementation 'io.reactivex.rxjava2:rxjava:2.2.0'
+    // log
+    implementation 'com.orhanobut:logger:2.2.0'
 }

@@ -26,7 +26,10 @@
         android:roundIcon="@mipmap/icon_logo_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".act.SettingActivity"></activity>
+        <activity android:name=".txt.act.ReadActivity" android:theme="@style/HwTxtFullScreen"></activity>
+        <activity android:name=".msg.act.SelectNewSessionActivity" />
+        <activity android:name=".msg.act.ForWardingActivity" />
+        <activity android:name=".act.SettingActivity" />
         <activity android:name=".act.QREncodeActivity" />
         <activity android:name=".act.ScannerActivity" />
 

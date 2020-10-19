@@ -7,67 +7,69 @@
     android:orientation="vertical"
     tools:context=".msg.act.ChatActivity">
 
+
     <RelativeLayout
         android:layout_width="match_parent"
-        android:background="@color/deepskyblue"
-        android:layout_height="55dp">
+        android:layout_height="55dp"
+        android:background="@color/deepskyblue">
 
         <ImageView
             android:id="@+id/iv_back"
             android:layout_width="30dp"
+            android:layout_height="30dp"
             android:layout_centerVertical="true"
             android:layout_marginLeft="16dp"
-            android:src="@mipmap/icon_back_toolbar"
-            android:layout_height="30dp"/>
+            android:src="@mipmap/icon_back_toolbar" />
 
         <LinearLayout
-            android:layout_toRightOf="@id/iv_back"
-            android:layout_marginLeft="24dp"
-            android:layout_toLeftOf="@id/tv_setting"
-            android:layout_marginRight="24dp"
-            android:orientation="vertical"
-            android:layout_centerInParent="true"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_marginLeft="24dp"
+            android:layout_marginRight="24dp"
+            android:layout_toLeftOf="@id/tv_setting"
+            android:layout_toRightOf="@id/iv_back"
+            android:orientation="vertical">
 
             <TextView
                 android:id="@+id/tv_name"
                 android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
                 android:layout_marginTop="4dp"
+                android:ellipsize="end"
+                android:maxLines="1"
                 android:textColor="@color/white"
                 android:textSize="14sp"
-                android:textStyle="bold"
-                android:maxLines="1"
-                android:ellipsize="end"
-                android:layout_gravity="center_horizontal"
-                android:layout_height="wrap_content"/>
+                android:textStyle="bold" />
+
             <TextView
                 android:id="@+id/tv_net_state"
                 android:layout_width="wrap_content"
-                android:layout_marginTop="2dp"
-                android:textColor="@color/white"
-                android:textSize="12sp"
-                android:maxLines="1"
-                android:ellipsize="end"
-                android:layout_marginBottom="4dp"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:layout_height="wrap_content"/>
+                android:layout_marginTop="2dp"
+                android:layout_marginBottom="4dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textColor="@color/white"
+                android:textSize="12sp" />
 
 
         </LinearLayout>
 
 
         <TextView
+            android:id="@+id/tv_setting"
             android:layout_width="wrap_content"
-            android:textSize="16sp"
-            android:textColor="@color/white"
-            android:textStyle="bold"
-            android:text="设置"
+            android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:id="@+id/tv_setting"
             android:layout_marginRight="12dp"
-            android:layout_height="wrap_content"/>
+            android:text="设置"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:textStyle="bold" />
 
 
     </RelativeLayout>
@@ -76,8 +78,9 @@
     <com.codebear.keyboard.CBEmoticonsKeyBoard
         android:id="@+id/cb_kb"
         android:layout_width="match_parent"
-        android:background="@color/whitesmoke"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:animateLayoutChanges="true"
+        android:background="@color/whitesmoke">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -92,31 +95,42 @@
 
                 <RelativeLayout
                     android:layout_width="match_parent"
-                    android:orientation="vertical"
-                    android:layout_height="match_parent">
+                    android:layout_height="match_parent"
+                    android:animateLayoutChanges="true"
+                    android:orientation="vertical">
 
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/rv_chat"
+                    <LinearLayout
                         android:layout_width="match_parent"
-                        android:overScrollMode="never"
-                        android:scrollbars="none"
-                        android:layout_marginBottom="10dp"
-                        android:layout_height="match_parent" />
+                        android:layout_height="match_parent"
+                        android:animateLayoutChanges="true"
+                        android:orientation="vertical">
+
+                        <include layout="@layout/socket_connect_error"/>
+
+
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/rv_chat"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_marginBottom="10dp"
+                            android:overScrollMode="never"
+                            android:scrollbars="none" />
+                    </LinearLayout>
 
                     <TextView
                         android:id="@+id/tv_new_msg"
                         android:layout_width="wrap_content"
-                        android:layout_alignParentBottom="true"
+                        android:layout_height="wrap_content"
                         android:layout_alignParentRight="true"
+                        android:layout_alignParentBottom="true"
+                        android:layout_marginRight="10dp"
                         android:layout_marginBottom="100dp"
+                        android:background="@drawable/shape_new_msg_chat"
+                        android:padding="6dp"
                         android:text="1条新消息"
                         android:textColor="@color/white"
-                        android:padding="6dp"
                         android:textSize="14sp"
-                        android:visibility="gone"
-                        android:background="@drawable/shape_new_msg_chat"
-                        android:layout_marginRight="10dp"
-                        android:layout_height="wrap_content"/>
+                        android:visibility="gone" />
 
                 </RelativeLayout>
 

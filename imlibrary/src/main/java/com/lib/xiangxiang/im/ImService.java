@@ -12,6 +12,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.media.Image;
 import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
@@ -19,14 +20,28 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
+import com.google.gson.Gson;
+import com.learn.commonalitylibrary.ChatMessage;
 import com.learn.commonalitylibrary.Constant;
+import com.learn.commonalitylibrary.body.ImageBody;
+import com.learn.commonalitylibrary.body.LocationBody;
+import com.learn.commonalitylibrary.body.VoiceBody;
+import com.learn.commonalitylibrary.util.FileUpLoadManager;
+import com.learn.commonalitylibrary.util.GsonUtil;
+import com.learn.commonalitylibrary.util.ImSendMessageUtils;
 import com.learn.commonalitylibrary.util.NotificationUtils;
+import com.orhanobut.logger.Logger;
 import com.white.easysp.EasySP;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 /**
  * author : fengzhangwei
@@ -50,10 +65,12 @@ public class ImService extends Service {
     public static final String SOCKET_MSG = "msg";
     public static final String SOCKET_EVENT = "event";
     public static Boolean startService = false;
+    private Map<String, String> upLoadMap;
 
 
     @Nullable
     @Override
+
     public IBinder onBind(Intent intent) {
         return null;
     }
@@ -61,10 +78,11 @@ public class ImService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        upLoadMap = new HashMap<>();
         final String name = EasySP.init(this).getString(Constant.SPKey_userName(this));
         final String icon = EasySP.init(this).getString(Constant.SPKey_icon(this));
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            initChannel(this,NotificationUtils.System_channelId,NotificationUtils.System_channelName, NotificationManager.IMPORTANCE_LOW);
+            initChannel(this, NotificationUtils.System_channelId, NotificationUtils.System_channelName, NotificationManager.IMPORTANCE_LOW);
             new Thread() {
                 @Override
                 public void run() {
@@ -100,7 +118,7 @@ public class ImService extends Service {
     }
 
 
-    public  void initChannel(Context context, String channelId, String channelName, int importance) {
+    public void initChannel(Context context, String channelId, String channelName, int importance) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
                 NotificationChannel channel = new NotificationChannel(channelId, channelName, importance);
@@ -179,7 +197,36 @@ public class ImService extends Service {
     private void sendMsgSocket(Intent intent) {
         String msg = intent.getStringExtra(SOCKET_MSG);
         String msg_id = intent.getStringExtra(SOCKET_PID);
-        ImSocketClient.sendMsg(this, msg, msg_id);
+        ChatMessage chatMessage = GsonUtil.GsonToBean(msg, ChatMessage.class);
+        if (chatMessage.getBodyType() == ChatMessage.MSG_BODY_TYPE_VOICE) {
+            VoiceBody voiceBody = GsonUtil.GsonToBean(chatMessage.getBody(), VoiceBody.class);
+            if (!voiceBody.getUrl().isEmpty()) {
+                ImSocketClient.sendMsg(ImService.this, GsonUtil.BeanToJson(chatMessage), msg_id);
+            } else {
+                upLoadFile(voiceBody.getFileAbsPath(), chatMessage.getBodyType(), chatMessage, msg_id);
+            }
+        } else if (chatMessage.getBodyType() == ChatMessage.MSG_BODY_TYPE_IMAGE) {
+            ImageBody imageBody = GsonUtil.GsonToBean(chatMessage.getBody(), ImageBody.class);
+            if (imageBody.getImage().startsWith("https://")) {
+                ImSocketClient.sendMsg(ImService.this, GsonUtil.BeanToJson(chatMessage), msg_id);
+            } else {
+                Boolean upLoad = isUpLoad(imageBody);
+                Logger.t(ImSocketClient.TAG).i("是否存在同图片上传:" + upLoad);
+                upLoadMap.put(msg_id, msg);
+                if (!upLoad) {
+                    upLoadFile(imageBody.getImage(), chatMessage.getBodyType(), chatMessage, msg_id);
+                }
+            }
+        } else if (chatMessage.getBodyType() == ChatMessage.MSG_BODY_TYPE_LOCATION) {
+            LocationBody locationBody = GsonUtil.GsonToBean(chatMessage.getBody(), LocationBody.class);
+            if (!locationBody.getUrl().isEmpty()) {
+                ImSocketClient.sendMsg(ImService.this, GsonUtil.BeanToJson(chatMessage), msg_id);
+            } else {
+                upLoadFile(locationBody.getLocation_url(), chatMessage.getBodyType(), chatMessage, msg_id);
+            }
+        } else {
+            ImSocketClient.sendMsg(this, msg, msg_id);
+        }
     }
 
     private void initSocket(Intent intent) {
@@ -188,10 +235,103 @@ public class ImService extends Service {
         ImSocketClient.initSocket(token, this);
     }
 
+    private Boolean isUpLoad(ImageBody body) {
+        for (String value : upLoadMap.values()) {
+            ChatMessage chatMessage = GsonUtil.GsonToBean(value, ChatMessage.class);
+            String messageBody = chatMessage.getBody();
+            ImageBody imageBody = GsonUtil.GsonToBean(messageBody, ImageBody.class);
+            if (imageBody.getImage().equals(body.getImage())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void upLoadFile(String file_Location_path, final int body_type, final ChatMessage chatMessage, final String msg_id) {
+        if (file_Location_path.isEmpty()) return;
+        new FileUpLoadManager().upLoadFile(file_Location_path, new FileUpLoadManager.FileUpLoadCallBack() {
+            @Override
+            public void onError(Throwable e) {
+
+                if (body_type != ChatMessage.MSG_BODY_TYPE_IMAGE){
+                    chatMessage.setMsgStatus(ChatMessage.MSG_SEND_ERROR);
+                    String result = GsonUtil.BeanToJson(chatMessage);
+                    Intent mIntent = new Intent();
+                    mIntent.setAction(SocketManager.sendMsgBRCallReceiver.ACTION);
+                    mIntent.putExtra(SocketManager.sendMsgBRCallReceiver.MSG_ID, msg_id);
+                    mIntent.putExtra(SocketManager.sendMsgBRCallReceiver.RESULT, result);
+                    sendBroadcast(mIntent);
+                }else {
+                    ImageBody imageBody = GsonUtil.GsonToBean(chatMessage.getBody(), ImageBody.class);
+                    Iterator<Map.Entry<String, String>> iterator = upLoadMap.entrySet().iterator();
+                    while (iterator.hasNext()) {
+                        Map.Entry<String, String> entry = iterator.next();
+                        String msg = entry.getValue();
+                        ChatMessage message = GsonUtil.GsonToBean(msg, ChatMessage.class);
+                        String messageBody = message.getBody();
+                        ImageBody body = GsonUtil.GsonToBean(messageBody, ImageBody.class);
+                        if (body.getImage().equals(imageBody.getImage())) {
+                            message.setMsgStatus(ChatMessage.MSG_SEND_ERROR);
+                            String result = GsonUtil.BeanToJson(message);
+                            Intent mIntent = new Intent();
+                            mIntent.setAction(SocketManager.sendMsgBRCallReceiver.ACTION);
+                            mIntent.putExtra(SocketManager.sendMsgBRCallReceiver.MSG_ID, msg_id);
+                            mIntent.putExtra(SocketManager.sendMsgBRCallReceiver.RESULT, result);
+                            sendBroadcast(mIntent);
+                            iterator.remove();
+                        }
+                    }
+                }
+
+            }
+
+            @Override
+            public void onSuccess(String url) {
+
+                if (body_type == ChatMessage.MSG_BODY_TYPE_VOICE) {
+                    VoiceBody body = GsonUtil.GsonToBean(chatMessage.getBody(), VoiceBody.class);
+                    body.setUrl(url);
+                    chatMessage.setBody(GsonUtil.BeanToJson(body));
+                    ImSocketClient.sendMsg(ImService.this, GsonUtil.BeanToJson(chatMessage), msg_id);
+                }
+                if (body_type == ChatMessage.MSG_BODY_TYPE_IMAGE) {
+                    ImageBody imageBody = GsonUtil.GsonToBean(chatMessage.getBody(), ImageBody.class);
+                    Iterator<Map.Entry<String, String>> iterator = upLoadMap.entrySet().iterator();
+                    while (iterator.hasNext()) {
+                        Map.Entry<String, String> entry = iterator.next();
+                        String pid = entry.getKey();
+                        String msg = entry.getValue();
+                        ChatMessage message = GsonUtil.GsonToBean(msg, ChatMessage.class);
+                        String messageBody = message.getBody();
+                        ImageBody body = GsonUtil.GsonToBean(messageBody, ImageBody.class);
+                        if (body.getImage().equals(imageBody.getImage())) {
+                            message.setBody(GsonUtil.BeanToJson(imageBody));
+                            ImSocketClient.sendMsg(ImService.this, GsonUtil.BeanToJson(message), pid);
+                            iterator.remove();
+                        }
+                    }
+
+                }
+                if (body_type == ChatMessage.MSG_BODY_TYPE_LOCATION) {
+                    LocationBody locationBody = GsonUtil.GsonToBean(chatMessage.getBody(), LocationBody.class);
+                    locationBody.setUrl(url);
+                    chatMessage.setBody(GsonUtil.BeanToJson(locationBody));
+                    ImSocketClient.sendMsg(ImService.this, GsonUtil.BeanToJson(chatMessage), msg_id);
+                }
+            }
+
+            @Override
+            public void onProgress(int pro) {
+
+            }
+        });
+
+    }
+
     @Override
     public void onDestroy() {
         super.onDestroy();
-        
+
     }
 
 }

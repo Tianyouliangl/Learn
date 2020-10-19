@@ -129,7 +129,7 @@ public class FriendInfoActivity extends BaseMvpActivity<FriendInfoContract.IPres
                 if (btn_start.getText().equals("发消息")) {
                     String json = EasySP.init(this).getString(Constant.SPKey_info(this));
                     LoginBean from_bean = GsonUtil.GsonToBean(json, LoginBean.class);
-                    ChatActivity.startActivity(this,from_bean,toBean);
+                    ChatActivity.startActivity(this,toBean.getUid(),"",toBean);
                     finish();
                 }
                 if (btn_start.getText().equals("加好友")) {

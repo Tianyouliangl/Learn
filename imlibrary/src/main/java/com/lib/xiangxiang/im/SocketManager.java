@@ -5,23 +5,20 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Build;
-import android.os.Bundle;
-import android.util.Log;
-
-import androidx.annotation.NonNull;
-
 import com.learn.commonalitylibrary.ChatMessage;
+import com.learn.commonalitylibrary.Constant;
+import com.learn.commonalitylibrary.LoginBean;
 import com.learn.commonalitylibrary.SessionMessage;
-import com.learn.commonalitylibrary.body.TextBody;
 import com.learn.commonalitylibrary.sqlite.DataBaseHelp;
 import com.learn.commonalitylibrary.util.GsonUtil;
 import com.learn.commonalitylibrary.util.NotificationUtils;
+import com.orhanobut.logger.Logger;
+import com.white.easysp.EasySP;
 
 import org.greenrobot.eventbus.EventBus;
 import org.json.JSONObject;
 
 import java.util.HashMap;
-import java.util.Map;
 
 
 /**
@@ -105,11 +102,15 @@ public class SocketManager {
             intent.putExtra(ImService.SOCKET_MSG, msg);
             intent.putExtra(ImService.SOCKET_PID, msg_id);
             startService(context, intent);
-            mCallBackMap.put(msg_id, back);
+            EventBus.getDefault().post(GsonUtil.GsonToBean(msg, ChatMessage.class));
+            if (back != null) {
+                mCallBackMap.put(msg_id, back);
+            }
         } catch (Exception o) {
-            Log.i(ImSocketClient.TAG, "Socket ------  消息格式错误.");
+            Logger.t(ImSocketClient.TAG).i("Socket ------  消息格式错误.");
         }
     }
+
 
     /**
      * 清空消息callback
@@ -161,9 +162,9 @@ public class SocketManager {
             sessionMessage.setBody_type(message.getBodyType());
             sessionMessage.setNumber(0);
             DataBaseHelp.getInstance(context).addOrUpdateSession(sessionMessage);
-            EventBus.getDefault().post(message);
+            DataBaseHelp.getInstance(context).addChatMessage(message);
             mCallBackMap.remove(msg_id);
-            ImSocketClient.msgMap.remove(msg_id);
+            EventBus.getDefault().post(message);
         }
     }
 
@@ -201,11 +202,10 @@ public class SocketManager {
 
         private void sendEvent(Context context, String result) {
             ChatMessage chatMessage = GsonUtil.GsonToBean(result, ChatMessage.class);
-
+            String uid = EasySP.init(context).getString(Constant.SPKey_UID);
             if (chatMessage.getType() == ChatMessage.MSG_SEND_SYS) {
-//                Map<String, Object> map = new HashMap<>();
-//                map.put("notification", "change");
-                EventBus.getDefault().post(chatMessage);
+                LoginBean loginBean = GsonUtil.GsonToBean(chatMessage.getBody(), LoginBean.class);
+                DataBaseHelp.getInstance(context).addOrUpdateUser(loginBean.getUid(),GsonUtil.BeanToJson(loginBean));
             } else {
                 if (chatMessage.getType() == ChatMessage.MSG_SEND_CHAT) {
                     if (chatMessage.getBodyType() == ChatMessage.MSG_BODY_TYPE_VOICE) {
@@ -214,19 +214,23 @@ public class SocketManager {
                     int number = DataBaseHelp.getInstance(context).getSessionNumber(chatMessage.getConversation());
                     SessionMessage sessionMessage = new SessionMessage();
                     sessionMessage.setConversation(chatMessage.getConversation());
-                    sessionMessage.setTo_id(chatMessage.getToId());
-                    sessionMessage.setFrom_id(chatMessage.getFromId());
+                    if (chatMessage.getToId().equals(uid)){
+                        sessionMessage.setTo_id(chatMessage.getFromId());
+                        sessionMessage.setFrom_id(chatMessage.getToId());
+                    }else {
+                        sessionMessage.setTo_id(chatMessage.getToId());
+                        sessionMessage.setFrom_id(chatMessage.getFromId());
+                    }
                     sessionMessage.setBody(chatMessage.getBody());
                     sessionMessage.setMsg_status(chatMessage.getMsgStatus());
                     sessionMessage.setTime(chatMessage.getTime());
                     sessionMessage.setBody_type(chatMessage.getBodyType());
-                    sessionMessage.setNumber(DataBaseHelp.getInstance(context).isAddChatMessage(chatMessage) ? (number > 0 ? number : (number + 1)) : (number + 1));
+                    sessionMessage.setNumber((number + 1));
                     DataBaseHelp.getInstance(context).addOrUpdateSession(sessionMessage);
                     DataBaseHelp.getInstance(context).addChatMessage(chatMessage);
                 }
-                Log.i(ImSocketClient.TAG, "------------" + chatMessage.getBody() + "------------" + chatMessage.getToId());
-                EventBus.getDefault().post(chatMessage);
             }
+            EventBus.getDefault().post(chatMessage);
             NotificationUtils.showNotificationMessage(context, chatMessage);
         }
     }

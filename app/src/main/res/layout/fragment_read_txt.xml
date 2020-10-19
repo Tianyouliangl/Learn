@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/rl_group"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rl_books"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@id/tv_delete"
+            android:layout_below="@+id/toolbar"
+            android:background="@color/whitesmoke"
+            android:padding="10dp" />
+
+
+        <TextView
+            android:id="@+id/tv_delete"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_alignParentBottom="true"
+            android:layout_gravity="center"
+            android:layout_margin="6dp"
+            android:background="@drawable/shape_delete"
+            android:gravity="center"
+            android:text="删除"
+            android:textColor="@color/red"
+            android:textSize="20sp"
+            android:visibility="gone" />
+
+    </RelativeLayout>
+
+
+</LinearLayout>

@@ -13,6 +13,7 @@ import com.learn.commonalitylibrary.Constant;
 import com.learn.commonalitylibrary.sqlite.DataBaseHelp;
 import com.learn.commonalitylibrary.SessionMessage;
 import com.learn.commonalitylibrary.util.GsonUtil;
+import com.orhanobut.logger.Logger;
 import com.senyint.ihospital.client.HttpFactory;
 import com.white.easysp.EasySP;
 
@@ -71,7 +72,7 @@ public class MessagePresenter extends BasePresenter<MessageContract.IView> imple
         List<SessionMessage> sessionList = DataBaseHelp.getInstance(getMvpView().getContext()).getSessionList();
         for (int i=0;i<sessionList.size();i++){
             String json = GsonUtil.BeanToJson(sessionList.get(i));
-            Log.i("chat","会话"+(i+1) + "----" + json);
+            Logger.t("net").json( json);
         }
         getMvpView().onSession(sessionList);
     }

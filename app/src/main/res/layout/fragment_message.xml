@@ -5,8 +5,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
 
-    <include layout="@layout/layout_toolbar" />
-
     <com.scwang.smartrefresh.layout.SmartRefreshLayout
         android:id="@+id/msg_sl"
         android:layout_width="match_parent"
@@ -25,6 +23,7 @@
             <androidx.cardview.widget.CardView
                 android:id="@+id/cv"
                 android:layout_width="match_parent"
+                android:visibility="gone"
                 android:layout_height="60dp">
 
                 <RelativeLayout

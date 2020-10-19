@@ -68,6 +68,7 @@ public class SplashActivity extends BaseAppCompatActivity {
                 }else {
                     DataBaseHelp.getInstance(SplashActivity.this).createSessions();
                     DataBaseHelp.getInstance(SplashActivity.this).createUserTable();
+                    DataBaseHelp.getInstance(SplashActivity.this).createTxtTable();
                     goActivity(MainActivity.class);
                 }
                 finish();

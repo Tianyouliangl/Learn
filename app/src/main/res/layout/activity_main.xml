@@ -5,6 +5,8 @@
     android:layout_height="match_parent"
     tools:context=".act.MainActivity">
 
+    <include layout="@layout/layout_toolbar"/>
+
     <com.learn.agg.widgets.TabLayout
         android:id="@+id/bottom_tab"
         android:layout_width="match_parent"
@@ -16,6 +18,7 @@
     <FrameLayout
         android:id="@+id/fl_learn"
         android:layout_width="match_parent"
+        android:layout_below="@+id/toolbar_group"
         android:layout_height="match_parent"
         android:layout_above="@id/bottom_tab"/>
 

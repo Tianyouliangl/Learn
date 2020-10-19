@@ -144,4 +144,22 @@
     <color name="palevioletred">#db7093</color><!--苍紫罗兰色 -->
     <color name="darkviolet">#9400d3</color><!--暗紫罗兰色 -->
     <color name="mediumorchid">#ba55d3</color><!--中粉紫色 -->
+
+    <!--read-->
+    <color name="nb.read.bg_1">#CEC29C</color>
+    <color name="nb.read.bg_2">#CCEBCC</color>
+    <color name="nb.read.bg_3">#AAAAAA</color>
+    <color name="nb.read.bg_4">#D1CEC5</color>
+    <color name="nb.read.bg_5">#001C27</color>
+    <color name="nb.read.bg_6">#DDCEC29C</color>
+
+
+    <color name="nb.read.font_1">#2C2C2C</color>
+    <color name="nb.read.font_2">#2F332D</color>
+    <color name="nb.read.font_3">#92918C</color>
+    <color name="nb.read.font_4">#383429</color>
+    <color name="nb.read.font_5">#627176</color>
+
+    <color name="nb.read.bg.night">#000000</color>
+    <color name="nb.read.font_night">#99ffffff</color>
 </resources>

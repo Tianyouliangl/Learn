@@ -2,6 +2,7 @@ package com.learn.agg.msg.adapter;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -77,18 +78,8 @@ public class SessionsAdapter extends RecyclerView.Adapter<SessionsAdapter.Sessio
 
     @Override
     public void onBindViewHolder(@NonNull final SessionsHolder holder, final int position) {
-        String uid = EasySP.init(mContext).getString(Constant.SPKey_UID);
         final SessionMessage sessionMessage = mList.get(position);
-        DataBaseHelp.getInstance(mContext).setSessionNumber(sessionMessage.getConversation(), 0);
-        final String from_id = mList.get(position).getFrom_id();
-        String to_id = mList.get(position).getTo_id();
-        LoginBean userData;
-        if (uid.equals(from_id)){
-            userData = DataBaseHelp.getInstance(mContext).getUserData(to_id);
-        }else {
-            userData = DataBaseHelp.getInstance(mContext).getUserData(from_id);
-        }
-
+        LoginBean userData = sessionMessage.getInfo();
         if (null != userData) {
             sessionMessage.setInfo(userData);
             RequestOptions options;
@@ -106,20 +97,13 @@ public class SessionsAdapter extends RecyclerView.Adapter<SessionsAdapter.Sessio
                         .error(R.drawable.icon_t_nv);//图片加载失败后，显示的图片
             }
             Glide.with(mContext).load(userData.getImageUrl()).apply(options).into(holder.riv_session);
-        } else {
-            if (uid.equals(from_id)){
-                getFriendInfo(holder, to_id, sessionMessage);
-            }else {
-                getFriendInfo(holder,from_id, sessionMessage);
-            }
-
         }
         String body = mList.get(position).getBody();
         int body_type = mList.get(position).getBody_type();
         int msg_status = mList.get(position).getMsg_status();
         int number = mList.get(position).getNumber();
         Long time = mList.get(position).getTime();
-        holder.tv_content_session.setText(ImSendMessageUtils.getChatBodyType(mContext,sessionMessage.getTo_id(),body_type, body));
+        holder.tv_content_session.setText(ImSendMessageUtils.getChatBodyType(mContext, sessionMessage.getTo_id(), body_type, body));
         holder.tv_time_session.setText(TimeUtil.getTimeString(time));
         holder.bv_session.showBadge(number);
         if (number > 0) {
@@ -128,33 +112,19 @@ public class SessionsAdapter extends RecyclerView.Adapter<SessionsAdapter.Sessio
             holder.btnUnRead.setText("标记未读");
         }
         if (msg_status == ChatMessage.MSG_SEND_LOADING) {
+            holder.pb_state_session.setVisibility(View.VISIBLE);
             Drawable drawable = mContext.getResources().getDrawable(R.drawable.anim);
             holder.pb_state_session.setIndeterminateDrawable(drawable);
-            holder.pb_state_session.setVisibility(View.VISIBLE);
-            RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) holder.tv_content_session.getLayoutParams();
-            params.leftMargin = 0;
-            holder.tv_content_session.setLayoutParams(params);
-
+            holder.pb_state_session.setProgressDrawable(drawable);
         } else if (msg_status == ChatMessage.MSG_SEND_SUCCESS) {
             holder.pb_state_session.setVisibility(View.GONE);
-            RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) holder.pb_state_session.getLayoutParams();
-            RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) holder.tv_content_session.getLayoutParams();
-            params.leftMargin = layoutParams.leftMargin;
-            holder.tv_content_session.setLayoutParams(params);
         } else if (msg_status == ChatMessage.MSG_SEND_ERROR) {
+            holder.pb_state_session.setVisibility(View.VISIBLE);
             Drawable drawable = mContext.getResources().getDrawable(R.drawable.icon_send_error);
             holder.pb_state_session.setIndeterminateDrawable(drawable);
-            holder.pb_state_session.setVisibility(View.VISIBLE);
-            RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) holder.tv_content_session.getLayoutParams();
-            params.leftMargin = 0;
-            holder.tv_content_session.setLayoutParams(params);
-        } else {
-            holder.pb_state_session.setVisibility(View.GONE);
-            RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) holder.pb_state_session.getLayoutParams();
-            RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) holder.tv_content_session.getLayoutParams();
-            params.leftMargin = layoutParams.leftMargin;
-            holder.tv_content_session.setLayoutParams(params);
+            holder.pb_state_session.setProgressDrawable(drawable);
         }
+//        holder.itemView.invalidate();
         holder.rl_chat.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -162,27 +132,16 @@ public class SessionsAdapter extends RecyclerView.Adapter<SessionsAdapter.Sessio
                     final long time = System.currentTimeMillis();
                     long timeD = time - lastClickTime;
                     final LoginBean loginBean = sessionMessage.getInfo();
-                    if (timeD <= 1000) {
+                    if (timeD <= 1000 || null == loginBean) {
                         lastClickTime = time;
+                        Log.i("net", "userInfo is not null or click time <= 1s");
                         return;
                     }
-                    if (null == loginBean) {
-                        return;
-                    }
-                    String from_uid = EasySP.init(mContext).getString(Constant.SPKey_UID);
-                    String from_icon = EasySP.init(mContext).getString(Constant.SPKey_icon(mContext));
-                    LoginBean from_bean = new LoginBean();
-                    from_bean.setUid(from_uid);
-                    from_bean.setImageUrl(from_icon);
-                    ChatActivity.startActivity(mContext, from_bean, loginBean);
-                    DataBaseHelp.getInstance(mContext).setSessionNumber(sessionMessage.getConversation(), 0);
+                    ChatActivity.startActivity(mContext, loginBean.getUid(), sessionMessage.getConversation(), loginBean);
                     lastClickTime = time;
                     return;
-                } else {
-                    holder.sw_menu_layout.smoothClose();
-                    return;
                 }
-
+                holder.sw_menu_layout.smoothClose();
             }
         });
 
@@ -223,38 +182,6 @@ public class SessionsAdapter extends RecyclerView.Adapter<SessionsAdapter.Sessio
             }
         });
 
-    }
-
-    private void getFriendInfo(final SessionsHolder holder, String to_id, final SessionMessage sessionMessage) {
-        HashMap<String, String> map = new HashMap<>();
-        map.put("id", EasySP.init(mContext).getString(Constant.SPKey_UID));
-        map.put("uid", to_id);
-        HttpFactory.INSTANCE.getProtocol(IHttpProtocol.class)
-                .getFriendInfo(map)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new BaseObserverTC<LoginBean>() {
-                    @Override
-                    protected void onNextEx(@NonNull LoginBean data) {
-                        super.onNextEx(data);
-                        RequestOptions options;
-                        if (data.getSex().equals("男")) {
-                            options = new RequestOptions()
-                                    .placeholder(R.drawable.icon_t_na)//图片加载出来前，显示的图片
-                                    .fallback(R.drawable.icon_t_na) //url为空的时候,显示的图片
-                                    .error(R.drawable.icon_t_na);//图片加载失败后，显示的图片
-                        } else {
-                            options = new RequestOptions()
-                                    .placeholder(R.drawable.icon_t_nv)//图片加载出来前，显示的图片
-                                    .fallback(R.drawable.icon_t_nv) //url为空的时候,显示的图片
-                                    .error(R.drawable.icon_t_nv);//图片加载失败后，显示的图片
-                        }
-                        sessionMessage.setInfo(data);
-                        Glide.with(mContext).load(data.getImageUrl()).apply(options).into(holder.riv_session);
-                        holder.tv_name_session.setText(data.getRemark());
-                        DataBaseHelp.getInstance(mContext).addOrUpdateUser(data.getUid(), GsonUtil.BeanToJson(data));
-                    }
-                });
     }
 
     @Override

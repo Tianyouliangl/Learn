@@ -8,6 +8,7 @@ import com.learn.agg.net.bean.FriendMsgBean;
 import com.learn.agg.net.bean.FriendMsgCountBean;
 import com.learn.commonalitylibrary.ChatMessage;
 import com.learn.commonalitylibrary.LoginBean;
+import com.learn.commonalitylibrary.SessionNewBean;
 
 import java.util.HashMap;
 import java.util.List;
@@ -45,6 +46,10 @@ public interface IHttpProtocol {
     @FormUrlEncoded
     Observable<BaseResponseTC<List<LoginBean>>> getAllFriend(@FieldMap HashMap<String, String> map);
 
+    @POST("friend/allFriend")
+    @FormUrlEncoded
+    Observable<BaseResponseTC<List<SessionNewBean>>> getFriend(@FieldMap HashMap<String, String> map);
+
     @POST("friend/addFriend")
     @FormUrlEncoded
     Observable<BaseResponseTC<Object>> setFriend(@FieldMap HashMap<String, Object> map);
@@ -81,7 +86,7 @@ public interface IHttpProtocol {
     @FormUrlEncoded
     Observable<BaseResponseTC<List<ChatMessage>>> getHistory(@FieldMap HashMap<String, Object> map);
 
-    @POST("")
+    @POST("chat/getConversation")
     @FormUrlEncoded
-    Observable<BaseResponse<CommonBean>> getData(@Url String url, @FieldMap HashMap<String, String> map);
+    Observable<BaseResponseTC<String>> getConversation(@FieldMap HashMap<String, String> map);
 }

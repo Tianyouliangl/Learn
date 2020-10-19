@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="260dp"
+        android:orientation="vertical"
+        android:layout_marginLeft="40dp"
+        android:layout_marginRight="40dp"
+        android:background="@drawable/shape_offline"
+        android:layout_centerInParent="true"
+        android:layout_height="130dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:text="是否重新发送此消息?"
+            android:layout_marginTop="26dp"
+            android:textSize="18sp"
+            android:layout_gravity="center_horizontal"
+            android:textColor="@color/black"
+            android:layout_height="wrap_content"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:background="@color/darkgrey"
+            android:layout_marginTop="26dp"
+            android:layout_height="1dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:orientation="horizontal"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/tv_cancel"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:text="取消"
+                android:gravity="center"
+                android:textSize="14sp"
+                android:layout_height="match_parent"/>
+
+            <View
+                android:layout_width="1dp"
+                android:background="@color/darkgrey"
+                android:layout_height="match_parent"/>
+
+            <TextView
+                android:id="@+id/tv_resend"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:text="重新发送"
+                android:textColor="@color/deepskyblue"
+                android:gravity="center"
+                android:textSize="14sp"
+                android:layout_height="match_parent"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

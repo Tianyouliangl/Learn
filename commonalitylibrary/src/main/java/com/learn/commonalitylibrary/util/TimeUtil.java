@@ -2,6 +2,8 @@ package com.learn.commonalitylibrary.util;
 
 import android.util.Log;
 
+import com.orhanobut.logger.Logger;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -119,7 +121,8 @@ public class TimeUtil {
 
         long longHours = longExpend / (60 * 60 * 1000); //根据时间差来计算小时数
         int longMinutes = (int) ((longExpend - longHours * (60 * 60 * 1000)) / (60 * 1000));   //根据时间差来计算分钟数
-        if (longMinutes >= 3){
+        Logger.t("chat").i("时间差:" + longHours + "小时" + longMinutes + "分");
+        if (longMinutes >= 3 || longHours > 1){
             return false;
         }
         return true;

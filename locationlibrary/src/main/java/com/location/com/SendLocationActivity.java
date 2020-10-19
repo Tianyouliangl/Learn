@@ -44,9 +44,9 @@ import com.amap.api.services.core.LatLonPoint;
 import com.amap.api.services.core.PoiItem;
 import com.amap.api.services.poisearch.PoiResult;
 import com.amap.api.services.poisearch.PoiSearch;
-import com.autonavi.amap.mapcore.Inner_3dMap_locationManagerBase;
 import com.gyf.barlibrary.BarHide;
 import com.gyf.barlibrary.ImmersionBar;
+import com.learn.commonalitylibrary.body.LocationBody;
 import com.zyq.easypermission.EasyPermission;
 import com.zyq.easypermission.EasyPermissionResult;
 

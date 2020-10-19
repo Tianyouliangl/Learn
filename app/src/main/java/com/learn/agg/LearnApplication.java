@@ -17,10 +17,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.learn.agg.act.MainActivity;
 import com.learn.agg.widgets.CustomDialog;
 import com.learn.commonalitylibrary.Constant;
+import com.learn.commonalitylibrary.sqlite.DataBaseHelp;
 import com.learn.commonalitylibrary.util.NotificationUtils;
 import com.lib.xiangxiang.im.ImService;
 import com.lib.xiangxiang.im.ImSocketClient;
 import com.lib.xiangxiang.im.SocketManager;
+import com.orhanobut.logger.AndroidLogAdapter;
+import com.orhanobut.logger.FormatStrategy;
+import com.orhanobut.logger.PrettyFormatStrategy;
 import com.scwang.smartrefresh.header.MaterialHeader;
 import com.scwang.smartrefresh.layout.SmartRefreshLayout;
 import com.scwang.smartrefresh.layout.api.DefaultRefreshFooterCreator;
@@ -57,9 +61,18 @@ public class LearnApplication extends Application implements AppFrontBackHelper.
         });
     }
 
+    private static Context sInstance;
+
     @Override
     public void onCreate() {
         super.onCreate();
+        sInstance = this;
+        FormatStrategy formatStrategy = PrettyFormatStrategy.newBuilder()
+                .showThreadInfo(true)  // (Optional) Whether to show thread info or not. Default true
+                .methodCount(1)         // (Optional) How many method line to show. Default 2
+                .tag("log")   // (Optional) Global tag for every log. Default PRETTY_LOGGER
+                .build();
+        com.orhanobut.logger.Logger.addLogAdapter(new AndroidLogAdapter(formatStrategy));
         new AppFrontBackHelper().register(this,this);
         NotificationUtils.initChannel(this,NotificationUtils.Chat_channelId,NotificationUtils.Chat_channelName, NotificationManager.IMPORTANCE_HIGH);
         HttpConfig.INSTANCE.init(Constant.BASE_GROUP_URL,getHeader(),getParams(),true);
@@ -130,6 +143,10 @@ public class LearnApplication extends Application implements AppFrontBackHelper.
     @Override
     public void onStopped(Activity activity) {
        
+    }
+
+    public static Context getContext() {
+        return sInstance;
     }
 
     @Override

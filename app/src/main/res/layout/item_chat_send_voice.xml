@@ -91,12 +91,12 @@
 
         <ProgressBar
             android:id="@+id/pb_state"
-            android:layout_width="12dp"
+            android:layout_width="16dp"
             android:layout_centerVertical="true"
             android:indeterminateBehavior="repeat"
             android:indeterminateDrawable="@drawable/anim"
             android:layout_toLeftOf="@id/rl_voice"
-            android:layout_height="12dp"/>
+            android:layout_height="16dp"/>
 
     </RelativeLayout>
 

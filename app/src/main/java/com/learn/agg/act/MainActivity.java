@@ -2,17 +2,19 @@ package com.learn.agg.act;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toolbar;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationManagerCompat;
@@ -26,21 +28,24 @@ import com.learn.agg.R;
 import com.learn.agg.base.BaseSlidingFragmentActivity;
 import com.learn.agg.base.IconOnClickListener;
 import com.learn.agg.fragment.MenuLeftFragment;
-import com.learn.agg.msg.act.ChatActivity;
+import com.learn.agg.msg.act.FriendActivity;
 import com.learn.agg.msg.fragment.MessageFragment;
 import com.learn.agg.net.NetConfig;
 import com.learn.agg.net.base.BaseObserverTC;
 import com.learn.agg.net.base.IHttpProtocol;
 import com.learn.agg.util.ActivityUtil;
-import com.learn.agg.video.ReadFragment;
+import com.learn.agg.txt.ReadFragment;
 import com.learn.agg.widgets.CustomDialog;
 import com.learn.agg.widgets.TabLayout;
 import com.learn.commonalitylibrary.ChatMessage;
 import com.learn.commonalitylibrary.Constant;
 import com.learn.commonalitylibrary.LoginBean;
+import com.learn.commonalitylibrary.util.NetState;
 import com.learn.commonalitylibrary.util.NotificationUtils;
 import com.lib.xiangxiang.im.ImService;
+import com.lib.xiangxiang.im.ImSocketClient;
 import com.lib.xiangxiang.im.SocketManager;
+import com.makeramen.roundedimageview.RoundedImageView;
 import com.pgyersdk.update.DownloadFileListener;
 import com.pgyersdk.update.PgyUpdateManager;
 import com.pgyersdk.update.UpdateManagerListener;
@@ -55,11 +60,14 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.MissingResourceException;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
+import static android.view.View.GONE;
 import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
+import static android.view.View.VISIBLE;
 
 public class MainActivity extends BaseSlidingFragmentActivity implements TabLayout.OnTabClickListener, View.OnClickListener, IconOnClickListener, DownloadFileListener, UpdateManagerListener {
 
@@ -125,6 +133,65 @@ public class MainActivity extends BaseSlidingFragmentActivity implements TabLayo
         list.add(new TabLayout.Tab(R.drawable.selector_tab_read, R.string.books, ReadFragment.class));
         tab_layout.setUpData(list, this);
         tab_layout.setCurrentTab(0);
+        socketConnectState(ImSocketClient.checkSocket());
+    }
+
+    protected void initToolbar() {
+        final String image_url = EasySP.init(this).getString(Constant.SPKey_icon(this));
+        RoundedImageView back = (RoundedImageView) findViewById(R.id.toolbar_back);
+        TextView title = (TextView) findViewById(R.id.toolbar_title);
+        TextView right_content = (TextView) findViewById(R.id.toolbar_action);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setActionBar(toolbar);
+        if (back == null || title == null || right_content == null) {
+            throw new MissingResourceException("not find toolbar view", this.getClass().getName(), "toolbar");
+        }
+        back.setVisibility(VISIBLE);
+        title.setVisibility(VISIBLE);
+        right_content.setVisibility(VISIBLE);
+        NotificationUtils.getUserThreadCirBitmap(image_url, back, this);
+        back.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showMenu();
+            }
+        });
+        if (mCurrentFragment.getClass().getSimpleName().equals(MessageFragment.class.getSimpleName())) {
+            title.setText("消息");
+            right_content.setText("联系人");
+        }
+        if (mCurrentFragment.getClass().getSimpleName().equals(ReadFragment.class.getSimpleName())) {
+            title.setText("书架");
+            right_content.setText("书城");
+        }
+
+        right_content.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mCurrentFragment.getClass().getSimpleName().equals(MessageFragment.class.getSimpleName())) {
+                    goActivity(FriendActivity.class);
+                }
+                if (mCurrentFragment.getClass().getSimpleName().equals(ReadFragment.class.getSimpleName())) {
+
+                }
+            }
+        });
+    }
+
+    protected void socketConnectState(Boolean isConnect){
+        FrameLayout fl = (FrameLayout) findViewById(R.id.fl_connect_state);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        if (fl == null || toolbar == null){
+            throw new MissingResourceException("not find toolbar view", this.getClass().getName(), "toolbar");
+        }
+        setActionBar(toolbar);
+        fl.setVisibility( isConnect ? GONE : VISIBLE);
+        fl.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(Settings.ACTION_DATA_ROAMING_SETTINGS));
+            }
+        });
     }
 
     private void loginSocket() {
@@ -132,7 +199,7 @@ public class MainActivity extends BaseSlidingFragmentActivity implements TabLayo
         String uid = EasySP.init(this).getString(Constant.SPKey_UID);
         String mobile = EasySP.init(this).getString(Constant.SPKey_phone(this));
         Log.i("Net", "------------token==========  " + token);
-        SocketManager.loginSocket(this, "token=" + token + "&" + "uid=" + uid + "&" + "mobile=" + mobile + "&" + "desc=" + "Android");
+        SocketManager.loginSocket(this, "token=" + token + "&" + "uid=" + uid + "&" + "mobile=" + mobile + "&" + "desc=" + "Android" + "&" + "online=" + NetState.getNetWorkStatus(this));
     }
 
     private void initDialog() {
@@ -258,7 +325,7 @@ public class MainActivity extends BaseSlidingFragmentActivity implements TabLayo
                 transaction.commit();
             }
             mCurrentFragment = tmpFragment;
-
+            initToolbar();
         } catch (InstantiationException e) {
             e.printStackTrace();
         } catch (IllegalAccessException e) {
@@ -279,7 +346,7 @@ public class MainActivity extends BaseSlidingFragmentActivity implements TabLayo
                 customDialog.dismiss();
             }
             if (isUpdateAPK && !isOffLine) {
-                if (getSlidingMenu().isMenuShowing()){
+                if (getSlidingMenu().isMenuShowing()) {
                     closeMenu();
                 }
                 showUpdateDialog();
@@ -299,12 +366,20 @@ public class MainActivity extends BaseSlidingFragmentActivity implements TabLayo
         if (fragmentName != null && !fragmentName.isEmpty()) {
             if (tab_layout != null) {
                 int count = (int) map.get("count");
-                Log.i("chat","更改数量:" + count);
+                Log.i("chat", "更改数量:" + count);
                 int index = tab_layout.findFragmentIndex(fragmentName);
                 if (index != -1) {
                     tab_layout.onDataChanged(index, count);
                 }
             }
+        }
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN,sticky = true)
+    public void EventBusConnect(String connect){
+        if (connect.equals("connect")){
+            socketConnectState(ImSocketClient.checkSocket());
+            EventBus.getDefault().removeStickyEvent(connect);
         }
     }
 
@@ -339,13 +414,29 @@ public class MainActivity extends BaseSlidingFragmentActivity implements TabLayo
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            if (!getSlidingMenu().isMenuShowing()) {
-                moveTaskToBack(true);
-                return true;
-            }else {
-                getSlidingMenu().toggle();
-                return true;
+            if (mCurrentFragment instanceof ReadFragment) {
+                if (((ReadFragment) mCurrentFragment).isDelete()) {
+                    ((ReadFragment) mCurrentFragment).setIsDelete(!((ReadFragment) mCurrentFragment).isDelete());
+                    return true;
+                } else {
+                    if (!getSlidingMenu().isMenuShowing()) {
+                        moveTaskToBack(true);
+                        return true;
+                    } else {
+                        getSlidingMenu().toggle();
+                        return true;
+                    }
+                }
+            } else {
+                if (!getSlidingMenu().isMenuShowing()) {
+                    moveTaskToBack(true);
+                    return true;
+                } else {
+                    getSlidingMenu().toggle();
+                    return true;
+                }
             }
+
         }
         return super.onKeyDown(keyCode, event);
     }

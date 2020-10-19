@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:orientation="vertical"
+    android:background="@color/black"
+    android:layout_alignParentBottom="true"
+    android:padding="10dp"
+    android:layout_height="wrap_content">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_marginRight="10dp"
+        android:layout_marginLeft="10dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp">
+
+        <TextView
+            android:id="@+id/txtreadr_menu_chapter_pre"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:text="上一章"
+            android:textColor="@color/hwtxtreader_bottom_menu_textcolor"
+            android:textSize="13sp" />
+
+        <SeekBar
+            android:id="@+id/txtreadr_menu_seekbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_gravity="center_vertical"
+            android:layout_toLeftOf="@+id/txtreadr_menu_chapter_next"
+            android:layout_toRightOf="@+id/txtreadr_menu_chapter_pre"
+            android:layout_weight="1"
+            android:maxHeight="3dip"
+            android:minHeight="3dip"
+            android:progress="30"
+            android:progressDrawable="@drawable/txtview_po_seekbar"
+            android:thumb="@drawable/shape_seekbar_thumb"
+            android:thumbOffset="0dip" />
+
+        <TextView
+            android:id="@+id/txtreadr_menu_chapter_next"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:text="下一章"
+            android:textColor="@color/hwtxtreader_bottom_menu_textcolor"
+            android:textSize="13sp" />
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:orientation="horizontal"
+        android:layout_marginTop="20dp"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:onClick="txtMenuCatalog"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:text="目录"
+            android:gravity="center"
+            android:drawableTop="@mipmap/icon_mulu"
+            android:drawablePadding="4dp"
+            android:textSize="16sp"
+            android:minHeight="45dp"
+            android:textColor="@color/white"
+            android:layout_height="wrap_content"/>
+        <TextView
+            android:onClick="txtMenuBrightness"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:text="亮度"
+            android:gravity="center"
+            android:drawableTop="@mipmap/icon_liangdu"
+            android:drawablePadding="4dp"
+            android:textSize="16sp"
+            android:minHeight="45dp"
+            android:textColor="@color/white"
+            android:layout_height="wrap_content"/>
+        <TextView
+            android:onClick="txtMenuSetting"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:text="设置"
+            android:gravity="center"
+            android:drawableTop="@mipmap/icon_wenzi"
+            android:drawablePadding="4dp"
+            android:textSize="16sp"
+            android:minHeight="45dp"
+            android:textColor="@color/white"
+            android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+
+</LinearLayout>
