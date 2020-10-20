@@ -17,22 +17,27 @@ import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
 import com.google.gson.Gson;
 import com.learn.commonalitylibrary.ChatMessage;
 import com.learn.commonalitylibrary.Constant;
+import com.learn.commonalitylibrary.LoginBean;
 import com.learn.commonalitylibrary.body.ImageBody;
 import com.learn.commonalitylibrary.body.LocationBody;
 import com.learn.commonalitylibrary.body.VoiceBody;
+import com.learn.commonalitylibrary.sqlite.DataBaseHelp;
 import com.learn.commonalitylibrary.util.FileUpLoadManager;
 import com.learn.commonalitylibrary.util.GsonUtil;
 import com.learn.commonalitylibrary.util.ImSendMessageUtils;
 import com.learn.commonalitylibrary.util.NotificationUtils;
 import com.orhanobut.logger.Logger;
+import com.senyint.ihospital.client.HttpFactory;
 import com.white.easysp.EasySP;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -42,6 +47,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * author : fengzhangwei
@@ -195,9 +203,9 @@ public class ImService extends Service {
     }
 
     private void sendMsgSocket(Intent intent) {
-        String msg = intent.getStringExtra(SOCKET_MSG);
-        String msg_id = intent.getStringExtra(SOCKET_PID);
-        ChatMessage chatMessage = GsonUtil.GsonToBean(msg, ChatMessage.class);
+        final String msg = intent.getStringExtra(SOCKET_MSG);
+        final String msg_id = intent.getStringExtra(SOCKET_PID);
+        final ChatMessage chatMessage = GsonUtil.GsonToBean(msg, ChatMessage.class);
         if (chatMessage.getBodyType() == ChatMessage.MSG_BODY_TYPE_VOICE) {
             VoiceBody voiceBody = GsonUtil.GsonToBean(chatMessage.getBody(), VoiceBody.class);
             if (!voiceBody.getUrl().isEmpty()) {
@@ -206,16 +214,49 @@ public class ImService extends Service {
                 upLoadFile(voiceBody.getFileAbsPath(), chatMessage.getBodyType(), chatMessage, msg_id);
             }
         } else if (chatMessage.getBodyType() == ChatMessage.MSG_BODY_TYPE_IMAGE) {
-            ImageBody imageBody = GsonUtil.GsonToBean(chatMessage.getBody(), ImageBody.class);
+            final ImageBody imageBody = GsonUtil.GsonToBean(chatMessage.getBody(), ImageBody.class);
             if (imageBody.getImage().startsWith("https://")) {
                 ImSocketClient.sendMsg(ImService.this, GsonUtil.BeanToJson(chatMessage), msg_id);
             } else {
-                Boolean upLoad = isUpLoad(imageBody);
-                Logger.t(ImSocketClient.TAG).i("是否存在同图片上传:" + upLoad);
-                upLoadMap.put(msg_id, msg);
-                if (!upLoad) {
-                    upLoadFile(imageBody.getImage(), chatMessage.getBodyType(), chatMessage, msg_id);
-                }
+                HashMap<String, String> map = new HashMap<>();
+                map.put("fileName", new File(imageBody.getImage()).getName());
+                HttpFactory.INSTANCE.getProtocol(IHttpImProtocol.class)
+                        .existFileUrl(map)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(new BaseObserver<String>() {
+                            @Override
+                            protected void onNextEx(@NonNull String data) {
+                                super.onNextEx(data);
+                                Logger.t(ImSocketClient.TAG).i("图片上传过:" + data);
+                                imageBody.setImage(data);
+                                chatMessage.setBody(GsonUtil.BeanToJson(imageBody));
+                                ImSocketClient.sendMsg(ImService.this, GsonUtil.BeanToJson(chatMessage), msg_id);
+                            }
+
+                            @Override
+                            protected void onNextSN(String m) {
+                                super.onNextSN(m);
+                                Boolean upLoad = isUpLoad(imageBody);
+                                Logger.t(ImSocketClient.TAG).i("是否存在同图片上传:" + upLoad);
+                                upLoadMap.put(msg_id, msg);
+                                if (!upLoad) {
+                                    upLoadFile(imageBody.getImage(), chatMessage.getBodyType(), chatMessage, msg_id);
+                                }
+                            }
+
+                            @Override
+                            protected void onErrorEx(@NonNull Throwable e) {
+                                super.onErrorEx(e);
+                                Logger.t(ImSocketClient.TAG).i("error:" + e.toString());
+                                Boolean upLoad = isUpLoad(imageBody);
+                                upLoadMap.put(msg_id, msg);
+                                if (!upLoad) {
+                                    upLoadFile(imageBody.getImage(), chatMessage.getBodyType(), chatMessage, msg_id);
+                                }
+                            }
+                        });
+
             }
         } else if (chatMessage.getBodyType() == ChatMessage.MSG_BODY_TYPE_LOCATION) {
             LocationBody locationBody = GsonUtil.GsonToBean(chatMessage.getBody(), LocationBody.class);
@@ -287,7 +328,7 @@ public class ImService extends Service {
 
             @Override
             public void onSuccess(String url) {
-
+                Logger.t(ImSocketClient.TAG).i("上传成功:" + url);
                 if (body_type == ChatMessage.MSG_BODY_TYPE_VOICE) {
                     VoiceBody body = GsonUtil.GsonToBean(chatMessage.getBody(), VoiceBody.class);
                     body.setUrl(url);
@@ -305,6 +346,7 @@ public class ImService extends Service {
                         String messageBody = message.getBody();
                         ImageBody body = GsonUtil.GsonToBean(messageBody, ImageBody.class);
                         if (body.getImage().equals(imageBody.getImage())) {
+                            imageBody.setImage(url);
                             message.setBody(GsonUtil.BeanToJson(imageBody));
                             ImSocketClient.sendMsg(ImService.this, GsonUtil.BeanToJson(message), pid);
                             iterator.remove();
@@ -325,7 +367,6 @@ public class ImService extends Service {
 
             }
         });
-
     }
 
     @Override

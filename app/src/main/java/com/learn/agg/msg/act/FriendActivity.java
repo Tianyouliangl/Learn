@@ -14,6 +14,7 @@ import com.learn.agg.base.BaseMvpActivity;
 import com.learn.agg.msg.adapter.FriendAdapter;
 import com.learn.agg.msg.contract.FriendContract;
 import com.learn.agg.msg.presenter.FriendPresenter;
+import com.learn.commonalitylibrary.ChatMessage;
 import com.learn.commonalitylibrary.Constant;
 import com.learn.commonalitylibrary.LoginBean;
 import com.learn.commonalitylibrary.sqlite.DataBaseHelp;
@@ -87,12 +88,9 @@ public class FriendActivity extends BaseMvpActivity<FriendContract.IPresenter> i
     //黏性事件的 订阅   
 
     @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
-    public void MessageEvent(HashMap<String, Object> map) {
-        String name = (String) map.get("notification");
-        if (name != null && !name.isEmpty()) {
-            if (name.equals("change")) {
-                getPresenter().getAllFriend();
-            }
+    public void MessageEvent(ChatMessage chatMessage) {
+        if (chatMessage.getType() == ChatMessage.MSG_SEND_SYS) {
+            getPresenter().getAllFriend();
         }
     }
 

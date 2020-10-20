@@ -21,7 +21,6 @@ public class Constant {
             list.add("https://b-ssl.duitang.com/uploads/item/201807/06/20180706112251_niE3Y.thumb.700_0.jpeg");
             list.add("https://b-ssl.duitang.com/uploads/item/201804/29/20180429111927_4i2Ks.thumb.700_0.jpeg");
             list.add("https://b-ssl.duitang.com/uploads/item/201709/10/20170910110429_5J8jt.jpeg");
-            list.add("http://img3.imgtn.bdimg.com/it/u=466636099,2440212896&fm=11&gp=0.jpg");
             list.add("https://b-ssl.duitang.com/uploads/item/201808/03/20180803090324_qrygh.thumb.700_0.jpeg");
         }
         return list.get((int)(0+Math.random()*(list.size()-1)));

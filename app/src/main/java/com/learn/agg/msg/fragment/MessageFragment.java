@@ -27,8 +27,10 @@ import com.learn.agg.msg.presenter.MessagePresenter;
 import com.learn.agg.widgets.BadgeView;
 import com.learn.commonalitylibrary.ChatMessage;
 import com.learn.commonalitylibrary.Constant;
+import com.learn.commonalitylibrary.LoginBean;
 import com.learn.commonalitylibrary.SessionMessage;
 import com.learn.commonalitylibrary.sqlite.DataBaseHelp;
+import com.learn.commonalitylibrary.util.GsonUtil;
 import com.learn.commonalitylibrary.util.NotificationUtils;
 import com.lib.xiangxiang.im.ImSocketClient;
 import com.mcxtzhang.swipemenulib.SwipeMenuLayout;
@@ -186,6 +188,14 @@ public class MessageFragment extends BaseMvpFragment<MessageContract.IPresenter>
         sendNumberCount();
     }
 
+    @Override
+    public void onSuccessFriend(List<LoginBean> list) {
+        for (int i = 0; i < list.size(); i++) {
+            DataBaseHelp.getInstance(getActivity()).addOrUpdateUser(list.get(i).getUid(), GsonUtil.BeanToJson(list.get(i)));
+        }
+        getPresenter().getSessionList();
+    }
+
     public void sendNumberCount() {
         Log.i("chat", "发送数量");
         int n = 0;
@@ -221,7 +231,11 @@ public class MessageFragment extends BaseMvpFragment<MessageContract.IPresenter>
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void EventBus(ChatMessage chatMessage) {
         if (chatMessage.getType() == ChatMessage.MSG_SEND_CHAT || chatMessage.getType() == ChatMessage.MSG_SEND_SYS) {
-            getPresenter().getSessionList();
+            if (chatMessage.getBodyType() == ChatMessage.MSG_BODY_TYPE_TEXT_HELLO){
+                getPresenter().getAllFriend();
+            }else {
+                getPresenter().getSessionList();
+            }
         }
         if (chatMessage.getType() == ChatMessage.MSG_ADD_FRIEND) {
             getPresenter().getAddFriendMsg();

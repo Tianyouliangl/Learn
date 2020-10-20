@@ -10,6 +10,7 @@ import com.learn.agg.net.base.BaseObserverTC;
 import com.learn.agg.net.base.IHttpProtocol;
 import com.learn.agg.net.bean.FriendMsgCountBean;
 import com.learn.commonalitylibrary.Constant;
+import com.learn.commonalitylibrary.LoginBean;
 import com.learn.commonalitylibrary.sqlite.DataBaseHelp;
 import com.learn.commonalitylibrary.SessionMessage;
 import com.learn.commonalitylibrary.util.GsonUtil;
@@ -75,5 +76,33 @@ public class MessagePresenter extends BasePresenter<MessageContract.IView> imple
             Logger.t("net").json( json);
         }
         getMvpView().onSession(sessionList);
+    }
+
+    @Override
+    public void getAllFriend() {
+        HashMap<String, String> map = new HashMap<>();
+        map.put("uid",getMvpView().getUid());
+        HttpFactory.INSTANCE.getProtocol(IHttpProtocol.class)
+                .getAllFriend(map)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new BaseObserverTC<List<LoginBean>>(){
+                    @Override
+                    protected void onNextEx(@NonNull List<LoginBean> data) {
+                        super.onNextEx(data);
+                        getMvpView().onSuccessFriend(data);
+                    }
+
+                    @Override
+                    protected void onErrorEx(@NonNull Throwable e) {
+                        super.onErrorEx(e);
+
+                    }
+
+                    @Override
+                    protected void onNextSN(String msg) {
+                        super.onNextSN(msg);
+                    }
+                });
     }
 }

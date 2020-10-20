@@ -122,9 +122,10 @@ public class FileUpLoadManager {
                 if (response.isSuccessful()) {
                     String json = response.body().string();
                     Log.d("TAG", "====body========" + json);
-                    UpLoadFileBean bean = new Gson().fromJson(json, UpLoadFileBean.class);
-                    if (bean.getCode() == 1) {
-                        emitter.onNext(bean.getUrl());
+                    UpLoadFileBean fileBean = GsonUtil.GsonToBean(json, UpLoadFileBean.class);
+                    if (fileBean.getCode() == 1) {
+                        emitter.onNext(fileBean.getUrl());
+                        Log.d("TAG", "====url========" + fileBean.getUrl());
                     }
                 } else {
                     emitter.onError(new IllegalStateException(response.message()));

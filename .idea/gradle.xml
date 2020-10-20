@@ -14,6 +14,7 @@
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/cbkeyboardlibrary" />
             <option value="$PROJECT_DIR$/commonalitylibrary" />
+            <option value="$PROJECT_DIR$/hwtxtreaderlib" />
             <option value="$PROJECT_DIR$/imlibrary" />
             <option value="$PROJECT_DIR$/locationlibrary" />
             <option value="$PROJECT_DIR$/mvplib" />
@@ -23,6 +24,7 @@
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />
+        <option name="useQualifiedModuleNames" value="true" />
       </GradleProjectSettings>
     </option>
   </component>

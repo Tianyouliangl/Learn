@@ -144,14 +144,17 @@ public class NotificationUtils {
                     conn.connect();
                     InputStream in;
                     in = conn.getInputStream();
-                    Bitmap map = BitmapFactory.decodeStream(in);
-                    final Bitmap cirleBitmap = NotificationUtils.getCirleBitmap(map);
+                    final Bitmap map = BitmapFactory.decodeStream(in);
                     context.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            if (view != null){
-                                view.setImageBitmap(cirleBitmap);
+                            if (map != null){
+                                final Bitmap cirleBitmap = NotificationUtils.getCirleBitmap(map);
+                                if (view != null && cirleBitmap != null){
+                                    view.setImageBitmap(cirleBitmap);
+                                }
                             }
+
                         }
                     });
                 } catch (IOException e) {
@@ -163,30 +166,32 @@ public class NotificationUtils {
 
     public static Bitmap getCirleBitmap(Bitmap bmp) {
         //获取bmp的宽高 小的一个做为圆的直径r
-        int w = bmp.getWidth();
-        int h = bmp.getHeight();
-        int r = Math.min(w, h);
+        if (bmp != null){
+            int w = bmp.getWidth();
+            int h = bmp.getHeight();
+            int r = Math.min(w, h);
 
-        //创建一个paint
-        Paint paint = new Paint();
-        paint.setAntiAlias(true);
+            //创建一个paint
+            Paint paint = new Paint();
+            paint.setAntiAlias(true);
 
-        //新创建一个Bitmap对象newBitmap 宽高都是r
-        Bitmap newBitmap = Bitmap.createBitmap(r, r, Bitmap.Config.ARGB_8888);
+            //新创建一个Bitmap对象newBitmap 宽高都是r
+            Bitmap newBitmap = Bitmap.createBitmap(r, r, Bitmap.Config.ARGB_8888);
 
-        //创建一个使用newBitmap的Canvas对象
-        Canvas canvas = new Canvas(newBitmap);
+            //创建一个使用newBitmap的Canvas对象
+            Canvas canvas = new Canvas(newBitmap);
 
-        //canvas画一个圆形
-        canvas.drawCircle(r / 2, r / 2, r / 2, paint);
+            //canvas画一个圆形
+            canvas.drawCircle(r / 2, r / 2, r / 2, paint);
 
-        //然后 paint要设置Xfermode 模式为SRC_IN 显示上层图像（后绘制的一个）的相交部分
-        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+            //然后 paint要设置Xfermode 模式为SRC_IN 显示上层图像（后绘制的一个）的相交部分
+            paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
 
-        //canvas调用drawBitmap直接将bmp对象画在画布上 因为paint设置了Xfermode，所以最终只会显示这个bmp的一部分 也就
-        //是bmp的和下层圆形相交的一部分圆形的内容
-        canvas.drawBitmap(bmp, 0, 0, paint);
-
-        return newBitmap;
+            //canvas调用drawBitmap直接将bmp对象画在画布上 因为paint设置了Xfermode，所以最终只会显示这个bmp的一部分 也就
+            //是bmp的和下层圆形相交的一部分圆形的内容
+            canvas.drawBitmap(bmp, 0, 0, paint);
+            return newBitmap;
+        }
+        return null;
     }
 }
