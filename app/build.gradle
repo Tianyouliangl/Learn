@@ -25,13 +25,13 @@ android {
 
     signingConfigs {
         debug {
-            storeFile file('../key/key')
+            storeFile file('/Users/fengzhangwei/studio–path/demo/learn/key/key')
             storePassword "123456"
             keyAlias "key"
             keyPassword "123456"
         }
         release {
-            storeFile file('../key/key')
+            storeFile file('/Users/fengzhangwei/studio–path/demo/learn/key/key')
             storePassword "123456"
             keyAlias "key"
             keyPassword "123456"
