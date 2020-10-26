@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:minHeight="80dp"
+    android:background="@color/white"
+    android:layout_height="wrap_content">
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:layout_width="match_parent"
+        android:layout_marginBottom="6dp"
+        android:id="@+id/rl_search_heatMap"
+        android:layout_height="wrap_content"/>
+
+</RelativeLayout>

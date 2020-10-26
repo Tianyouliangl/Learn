@@ -1,6 +1,7 @@
 package com.learn.agg.msg.adapter;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
@@ -12,13 +13,18 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.learn.agg.R;
 import com.learn.agg.msg.chatHolder.ChatEmojiReceiveHolder;
 import com.learn.agg.msg.chatHolder.ChatEmojiSendHolder;
+import com.learn.agg.msg.chatHolder.ChatGifReceiveHolder;
+import com.learn.agg.msg.chatHolder.ChatGifSendHolder;
 import com.learn.agg.msg.chatHolder.ChatImageReceiveHolder;
 import com.learn.agg.msg.chatHolder.ChatImageSendHolder;
 import com.learn.agg.msg.chatHolder.ChatLocationReceiveHolder;
@@ -29,6 +35,7 @@ import com.learn.agg.msg.chatHolder.ChatTextSendHolder;
 import com.learn.agg.msg.chatHolder.ChatTextWithdrawHolder;
 import com.learn.agg.msg.chatHolder.ChatVoiceReceiveHolder;
 import com.learn.agg.msg.chatHolder.ChatVoiceSendHolder;
+import com.learn.commonalitylibrary.body.GifBean;
 import com.learn.commonalitylibrary.util.FileUpLoadManager;
 import com.learn.commonalitylibrary.ChatMessage;
 import com.learn.commonalitylibrary.LoginBean;
@@ -107,6 +114,10 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     //撤回
     private final int TYPE_TEXT_WITHDRAW = 12;
 
+    // 斗图
+    private final int TYPE_GIF_SEND = 13;
+    private final int TYPE_GIF_RECEIVE = 14;
+
 
     public ChatAdapter(Context context, List<ChatMessage> list) {
         this.mContext = context;
@@ -141,6 +152,9 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 if (bodyType == ChatMessage.MSG_BODY_TYPE_LOCATION) {
                     return TYPE_LOCATION_SEND;
                 }
+                if (bodyType == ChatMessage.MSG_BODY_TYPE_GIF) {
+                    return TYPE_GIF_SEND;
+                }
             } else {
                 if (bodyType == ChatMessage.MSG_BODY_TYPE_TEXT) {
                     return TYPE_TEXT_RECEIVE;
@@ -159,6 +173,9 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 }
                 if (bodyType == ChatMessage.MSG_BODY_TYPE_LOCATION) {
                     return TYPE_LOCATION_RECEIVE;
+                }
+                if (bodyType == ChatMessage.MSG_BODY_TYPE_GIF) {
+                    return TYPE_GIF_RECEIVE;
                 }
             }
         }
@@ -199,6 +216,10 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 view = LayoutInflater.from(mContext).inflate(R.layout.item_chat_send_location, parent, false);
                 viewHolder = new ChatLocationSendHolder(view);
                 break;
+            case TYPE_GIF_SEND:
+                view = LayoutInflater.from(mContext).inflate(R.layout.item_chat_send_gif, parent, false);
+                viewHolder = new ChatGifSendHolder(view);
+                break;
             case TYPE_TEXT_RECEIVE:
                 view = LayoutInflater.from(mContext).inflate(R.layout.item_chat_receive_text, parent, false);
                 viewHolder = new ChatTextReceiveHolder(view);
@@ -218,6 +239,10 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             case TYPE_LOCATION_RECEIVE:
                 view = LayoutInflater.from(mContext).inflate(R.layout.item_chat_receive_location, parent, false);
                 viewHolder = new ChatLocationReceiveHolder(view);
+                break;
+            case TYPE_GIF_RECEIVE:
+                view = LayoutInflater.from(mContext).inflate(R.layout.item_chat_receive_gif, parent, false);
+                viewHolder = new ChatGifReceiveHolder(view);
                 break;
         }
         return viewHolder;
@@ -380,6 +405,16 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                         }
                     });
                     break;
+                case TYPE_GIF_SEND:
+                    ((ChatGifSendHolder) holder).pb_state.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            if (mClickListener != null) {
+                                mClickListener.onClickPb(message);
+                            }
+                        }
+                    });
+                    break;
                 default:
                     break;
             }
@@ -436,7 +471,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
     }
 
-    private void showImage(RecyclerView.ViewHolder holder, ChatMessage message) {
+    private void showImage(final RecyclerView.ViewHolder holder, ChatMessage message) {
         RequestOptions options = new RequestOptions()
                 .placeholder(R.drawable.icon_iv_loading)//图片加载出来前，显示的图片
                 .fallback(R.drawable.icon_iv_error) //url为空的时候,显示的图片
@@ -454,6 +489,46 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     Glide.with(mContext).load(image_url).apply(options).into(((ChatImageReceiveHolder) holder).iv_iv);
                     break;
                 default:
+                    break;
+            }
+        } else if (bodyType == ChatMessage.MSG_BODY_TYPE_GIF) {
+            GifBean bean = GsonUtil.GsonToBean(body, GifBean.class);
+            String url = bean.getUrl();
+            int type = bean.getType();
+            switch (holder.getItemViewType()) {
+                case TYPE_GIF_SEND:
+                    switch (type) {
+                        case 5:
+                            Glide.with(mContext).asGif().apply(options).load(url).into(((ChatGifSendHolder) holder).iv_iv);
+                            break;
+                        case 6:
+                            Glide.with(mContext).asBitmap().apply(options).load(url).into(new SimpleTarget<Bitmap>() {
+                                @Override
+                                public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                                    resource = eraseColor(resource, -1);
+                                    resource = eraseColor(resource, -16777216);
+                                    ((ChatGifSendHolder) holder).iv_iv.setImageBitmap(resource);
+                                }
+                            });
+                            break;
+                    }
+                    break;
+                case TYPE_GIF_RECEIVE:
+                    switch (type) {
+                        case 5:
+                            Glide.with(mContext).asGif().load(url).apply(options).into(((ChatGifReceiveHolder) holder).iv_iv);
+                            break;
+                        case 6:
+                            Glide.with(mContext).asBitmap().apply(options).load(url).into(new SimpleTarget<Bitmap>() {
+                                @Override
+                                public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                                    resource = eraseColor(resource, -1);
+                                    resource = eraseColor(resource, -16777216);
+                                    ((ChatGifReceiveHolder) holder).iv_iv.setImageBitmap(resource);
+                                }
+                            });
+                            break;
+                    }
                     break;
             }
         }
@@ -620,6 +695,18 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     ((ChatLocationSendHolder) holder).pb_state.setVisibility(View.VISIBLE);
                 }
                 break;
+            case TYPE_GIF_SEND:
+                if (msgStatus == ChatMessage.MSG_SEND_SUCCESS) {
+                    ((ChatGifSendHolder) holder).pb_state.setVisibility(View.GONE);
+                } else if (msgStatus == ChatMessage.MSG_SEND_LOADING) {
+                    ((ChatGifSendHolder) holder).pb_state.setVisibility(View.VISIBLE);
+                } else if (msgStatus == ChatMessage.MSG_SEND_ERROR) {
+                    Drawable drawable = mContext.getResources().getDrawable(R.drawable.icon_send_error);
+                    ((ChatGifSendHolder) holder).pb_state.setIndeterminateDrawable(drawable);
+                    ((ChatGifSendHolder) holder).pb_state.setProgressDrawable(drawable);
+                    ((ChatGifSendHolder) holder).pb_state.setVisibility(View.VISIBLE);
+                }
+                break;
             case TYPE_VOICE_RECEIVE:
                 if (msgStatus == ChatMessage.MSG_VOICE_UNREAD) {
                     ((ChatVoiceReceiveHolder) holder).pb_state.setVisibility(View.VISIBLE);
@@ -692,6 +779,14 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     ((ChatLocationSendHolder) holder).tv_time.setVisibility(View.GONE);
                 }
                 break;
+            case TYPE_GIF_SEND:
+                if (displaytime == ChatMessage.MSG_TIME_TRUE) {
+                    ((ChatGifSendHolder) holder).tv_time.setVisibility(View.VISIBLE);
+                    ((ChatGifSendHolder) holder).tv_time.setText(chatTime);
+                } else {
+                    ((ChatGifSendHolder) holder).tv_time.setVisibility(View.GONE);
+                }
+                break;
             case TYPE_TEXT_RECEIVE:
                 if (displaytime == ChatMessage.MSG_TIME_TRUE) {
                     ((ChatTextReceiveHolder) holder).tv_time.setVisibility(View.VISIBLE);
@@ -732,6 +827,14 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     ((ChatLocationReceiveHolder) holder).tv_time.setVisibility(View.GONE);
                 }
                 break;
+            case TYPE_GIF_RECEIVE:
+                if (displaytime == ChatMessage.MSG_TIME_TRUE) {
+                    ((ChatGifReceiveHolder) holder).tv_time.setVisibility(View.VISIBLE);
+                    ((ChatGifReceiveHolder) holder).tv_time.setText(chatTime);
+                } else {
+                    ((ChatGifReceiveHolder) holder).tv_time.setVisibility(View.GONE);
+                }
+                break;
             default:
                 break;
         }
@@ -756,6 +859,9 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             case TYPE_LOCATION_SEND:
                 Glide.with(mContext).load(from_ImageUrl).into(((ChatLocationSendHolder) holder).iv_icon);
                 break;
+            case TYPE_GIF_SEND:
+                Glide.with(mContext).load(from_ImageUrl).into(((ChatGifSendHolder) holder).iv_icon);
+                break;
             case TYPE_TEXT_RECEIVE:
                 Glide.with(mContext).load(to_imageUrl).into(((ChatTextReceiveHolder) holder).iv_icon);
                 break;
@@ -770,6 +876,9 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 break;
             case TYPE_LOCATION_RECEIVE:
                 Glide.with(mContext).load(to_imageUrl).into(((ChatLocationReceiveHolder) holder).iv_icon);
+                break;
+            case TYPE_GIF_RECEIVE:
+                Glide.with(mContext).load(to_imageUrl).into(((ChatGifReceiveHolder) holder).iv_icon);
                 break;
             default:
                 break;
@@ -948,6 +1057,24 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 }
 
         }
+    }
+
+
+    //BitmapUtil中擦除Bitmap像素的方法
+    private Bitmap eraseColor(Bitmap src, int color) {
+        int width = src.getWidth();
+        int height = src.getHeight();
+        Bitmap b = src.copy(Bitmap.Config.ARGB_8888, true);
+        b.setHasAlpha(true);
+        int[] pixels = new int[width * height];
+        src.getPixels(pixels, 0, width, 0, 0, width, height);
+        for (int i = 0; i < width * height; i++) {
+            if (pixels[i] == color) {
+                pixels[i] = 0;
+            }
+        }
+        b.setPixels(pixels, 0, width, 0, 0, width, height);
+        return b;
     }
 
     private void playMedia(final RecyclerView.ViewHolder holder, final AnimationDrawable animation, final String playPath, final ChatMessage message) {

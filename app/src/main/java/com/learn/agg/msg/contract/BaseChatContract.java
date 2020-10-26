@@ -26,6 +26,8 @@ public interface BaseChatContract {
 
         void onSuccess();
 
+        void onSuccessAddLike(ChatMessage message);
+
         void onSuccessConversation(String conversation);
 
         void onError(String msg);
@@ -42,5 +44,7 @@ public interface BaseChatContract {
         void getConversation();
 
         void SocketSendJson(String json,Boolean isUpdateSession);
+
+        void addLikePhoto(ChatMessage msg);
     }
 }

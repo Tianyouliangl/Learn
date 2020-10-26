@@ -2,11 +2,16 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:animateLayoutChanges="true"
     android:orientation="vertical">
+
+    <include layout="@layout/view_pop_search"
+        android:visibility="gone"
+        android:id="@+id/search_view_group"/>
 
     <include
         android:id="@+id/view_line_bottom_keyboard"
-        android:visibility="gone"
+        android:visibility="visible"
         layout="@layout/ic_spit_view_horizontal" />
 
     <RelativeLayout

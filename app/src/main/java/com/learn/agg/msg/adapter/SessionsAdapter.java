@@ -116,7 +116,7 @@ public class SessionsAdapter extends RecyclerView.Adapter<SessionsAdapter.Sessio
             Drawable drawable = mContext.getResources().getDrawable(R.drawable.anim);
             holder.pb_state_session.setIndeterminateDrawable(drawable);
             holder.pb_state_session.setProgressDrawable(drawable);
-        } else if (msg_status == ChatMessage.MSG_SEND_SUCCESS) {
+        } else if (msg_status == ChatMessage.MSG_SEND_SUCCESS || msg_status == ChatMessage.MSG_VOICE_UNREAD) {
             holder.pb_state_session.setVisibility(View.GONE);
         } else if (msg_status == ChatMessage.MSG_SEND_ERROR) {
             holder.pb_state_session.setVisibility(View.VISIBLE);

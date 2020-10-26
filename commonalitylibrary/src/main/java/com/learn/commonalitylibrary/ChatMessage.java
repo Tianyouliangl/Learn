@@ -18,12 +18,17 @@ public class ChatMessage implements Serializable {
     public static int MSG_BODY_TYPE_EMOJI = 6;  // 表情
     public static int MSG_BODY_TYPE_TEXT_HELLO = 7;   // 文本 hello 打招呼
     public static int MSG_BODY_TYPE_CANCEL = 8; // 撤回
+    public static int MSG_BODY_TYPE_GIF = 9; // 斗图
 
     // 消息状态
     public static int MSG_SEND_LOADING = 1;  // 正在发送
     public static int MSG_SEND_SUCCESS = 2;  // 成功
     public static int MSG_SEND_ERROR = 3;    // 失败
     public static int MSG_VOICE_UNREAD = 4;  // 语音 未读
+
+    // 斗图 类型
+    public static int MSG_GIF_GIF = 5;      // 斗图 =  动图
+    public static int MSG_GIF_IMAGE = 6;    // 斗图 = 静态图
 
     public static int MSG_SEND_CHAT = 1;   // 聊天 1v1
     public static int MSG_SEND_SYS = 2;    // 上线/下线 通知

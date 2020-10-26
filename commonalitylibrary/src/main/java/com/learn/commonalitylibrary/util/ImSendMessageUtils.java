@@ -6,6 +6,7 @@ import android.util.Log;
 import com.learn.commonalitylibrary.ChatMessage;
 import com.learn.commonalitylibrary.Constant;
 import com.learn.commonalitylibrary.body.EmoticonBody;
+import com.learn.commonalitylibrary.body.GifBean;
 import com.learn.commonalitylibrary.body.ImageBody;
 import com.learn.commonalitylibrary.body.RedEnvelopeBody;
 import com.learn.commonalitylibrary.body.TextBody;
@@ -86,6 +87,25 @@ public class ImSendMessageUtils {
             object.put("pid", getPid());
             object.put("bodyType", ChatMessage.MSG_BODY_TYPE_IMAGE);
             object.put("body", GsonUtil.BeanToJson(new ImageBody(body)));
+            object.put("msgStatus", ChatMessage.MSG_SEND_LOADING);
+            object.put("time", System.currentTimeMillis());
+            object.put("type", ChatMessage.MSG_SEND_CHAT);
+            object.put("conversation", conversation);
+            object.put("displaytime", displaytime);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return object.toString();
+    }
+
+    public static String getChatMessageGif(String body, String fromId, String toId,String pid, String conversation, int displaytime) {
+        JSONObject object = new JSONObject();
+        try {
+            object.put("fromId", fromId);
+            object.put("toId", toId);
+            object.put("pid",pid);
+            object.put("bodyType", ChatMessage.MSG_BODY_TYPE_GIF);
+            object.put("body",body);
             object.put("msgStatus", ChatMessage.MSG_SEND_LOADING);
             object.put("time", System.currentTimeMillis());
             object.put("type", ChatMessage.MSG_SEND_CHAT);
@@ -216,6 +236,12 @@ public class ImSendMessageUtils {
             if (bodyType == ChatMessage.MSG_BODY_TYPE_EMOJI) {
                 return "[表情]";
             }
+            if (bodyType == ChatMessage.MSG_BODY_TYPE_GIF) {
+                return "[斗图]";
+            }
+            if (bodyType == ChatMessage.MSG_BODY_TYPE_CANCEL) {
+                return "[撤回消息]";
+            }
 
         } else {
             return body;
@@ -243,8 +269,8 @@ public class ImSendMessageUtils {
         if (bodyType == ChatMessage.MSG_BODY_TYPE_EMOJI) {
             return "[表情]";
         }
-        if (bodyType == ChatMessage.MSG_BODY_TYPE_CANCEL) {
-
+        if (bodyType == ChatMessage.MSG_BODY_TYPE_GIF) {
+            return "[斗图]";
         }
         if (bodyType == ChatMessage.MSG_BODY_TYPE_CANCEL) {
             String uid = EasySP.init(context).getString(Constant.SPKey_UID);

@@ -25,6 +25,7 @@ import com.codebear.keyboard.data.EmoticonAdapterBean;
 import com.codebear.keyboard.data.EmoticonsBean;
 import com.codebear.keyboard.widget.CBEmoticonsView;
 import com.codebear.keyboard.widget.CBViewPagerIndicatorView;
+import com.learn.commonalitylibrary.body.GifBean;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -289,6 +290,11 @@ public class CBEmoticonFragment extends Fragment implements ICBFragment {
         this.emoticonsBean = emoticonsBean;
         initData();
         initView();
+    }
+
+    @Override
+    public void setLikePhotoBean(GifBean gifBean) {
+
     }
 
     @Override

@@ -4,27 +4,60 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Rect;
+import android.os.CountDownTimer;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.codebear.keyboard.adapter.HeatMapAdapter;
+import com.codebear.keyboard.data.SearchHeatMapBean;
 import com.codebear.keyboard.emoji.ZsFilter;
 import com.codebear.keyboard.fragment.CBVoice;
 import com.codebear.keyboard.interfaces.IEmoticonsView;
+import com.codebear.keyboard.net.BaseObserverTC;
+import com.codebear.keyboard.net.IHttpProtocol;
 import com.codebear.keyboard.utils.EmoticonsKeyboardUtils;
 import com.codebear.keyboard.widget.AutoHeightLayout;
+import com.codebear.keyboard.widget.CustomLinearLayoutManager;
 import com.codebear.keyboard.widget.EmoticonsEditText;
 import com.codebear.keyboard.widget.FuncLayout;
 import com.codebear.keyboard.widget.RecordIndicator;
+import com.codebear.keyboard.widget.RecyclerViewSpacesItemDecoration;
+import com.learn.commonalitylibrary.ChatMessage;
+import com.learn.commonalitylibrary.body.GifBean;
+import com.learn.commonalitylibrary.util.ImSendMessageUtils;
+import com.senyint.ihospital.client.HttpClient;
+import com.senyint.ihospital.client.HttpFactory;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Random;
+
+import io.reactivex.Observer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.annotations.NonNull;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
+
+import static androidx.recyclerview.widget.RecyclerView.SCROLL_STATE_IDLE;
 
 /**
  * description:
@@ -36,7 +69,7 @@ import com.codebear.keyboard.widget.RecordIndicator;
  */
 
 public class CBEmoticonsKeyBoard extends AutoHeightLayout implements View.OnClickListener, EmoticonsEditText
-        .OnBackKeyClickListener, FuncLayout.OnFuncChangeListener, FuncLayout.OnFuncKeyBoardListener {
+        .OnBackKeyClickListener, FuncLayout.OnFuncChangeListener, FuncLayout.OnFuncKeyBoardListener, HeatMapAdapter.HearMapClick {
     public static final int FUNC_TYPE_EMOTION = -1; // 表情
     public static final int FUNC_TYPE_APPS = -2;   // + 号
     public static final int FUNC_TYPE_VOICE = -3;  // 语音
@@ -72,6 +105,13 @@ public class CBEmoticonsKeyBoard extends AutoHeightLayout implements View.OnClic
     private View mVLineBottom;
     public static final String TAG = "CBEmoticonsKeyBoard";
     private CBVoice cb_voice;
+    private RecyclerView rl_search_heatMap;
+    private RelativeLayout search_view_group;
+    private List<GifBean> searchList = new ArrayList<>();
+    private HeatMapAdapter heatMapAdapter;
+    private HeatMapAdapter.HearMapClick mOnHeatMapClick;
+    private Disposable mDisposable;
+    private CountDownTimer timer = null;
 
     public CBEmoticonsKeyBoard(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -81,8 +121,13 @@ public class CBEmoticonsKeyBoard extends AutoHeightLayout implements View.OnClic
         initFuncView();
     }
 
+
     protected void inflateKeyboardBar() {
         mInflater.inflate(R.layout.cb_view_keyboard, this);
+    }
+
+    private View initSearchPopView() {
+        return mInflater.inflate(R.layout.view_pop_search, null);
     }
 
     protected View inflateFunc() {
@@ -99,6 +144,15 @@ public class CBEmoticonsKeyBoard extends AutoHeightLayout implements View.OnClic
         funFunction.setVisibility(vis);
     }
 
+    private void setSearchHeatMapVisibility(int vis) {
+        search_view_group.setVisibility(vis);
+        if (vis == GONE){
+            if (searchList.size() > 0){
+                searchList.clear();
+            }
+        }
+    }
+
     protected void initView() {
         mRlBottomKeyboard = findViewById(R.id.rl_bottom_keyboard);
         mVLineBottom = findViewById(R.id.view_line_bottom_keyboard);
@@ -110,6 +164,8 @@ public class CBEmoticonsKeyBoard extends AutoHeightLayout implements View.OnClic
         mBtnMultimedia = (ImageView) findViewById(R.id.iv_multimedia);
         mBtnSend = (Button) findViewById(R.id.btn_send);
         funFunction = (FuncLayout) findViewById(R.id.fun_function);
+        rl_search_heatMap = findViewById(R.id.rl_search_heatMap);
+        search_view_group = findViewById(R.id.search_view_group);
 
         mBtnVoiceOrText.setOnClickListener(this);
         mBtnFace.setOnClickListener(this);
@@ -122,6 +178,21 @@ public class CBEmoticonsKeyBoard extends AutoHeightLayout implements View.OnClic
             initRecordIndicator = true;
             recordIndicator.setRecordButton(mBtnVoice);
         }
+
+        rl_search_heatMap.addItemDecoration(new RecyclerViewSpacesItemDecoration(20));
+        heatMapAdapter = new HeatMapAdapter(mContext, searchList);
+        rl_search_heatMap.setAdapter(heatMapAdapter);
+        CustomLinearLayoutManager layoutManager = new CustomLinearLayoutManager(mContext);
+        layoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
+        rl_search_heatMap.setLayoutManager(layoutManager);
+        heatMapAdapter.setOnHeatMapClickListener(this);
+        rl_search_heatMap.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(@androidx.annotation.NonNull RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                
+            }
+        });
     }
 
     protected void initFuncView() {
@@ -178,9 +249,16 @@ public class CBEmoticonsKeyBoard extends AutoHeightLayout implements View.OnClic
                 if (!TextUtils.isEmpty(s)) {
                     mBtnSend.setVisibility(VISIBLE);
                     mBtnMultimedia.setVisibility(GONE);
+                    if (mDisposable != null){
+                        mDisposable.dispose();
+                    }
+                    if (searchList.size() <= 0){
+                        getHotHeatMapAndroidId(s.toString().trim());
+                    }
                 } else {
                     mBtnMultimedia.setVisibility(VISIBLE);
                     mBtnSend.setVisibility(GONE);
+                    setSearchHeatMapVisibility(GONE);
                 }
             }
         });
@@ -205,6 +283,10 @@ public class CBEmoticonsKeyBoard extends AutoHeightLayout implements View.OnClic
         funFunction.setVisibility(false);
         EmoticonsKeyboardUtils.closeSoftKeyboard(this);
 //        mBtnFace.setImageResource(R.drawable.btn_face_bg);
+    }
+
+    public void setOnSearchHeatMapOnClickListener(HeatMapAdapter.HearMapClick click) {
+        this.mOnHeatMapClick = click;
     }
 
     protected void showVoice() {
@@ -245,6 +327,7 @@ public class CBEmoticonsKeyBoard extends AutoHeightLayout implements View.OnClic
 
     /**
      * 键盘监听   --- 弹起
+     *
      * @param height
      */
     @Override
@@ -264,8 +347,9 @@ public class CBEmoticonsKeyBoard extends AutoHeightLayout implements View.OnClic
         super.onSoftClose();
         if (clickFunc == 1) {
             funFunction.hideAllFuncView();
-        }else {
-            if (clickType == funFunction.DEF_KEY){
+            setSearchHeatMapVisibility(GONE);
+        } else {
+            if (clickType == funFunction.DEF_KEY) {
                 funFunction.hideAllFuncView();
             }
         }
@@ -288,7 +372,7 @@ public class CBEmoticonsKeyBoard extends AutoHeightLayout implements View.OnClic
         funFunction.addOnKeyBoardListener(l);
     }
 
-    public void addVoiceChangeListener(CBVoice.VoiceStateListener listener){
+    public void addVoiceChangeListener(CBVoice.VoiceStateListener listener) {
         cb_voice.setOnVoiceChangeListener(listener);
     }
 
@@ -339,10 +423,10 @@ public class CBEmoticonsKeyBoard extends AutoHeightLayout implements View.OnClic
                     reset();
                     return true;
                 } else {
-                    if (funFunction.isShown()){
+                    if (funFunction.isShown()) {
                         funFunction.hideAllFuncView();
                         return true;
-                    }else {
+                    } else {
                         return super.dispatchKeyEvent(event);
                     }
                 }
@@ -414,9 +498,9 @@ public class CBEmoticonsKeyBoard extends AutoHeightLayout implements View.OnClic
         }
     }
 
-    private void showLog(String msg){
-        if (isLog){
-            Log.i(TAG,"-------" + msg+"---------");
+    private void showLog(String msg) {
+        if (isLog) {
+            Log.i(TAG, "-------" + msg + "---------");
         }
     }
 
@@ -427,12 +511,157 @@ public class CBEmoticonsKeyBoard extends AutoHeightLayout implements View.OnClic
 
     @Override
     public void onFuncClose() {
-        if (clickType == FUNC_TYPE_VOICE){
+        if (clickType == FUNC_TYPE_VOICE) {
             mBtnVoiceOrText.setImageResource(R.mipmap.ic_voice_normal);
-        }else if( clickType == FUNC_TYPE_APPS){
+        } else if (clickType == FUNC_TYPE_APPS) {
             mBtnMultimedia.setImageResource(R.mipmap.ic_add_normal);
-        }else if (clickType == FUNC_TYPE_EMOTION){
+        } else if (clickType == FUNC_TYPE_EMOTION) {
             mBtnFace.setImageResource(R.mipmap.ic_face_normal);
         }
+    }
+
+
+    /**
+     * search hot heat map  斗图推荐
+     */
+    private void getHotHeatMapAndroidId(final String tag) {
+        HashMap<String, String> map = new HashMap<>();
+        map.put("key", "LIVDSRZULELA");
+        HttpFactory.INSTANCE.getProtocol(IHttpProtocol.class)
+                .getAnon_id(" https://api.tenor.com/v1/anonid", map)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<Object>() {
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
+                        mDisposable = d;
+                    }
+
+                    @Override
+                    public void onNext(@NonNull Object o) {
+                        mDisposable = null;
+                        String json = o.toString();
+                        try {
+                            JSONObject object = new JSONObject(json);
+                            if (object.has("anon_id")) {
+                                String anon_id = object.getString("anon_id");
+                                getHotHeatMapList(tag, anon_id);
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+                    }
+
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+    }
+
+    private void getHotHeatMapList(String tag, String anon_id) {
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("tag", tag);
+        map.put("key", "LIVDSRZULELA");
+        map.put("limit", 10);
+        map.put("anon_id", anon_id);
+        map.put("shares", 0);
+        HttpFactory.INSTANCE.getProtocol(IHttpProtocol.class)
+                .getHeatMapList("https://api.tenor.com/v1/search", map)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<SearchHeatMapBean>() {
+
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
+                        mDisposable = d;
+                    }
+
+                    @Override
+                    public void onNext(@NonNull SearchHeatMapBean o) {
+                        if (searchList.size() > 0) {
+                            searchList.clear();
+                        }
+                        mDisposable = null;
+                        List<SearchHeatMapBean.ResultsBean> list = o.getResults();
+                        setSearchHeatMapVisibility(VISIBLE);
+                        Log.i("net", "-------list" + list.size());
+                        for (int i = 0; i < list.size(); i++) {
+                            List<SearchHeatMapBean.ResultsBean.MediaBean> media = list.get(i).getMedia();
+                            Log.i("net", "-------i：" + i);
+                            for (int j = 0; j < media.size(); j++) {
+                                SearchHeatMapBean.ResultsBean.MediaBean bean = media.get(j);
+                                GifBean gifBean = new GifBean();
+                                String url = bean.getGif().getUrl();
+                                String preview = bean.getGif().getPreview();
+                                int randomInt = getRandomInt();
+                                if (randomInt == ChatMessage.MSG_GIF_GIF) {
+                                    gifBean.setUrl(url);
+                                } else {
+                                    gifBean.setUrl(preview);
+                                }
+                                gifBean.setType(randomInt);
+                                gifBean.setPid(ImSendMessageUtils.getPid());
+                                searchList.add(gifBean);
+                                countDown();
+                                Log.i("net", "-------randomInt:" + randomInt + "---------");
+                            }
+                        }
+                        Log.i("net", "-------searchSize:" + searchList.size() + "---------");
+                        heatMapAdapter.setData(searchList);
+                    }
+
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+                        Log.i("net", "-------onError:" + e.toString());
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+    }
+
+    private int getRandomInt() {
+        int min = 5;
+        int max = 7;
+        Random random = new Random();
+        int num = random.nextInt(max - min) + min;
+        return num;
+    }
+
+    @Override
+    public void onHeatMapItemClick(GifBean gifBean) {
+        mEtChat.setText("");
+        if (null != mOnHeatMapClick) {
+            mOnHeatMapClick.onHeatMapItemClick(gifBean);
+        }
+    }
+
+    /**
+     * 倒计时显示
+     */
+    private void countDown() {
+
+        timer = new CountDownTimer(8000, 1000) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+
+            }
+
+            @Override
+            public void onFinish() {
+                setSearchHeatMapVisibility(GONE);
+            }
+        }.start();
+
+
     }
 }

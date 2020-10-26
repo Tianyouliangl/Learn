@@ -15,6 +15,7 @@ import com.learn.agg.net.base.IHttpProtocol;
 import com.learn.commonalitylibrary.Constant;
 import com.learn.commonalitylibrary.LoginBean;
 import com.learn.commonalitylibrary.SessionMessage;
+import com.learn.commonalitylibrary.body.GifBean;
 import com.learn.commonalitylibrary.sqlite.DataBaseHelp;
 import com.learn.commonalitylibrary.ChatMessage;
 import com.learn.commonalitylibrary.util.GsonUtil;
@@ -181,6 +182,40 @@ public class BaseChatPresenter extends BasePresenter<BaseChatContract.IView> imp
             addOrUpdateSession(chatMessage);
         }
         SocketManager.sendMsgSocket(getMvpView().getContent(), json, getMvpView().callBack());
+    }
+
+    @Override
+    public void addLikePhoto(final ChatMessage msg) {
+        if (msg.getBodyType() == ChatMessage.MSG_BODY_TYPE_GIF){
+            GifBean gifBean = GsonUtil.GsonToBean(msg.getBody(), GifBean.class);
+            String uid = getMvpView().getUid();
+            String url = gifBean.getUrl();
+            String pid = gifBean.getPid();
+            int type = gifBean.getType();
+            HashMap<String, Object> map = new HashMap<>();
+            map.put("uid", uid);
+            map.put("url",url);
+            map.put("pid",pid);
+            map.put("type",type);
+            HttpFactory.INSTANCE.getProtocol(IHttpProtocol.class)
+                    .addLikePhoto(map)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new BaseObserverTC<String>() {
+                        @Override
+                        protected void onNextEx(@NonNull String data) {
+                            super.onNextEx(data);
+                            getMvpView().onSuccessAddLike(msg);
+                        }
+
+                        @Override
+                        protected void onNextSN(String msg) {
+                            super.onNextSN(msg);
+                            getMvpView().onError(msg);
+                        }
+                    });
+
+        }
     }
 
     private final void addOrChatMessage(ChatMessage chatMessage) {

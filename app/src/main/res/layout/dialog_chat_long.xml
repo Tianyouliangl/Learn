@@ -32,6 +32,17 @@
             android:background="@drawable/shape_chat_item_dialog"
             android:layout_height="60dp"/>
 
+        <Button
+            android:id="@+id/btn_add_like"
+            android:layout_width="match_parent"
+            android:text="添加到表情"
+            android:textSize="16sp"
+            android:visibility="gone"
+            android:textColor="@color/black"
+            android:textStyle="bold"
+            android:background="@drawable/shape_chat_item_dialog"
+            android:layout_height="60dp"/>
+
     </LinearLayout>
 
 </FrameLayout>

@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.codebear.keyboard.CBEmoticonsKeyBoard;
+import com.codebear.keyboard.adapter.HeatMapAdapter;
 import com.codebear.keyboard.data.AppFuncBean;
 import com.codebear.keyboard.data.EmoticonsBean;
 import com.codebear.keyboard.fragment.CBVoice;
@@ -35,6 +36,7 @@ import com.learn.agg.msg.presenter.BaseChatPresenter;
 import com.learn.agg.widgets.CustomDialog;
 import com.learn.commonalitylibrary.Constant;
 import com.learn.commonalitylibrary.LoginBean;
+import com.learn.commonalitylibrary.body.GifBean;
 import com.learn.commonalitylibrary.sqlite.DataBaseHelp;
 import com.learn.commonalitylibrary.ChatMessage;
 import com.learn.commonalitylibrary.body.ImageBody;
@@ -67,7 +69,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
 
-public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.IPresenter> implements BaseChatContract.IView, FuncLayout.OnFuncKeyBoardListener, View.OnClickListener, RecordIndicator.OnRecordListener, CBEmoticonsView.OnEmoticonClickListener, CBAppFuncView.OnAppFuncClickListener, View.OnTouchListener, OnRefreshListener, SocketManager.SendMsgCallBack, CBVoice.VoiceStateListener, ChatAdapter.itemClickListener {
+public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.IPresenter> implements BaseChatContract.IView, FuncLayout.OnFuncKeyBoardListener, View.OnClickListener, RecordIndicator.OnRecordListener, CBEmoticonsView.OnEmoticonClickListener, CBAppFuncView.OnAppFuncClickListener, View.OnTouchListener, OnRefreshListener, SocketManager.SendMsgCallBack, CBVoice.VoiceStateListener, ChatAdapter.itemClickListener, HeatMapAdapter.HearMapClick {
 
 
     private static final int REQUEST_CODE_IMAGE = 1231;
@@ -78,6 +80,7 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
     private int OPTION_TYPE_CARD = 1;
     private int OPTION_TYPE_IMAGE = 2;
     private int OPTION_TYPE_LOCATION = 3;
+    private int OPTION_TYPE_GIF = 4;
     private int pageNo = 1;
     private int pageSize = 30;
     private String conversation;
@@ -88,6 +91,7 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
     private int new_msg_count = 0;
     private String to_id;
     public LoginBean to_bean;
+    private CBEmoticonsView cbEmoticonsView;
 
     public interface key {
         String KEY_TO = "key_to_bean";
@@ -204,7 +208,9 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
             View view = dialog.getView();
             final Button btn_cancel = view.findViewById(R.id.btn_cancel);
             Button btn_forwarding_item = view.findViewById(R.id.btn_forwarding_item);
+            Button btn_add_like = view.findViewById(R.id.btn_add_like);
             btn_cancel.setVisibility(fromId.equals(uid) ? View.VISIBLE : View.GONE);
+            btn_add_like.setVisibility(message.getBodyType() == ChatMessage.MSG_BODY_TYPE_GIF ? View.VISIBLE : View.GONE);
             if (TimeUtil.getTimeExpend3(System.currentTimeMillis(), message.getTime())) {
                 btn_cancel.setText("撤回");
                 btn_cancel.setClickable(true);
@@ -240,6 +246,14 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
                     bundle.putSerializable("msg", message);
                     goActivity(ForWardingActivity.class, bundle);
                     dialog.dismiss();
+                }
+            });
+            btn_add_like.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    dialog.dismiss();
+                    showLoadingDialog();
+                    getPresenter().addLikePhoto(message);
                 }
             });
             dialog.show();
@@ -419,6 +433,16 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
     }
 
     @Override
+    public void onSuccessAddLike(ChatMessage msg) {
+        dismissDialog();
+        showToast("添加成功");
+        GifBean gif = GsonUtil.GsonToBean(msg.getBody(), GifBean.class);
+        if (cbEmoticonsView != null) {
+            cbEmoticonsView.addLikePhoto(gif);
+        }
+    }
+
+    @Override
     public void onError(String msg) {
         dismissDialog();
         mSmart.finishRefresh();
@@ -486,6 +510,39 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
         String name = emoticon.getName();
         Log.i(ImSocketClient.TAG, "uil:" + uri + "-----name:" + name);
         sendEmoji(uri);
+    }
+
+    // 自己喜欢的图片/点击事件
+    @Override
+    public void onLikePhotoClick(GifBean gifBean) {
+        if (!getTo_Id().isEmpty() && !getUid().isEmpty()) {
+            String pid_to = ImSendMessageUtils.getPid();
+            GifBean bean = new GifBean();
+            bean.setUrl(gifBean.getUrl());
+            bean.setType(gifBean.getType());
+            bean.setPid(gifBean.getPid());
+            String send_json = ImSendMessageUtils.getChatMessageGif(GsonUtil.BeanToJson(bean), getUid(), getTo_Id(), pid_to, conversation, chatAdapter.getLastItemDisplayTime());
+            ChatMessage message = GsonUtil.GsonToBean(send_json, ChatMessage.class);
+            chatAdapter.setData(message);
+            toLastItem();
+            getPresenter().SocketSendJson(send_json, true);
+        }
+    }
+
+    @Override
+    public void onHeatMapItemClick(GifBean gifBean) {
+        if (!getTo_Id().isEmpty() && !getUid().isEmpty()) {
+            String pid_to = ImSendMessageUtils.getPid();
+            GifBean bean = new GifBean();
+            bean.setUrl(gifBean.getUrl());
+            bean.setType(gifBean.getType());
+            bean.setPid(gifBean.getPid());
+            String send_json = ImSendMessageUtils.getChatMessageGif(GsonUtil.BeanToJson(bean), getUid(), getTo_Id(), pid_to, conversation, chatAdapter.getLastItemDisplayTime());
+            ChatMessage message = GsonUtil.GsonToBean(send_json, ChatMessage.class);
+            chatAdapter.setData(message);
+            toLastItem();
+            getPresenter().SocketSendJson(send_json, true);
+        }
     }
 
     private final void sendEmoji(String uri) {
@@ -710,12 +767,13 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
         mKbView = keyBoard;
         mKbView.addOnFuncKeyBoardListener(this);
         mKbView.addVoiceChangeListener(this);
+        mKbView.setOnSearchHeatMapOnClickListener(this);
         mKbView.getBtnSend().setOnClickListener(this);
         RecordIndicator recordIndicator = new RecordIndicator(this);
         mKbView.setRecordIndicator(recordIndicator);
         recordIndicator.setOnRecordListener(this);
         recordIndicator.setMaxRecordTime(60);
-        CBEmoticonsView cbEmoticonsView = new CBEmoticonsView(this);
+        cbEmoticonsView = new CBEmoticonsView(this);
         cbEmoticonsView.init(getSupportFragmentManager());
         mKbView.setEmoticonFuncView(cbEmoticonsView);
         cbEmoticonsView.addEmoticonsWithName(new String[]{"emoji"});

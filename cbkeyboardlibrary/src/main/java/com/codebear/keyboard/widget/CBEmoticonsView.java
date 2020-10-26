@@ -21,9 +21,11 @@ import com.codebear.keyboard.data.EmojiBean;
 import com.codebear.keyboard.data.EmoticonsBean;
 import com.codebear.keyboard.emoji.DefEmoticons;
 import com.codebear.keyboard.fragment.CBEmoticonFragment;
+import com.codebear.keyboard.fragment.CBEmoticonLikeFragment;
 import com.codebear.keyboard.fragment.ICBFragment;
 import com.codebear.keyboard.interfaces.IEmoticonsView;
 import com.codebear.keyboard.utils.ParseDataUtils;
+import com.learn.commonalitylibrary.body.GifBean;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -39,6 +41,8 @@ public class CBEmoticonsView extends FrameLayout implements IEmoticonsView {
 
     public interface OnEmoticonClickListener {
         void onEmoticonClick(EmoticonsBean emoticon, boolean isDel);
+
+        void onLikePhotoClick(GifBean bean);
     }
 
     private View rootView;
@@ -139,6 +143,23 @@ public class CBEmoticonsView extends FrameLayout implements IEmoticonsView {
         });
     }
 
+    private void initLikeFragment() {
+        EmoticonsBean bean = new EmoticonsBean();
+        emoticonsToolbarAdapter.add(bean);
+        emoticonsBeanList.add(bean);
+        emoticonsToolbarAdapter.notifyItemInserted(emoticonsBeanList.size());
+
+
+        bean.setIconUri(R.drawable.icon_xihuan);
+        ICBFragment fragment = CBEmoticonLikeFragment.newInstance();
+        fragment.setEmoticonsBean(bean);
+        fragment.setOnEmoticonClickListener(listener);
+        emoticonFragments.add(fragment);
+
+        vpEmoticonsContent.setOffscreenPageLimit(emoticonFragments.size());
+        vpEmoticonsContent.getAdapter().notifyDataSetChanged();
+    }
+
     public void addEmoticons(EmoticonsBean bean) {
         emoticonsToolbarAdapter.add(bean);
         emoticonsBeanList.add(bean);
@@ -180,6 +201,14 @@ public class CBEmoticonsView extends FrameLayout implements IEmoticonsView {
             addEmoticonsWithName(name);
             addEmoticonByName(name);
         }
+        initLikeFragment();
+    }
+
+    public void addLikePhoto(GifBean bean){
+        if (bean == null)return;
+       for (int i=0;i<emoticonFragments.size();i++){
+           emoticonFragments.get(i).setLikePhotoBean(bean);
+       }
     }
 
     private void addEmoticonByName(String name) {

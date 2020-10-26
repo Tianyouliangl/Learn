@@ -82,6 +82,10 @@ public interface IHttpProtocol {
     @FormUrlEncoded
     Observable<BaseResponseTC<LoginBean>> getUserInfo(@FieldMap HashMap<String, String> map);
 
+    @POST("photo/addLike")
+    @FormUrlEncoded
+    Observable<BaseResponseTC<String>> addLikePhoto(@FieldMap HashMap<String, Object> map);
+
     @POST("history/user")
     @FormUrlEncoded
     Observable<BaseResponseTC<List<ChatMessage>>> getHistory(@FieldMap HashMap<String, Object> map);
