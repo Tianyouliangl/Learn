@@ -1,0 +1,44 @@
+com/jeremyfeinstein/slidingmenu/lib/app/SlidingListActivity.java
+ com.jeremyfeinstein.slidingmenu.lib.app.SlidingListActivity
+com/jeremyfeinstein/slidingmenu/lib/app/SlidingFragmentActivity.java
+ com.jeremyfeinstein.slidingmenu.lib.app.SlidingFragmentActivity
+com/jeremyfeinstein/slidingmenu/lib/CustomViewBehind.java
+ com.jeremyfeinstein.slidingmenu.lib.CustomViewBehind
+com/jeremyfeinstein/slidingmenu/lib/app/SlidingActivityBase.java
+ com.jeremyfeinstein.slidingmenu.lib.app.SlidingActivityBase
+com/jeremyfeinstein/slidingmenu/lib/CanvasTransformerBuilder.java
+ com.jeremyfeinstein.slidingmenu.lib.CanvasTransformerBuilder
+ com.jeremyfeinstein.slidingmenu.lib.CanvasTransformerBuilder$1
+ com.jeremyfeinstein.slidingmenu.lib.CanvasTransformerBuilder$2
+ com.jeremyfeinstein.slidingmenu.lib.CanvasTransformerBuilder$3
+ com.jeremyfeinstein.slidingmenu.lib.CanvasTransformerBuilder$4
+ com.jeremyfeinstein.slidingmenu.lib.CanvasTransformerBuilder$5
+ com.jeremyfeinstein.slidingmenu.lib.CanvasTransformerBuilder$6
+com/jeremyfeinstein/slidingmenu/lib/app/SlidingActivity.java
+ com.jeremyfeinstein.slidingmenu.lib.app.SlidingActivity
+com/jeremyfeinstein/slidingmenu/lib/MenuInterface.java
+ com.jeremyfeinstein.slidingmenu.lib.MenuInterface
+com/jeremyfeinstein/slidingmenu/lib/app/SlidingActivityHelper.java
+ com.jeremyfeinstein.slidingmenu.lib.app.SlidingActivityHelper
+ com.jeremyfeinstein.slidingmenu.lib.app.SlidingActivityHelper$1
+com/jeremyfeinstein/slidingmenu/lib/app/SlidingPreferenceActivity.java
+ com.jeremyfeinstein.slidingmenu.lib.app.SlidingPreferenceActivity
+com/jeremyfeinstein/slidingmenu/lib/BuildConfig.java
+ com.jeremyfeinstein.slidingmenu.lib.BuildConfig
+com/jeremyfeinstein/slidingmenu/lib/CustomViewAbove.java
+ com.jeremyfeinstein.slidingmenu.lib.CustomViewAbove
+ com.jeremyfeinstein.slidingmenu.lib.CustomViewAbove$1
+ com.jeremyfeinstein.slidingmenu.lib.CustomViewAbove$2
+ com.jeremyfeinstein.slidingmenu.lib.CustomViewAbove$OnPageChangeListener
+ com.jeremyfeinstein.slidingmenu.lib.CustomViewAbove$SimpleOnPageChangeListener
+com/jeremyfeinstein/slidingmenu/lib/SlidingMenu.java
+ com.jeremyfeinstein.slidingmenu.lib.SlidingMenu
+ com.jeremyfeinstein.slidingmenu.lib.SlidingMenu$1
+ com.jeremyfeinstein.slidingmenu.lib.SlidingMenu$2
+ com.jeremyfeinstein.slidingmenu.lib.SlidingMenu$CanvasTransformer
+ com.jeremyfeinstein.slidingmenu.lib.SlidingMenu$OnCloseListener
+ com.jeremyfeinstein.slidingmenu.lib.SlidingMenu$OnClosedListener
+ com.jeremyfeinstein.slidingmenu.lib.SlidingMenu$OnOpenListener
+ com.jeremyfeinstein.slidingmenu.lib.SlidingMenu$OnOpenedListener
+ com.jeremyfeinstein.slidingmenu.lib.SlidingMenu$SavedState
+ com.jeremyfeinstein.slidingmenu.lib.SlidingMenu$SavedState$1
