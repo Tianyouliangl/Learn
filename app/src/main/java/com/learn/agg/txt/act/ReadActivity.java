@@ -220,7 +220,7 @@ public class ReadActivity extends BaseMvpActivity<ReadContract.IPresenter> imple
 
     @Override
     public void onCurrentPage(float progress) {
-        tv_top_section_name.setText(txt_view.getCurrentChapter().getTitle());
+        tv_top_section_name.setText(txt_view.getCurrentChapter().getTitle()+"");
     }
 
     @Override

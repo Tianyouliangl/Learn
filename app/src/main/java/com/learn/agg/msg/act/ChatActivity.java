@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.codebear.keyboard.CBEmoticonsKeyBoard;
 import com.learn.agg.R;
+import com.learn.agg.trtc.service.TRTCService;
 import com.learn.commonalitylibrary.LoginBean;
 import com.learn.commonalitylibrary.util.NetState;
 import com.scwang.smartrefresh.layout.SmartRefreshLayout;
@@ -29,6 +30,14 @@ public class ChatActivity extends BaseChatActivity {
         intent.putExtra(key.KEY_TO,toBean);
         intent.putExtra(key.KEY_CONVERSATION,conversation);
         context.startActivity(intent);
+    }
+
+    public static Intent getIntent(Context context,String toId,String conversation,LoginBean toBean){
+        Intent intent = new Intent(context, ChatActivity.class);
+        intent.putExtra(key.KEY_ID,toId);
+        intent.putExtra(key.KEY_TO,toBean);
+        intent.putExtra(key.KEY_CONVERSATION,conversation);
+        return intent;
     }
 
     @Override
@@ -55,7 +64,6 @@ public class ChatActivity extends BaseChatActivity {
     protected void initData() {
         super.initData();
         iv_back.setOnClickListener(this);
-
     }
 
     @Override

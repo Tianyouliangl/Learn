@@ -16,21 +16,14 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.learn.agg.R;
 import com.learn.agg.msg.act.FriendInfoActivity;
-import com.learn.agg.net.base.BaseObserverTC;
-import com.learn.agg.net.base.IHttpProtocol;
 import com.learn.agg.net.bean.FriendMsgBean;
 import com.learn.commonalitylibrary.Constant;
 import com.learn.commonalitylibrary.LoginBean;
 import com.learn.commonalitylibrary.util.GsonUtil;
 import com.makeramen.roundedimageview.RoundedImageView;
-import com.senyint.ihospital.client.HttpFactory;
 import com.white.easysp.EasySP;
 
-import java.util.HashMap;
 import java.util.List;
-
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.schedulers.Schedulers;
 
 public class FriendMsgAdapter extends RecyclerView.Adapter<FriendMsgAdapter.FriendMsgHolder> {
 
@@ -187,8 +180,7 @@ public class FriendMsgAdapter extends RecyclerView.Adapter<FriendMsgAdapter.Frie
     }
 
     public void setData(List<FriendMsgBean> list) {
-        mList.clear();
-        mList.addAll(list);
+        mList = list;
         notifyDataSetChanged();
     }
 

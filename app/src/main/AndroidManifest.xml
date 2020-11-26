@@ -26,7 +26,11 @@
         android:roundIcon="@mipmap/icon_logo_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".txt.act.ReadActivity" android:theme="@style/HwTxtFullScreen"></activity>
+        <activity android:name=".trtc.VideoCallActivity"
+            android:launchMode="singleInstance"></activity>
+        <activity
+            android:name=".txt.act.ReadActivity"
+            android:theme="@style/HwTxtFullScreen" />
         <activity android:name=".msg.act.SelectNewSessionActivity" />
         <activity android:name=".msg.act.ForWardingActivity" />
         <activity android:name=".act.SettingActivity" />
@@ -43,7 +47,7 @@
         <activity android:name=".msg.act.FindFriendActivity" />
         <activity android:name=".act.EnrollActivity" />
         <activity android:name=".msg.act.FriendActivity" />
-        <activity android:name=".msg.act.ChatActivity" />
+        <activity android:name=".msg.act.ChatActivity"/>
         <activity
             android:name=".act.LoginActivity"
             android:theme="@style/SplashTheme" />
@@ -61,6 +65,9 @@
             android:launchMode="singleTop" />
 
         <service android:name="com.lib.xiangxiang.im.ImService" />
+
+        <service android:name=".trtc.service.TRTCService"/>
+
     </application>
 
 </manifest>

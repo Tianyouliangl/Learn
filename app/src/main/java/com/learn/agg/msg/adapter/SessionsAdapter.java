@@ -1,7 +1,9 @@
 package com.learn.agg.msg.adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +15,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.core.app.ActivityOptionsCompat;
+import androidx.core.util.Pair;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -48,6 +53,7 @@ public class SessionsAdapter extends RecyclerView.Adapter<SessionsAdapter.Sessio
     private long lastClickTime = 0;
     private Boolean isOpenMenu = false;
     private MenuClickListener mListener;
+    private ItemClickListener mClickItemListener;
 
     public SessionsAdapter(Context context, List<SessionMessage> list) {
         mContext = context;
@@ -137,7 +143,10 @@ public class SessionsAdapter extends RecyclerView.Adapter<SessionsAdapter.Sessio
                         Log.i("net", "userInfo is not null or click time <= 1s");
                         return;
                     }
-                    ChatActivity.startActivity(mContext, loginBean.getUid(), sessionMessage.getConversation(), loginBean);
+                    if (mClickItemListener != null){
+                        mClickItemListener.onItemClick(holder.tv_name_session,loginBean,sessionMessage.getConversation());
+                    }
+//                    ChatActivity.startActivity(mContext, loginBean.getUid(), sessionMessage.getConversation(), loginBean);
                     lastClickTime = time;
                     return;
                 }
@@ -202,8 +211,16 @@ public class SessionsAdapter extends RecyclerView.Adapter<SessionsAdapter.Sessio
         void onRedListener();
     }
 
+    public interface ItemClickListener{
+        void onItemClick(TextView v, LoginBean bean,String conversation);
+    }
+
     public void setOnMenuClickListener(MenuClickListener listener) {
         this.mListener = listener;
+    }
+
+    public void setOnItemClickListener(ItemClickListener listener){
+        this.mClickItemListener = listener;
     }
 
     public class SessionsHolder extends RecyclerView.ViewHolder {

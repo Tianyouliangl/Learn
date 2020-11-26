@@ -8,6 +8,39 @@
         <item name="colorAccent">@color/deepskyblue</item>
     </style>
 
+    <style name="Theme.notAnimation" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">@color/deepskyblue</item>
+        <item name="colorPrimaryDark">@color/deepskyblue</item>
+        <item name="colorAccent">@color/deepskyblue</item>
+        <item name="android:windowAnimationStyle">@style/notAnimation</item>
+    </style>
+
+    <style name="Theme.notAnimation.notBg" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">@color/deepskyblue</item>
+        <item name="colorPrimaryDark">@color/deepskyblue</item>
+        <item name="colorAccent">@color/deepskyblue</item>
+        <item name="background">@null</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <!--设置窗口的背景是否为半透明，设置透明背景必须要设置此项-->
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowAnimationStyle">@style/notAnimation</item>
+    </style>
+
+    <style name="notAnimation">
+        <item name="android:activityOpenEnterAnimation">@null</item>
+        <item name="android:activityOpenExitAnimation">@null</item>
+        <item name="android:activityCloseEnterAnimation">@null</item>
+        <item name="android:activityCloseExitAnimation">@null</item>
+        <item name="android:taskOpenEnterAnimation">@null</item>
+        <item name="android:taskOpenExitAnimation">@null</item>
+        <item name="android:taskCloseEnterAnimation">@null</item>
+        <item name="android:taskCloseExitAnimation">@null</item>
+        <item name="android:taskToFrontEnterAnimation">@null</item>
+        <item name="android:taskToFrontExitAnimation">@null</item>
+        <item name="android:taskToBackEnterAnimation">@null</item>
+        <item name="android:taskToBackExitAnimation">@null</item>
+    </style>
+
     <style name="HwTxtFullScreen" parent="Theme.AppCompat.NoActionBar">
         <item name="android:windowFullscreen">true</item>
         <item name="android:windowNoTitle">true</item>
@@ -60,21 +93,21 @@
 
     <style name="MyDialogStyle">
         <item name="android:windowBackground">@android:color/transparent</item>
-<!--        设置dialog的背景，此处为系统给定的透明值-->
+        <!--        设置dialog的背景，此处为系统给定的透明值-->
         <item name="android:windowFrame">@null</item>
-<!--        Dialog的windowFrame框为无-->
+        <!--        Dialog的windowFrame框为无-->
         <item name="android:windowNoTitle">true</item>　　　　　　　　
-<!--        是否显示标题-->
+        <!--        是否显示标题-->
         <item name="android:windowIsFloating">true</item>
-<!--        是否浮现在activity之上-->
+        <!--        是否浮现在activity之上-->
         <item name="android:windowIsTranslucent">true</item>
-<!--        是否半透明-->
+        <!--        是否半透明-->
         <item name="android:windowContentOverlay">@null</item>
-<!--        是否有覆盖-->
+        <!--        是否有覆盖-->
         <item name="android:windowAnimationStyle">@android:style/Animation.Dialog</item>
-<!--        设置Activity出现方式-->
+        <!--        设置Activity出现方式-->
         <item name="android:backgroundDimEnabled">true</item>
-<!--        背景是否模糊显示-->
+        <!--        背景是否模糊显示-->
     </style>
 
     <declare-styleable name="BadgeView">

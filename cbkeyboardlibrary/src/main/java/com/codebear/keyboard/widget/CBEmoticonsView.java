@@ -155,7 +155,7 @@ public class CBEmoticonsView extends FrameLayout implements IEmoticonsView {
         fragment.setEmoticonsBean(bean);
         fragment.setOnEmoticonClickListener(listener);
         emoticonFragments.add(fragment);
-
+        vpEmoticonsContent.getAdapter().notifyDataSetChanged();
         vpEmoticonsContent.setOffscreenPageLimit(emoticonFragments.size());
         vpEmoticonsContent.getAdapter().notifyDataSetChanged();
     }
@@ -169,6 +169,7 @@ public class CBEmoticonsView extends FrameLayout implements IEmoticonsView {
         fragment.setEmoticonsBean(bean);
         fragment.setOnEmoticonClickListener(listener);
         emoticonFragments.add(fragment);
+        vpEmoticonsContent.getAdapter().notifyDataSetChanged();
         vpEmoticonsContent.setOffscreenPageLimit(emoticonFragments.size());
         vpEmoticonsContent.getAdapter().notifyDataSetChanged();
     }

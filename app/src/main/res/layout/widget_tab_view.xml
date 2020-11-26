@@ -42,6 +42,6 @@
         android:layout_height="wrap_content"
         android:duplicateParentState="true"
         android:textSize="12sp"
-        android:textColor="@color/selector_tab_color" />
+        android:textColor="@drawable/selector_tab_color" />
 
 </LinearLayout>

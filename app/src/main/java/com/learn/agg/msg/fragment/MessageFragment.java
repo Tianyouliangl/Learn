@@ -1,12 +1,14 @@
 package com.learn.agg.msg.fragment;
 
 
+import android.app.ActivityOptions;
 import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -19,7 +21,7 @@ import com.gongwen.marqueen.SimpleMarqueeView;
 import com.gongwen.marqueen.util.OnItemClickListener;
 import com.learn.agg.R;
 import com.learn.agg.base.BaseMvpFragment;
-import com.learn.agg.msg.act.FriendActivity;
+import com.learn.agg.msg.act.ChatActivity;
 import com.learn.agg.msg.act.NewFriendActivity;
 import com.learn.agg.msg.adapter.SessionsAdapter;
 import com.learn.agg.msg.contract.MessageContract;
@@ -31,8 +33,6 @@ import com.learn.commonalitylibrary.LoginBean;
 import com.learn.commonalitylibrary.SessionMessage;
 import com.learn.commonalitylibrary.sqlite.DataBaseHelp;
 import com.learn.commonalitylibrary.util.GsonUtil;
-import com.learn.commonalitylibrary.util.NotificationUtils;
-import com.lib.xiangxiang.im.ImSocketClient;
 import com.mcxtzhang.swipemenulib.SwipeMenuLayout;
 import com.scwang.smartrefresh.layout.SmartRefreshLayout;
 import com.scwang.smartrefresh.layout.api.RefreshLayout;
@@ -50,7 +50,7 @@ import java.util.Iterator;
 import java.util.List;
 
 
-public class MessageFragment extends BaseMvpFragment<MessageContract.IPresenter> implements MessageContract.IView, View.OnClickListener, OnItemClickListener, OnRefreshListener, View.OnTouchListener, SessionsAdapter.MenuClickListener {
+public class MessageFragment extends BaseMvpFragment<MessageContract.IPresenter> implements MessageContract.IView, View.OnClickListener, OnItemClickListener, OnRefreshListener, View.OnTouchListener, SessionsAdapter.MenuClickListener, SessionsAdapter.ItemClickListener {
 
     private List<String> sList = new ArrayList<>();
     private RecyclerView rl_message;
@@ -99,6 +99,7 @@ public class MessageFragment extends BaseMvpFragment<MessageContract.IPresenter>
         smart_layout.setOnRefreshListener(this);
         rl_message.setOnTouchListener(this);
         sessionsAdapter.setOnMenuClickListener(this);
+        sessionsAdapter.setOnItemClickListener(this);
     }
 
     @Override
@@ -315,5 +316,12 @@ public class MessageFragment extends BaseMvpFragment<MessageContract.IPresenter>
             rl_no_msg.setVisibility(View.VISIBLE);
             rl_message.setVisibility(View.GONE);
         }
+    }
+
+    @Override
+    public void onItemClick(TextView v, LoginBean bean, String conversation) {
+        Intent intent = ChatActivity.getIntent(getContext(), bean.getUid(), conversation, bean);
+        ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(getActivity(), v, "CHAT_NAME");
+        startActivity(intent,options.toBundle());
     }
 }

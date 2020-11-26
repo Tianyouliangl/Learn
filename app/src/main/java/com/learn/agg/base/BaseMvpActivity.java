@@ -33,7 +33,7 @@ import static android.view.View.VISIBLE;
 
 public abstract class BaseMvpActivity<P extends IPresenterContract> extends MvpActivity<P>{
 
-    private CustomDialog mLoading;
+    public CustomDialog mLoading;
     private Boolean mDialogIsBack = true;
     protected String[] needPermissions = {
             Manifest.permission.CAMERA,
@@ -47,9 +47,9 @@ public abstract class BaseMvpActivity<P extends IPresenterContract> extends MvpA
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ActivityUtil.getInstance().addActivity(this);
         setTheme(R.style.AppTheme);
         setContentView(getLayoutId());
+        ActivityUtil.getInstance().addActivity(this);
         isRequestMission = isRequestMission();
         if (isRequestMission){
             requestPermission();

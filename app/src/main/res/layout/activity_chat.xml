@@ -39,6 +39,7 @@
                 android:layout_marginTop="4dp"
                 android:ellipsize="end"
                 android:maxLines="1"
+                android:transitionName="CHAT_NAME"
                 android:textColor="@color/white"
                 android:textSize="14sp"
                 android:textStyle="bold" />

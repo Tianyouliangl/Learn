@@ -8,10 +8,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -29,6 +26,7 @@ import com.codebear.keyboard.widget.CBEmoticonsView;
 import com.codebear.keyboard.widget.FuncLayout;
 import com.codebear.keyboard.widget.RecordIndicator;
 import com.learn.agg.R;
+import com.learn.agg.trtc.VideoCallActivity;
 import com.learn.agg.base.BaseMvpActivity;
 import com.learn.agg.msg.adapter.ChatAdapter;
 import com.learn.agg.msg.contract.BaseChatContract;
@@ -67,7 +65,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ListIterator;
 
 public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.IPresenter> implements BaseChatContract.IView, FuncLayout.OnFuncKeyBoardListener, View.OnClickListener, RecordIndicator.OnRecordListener, CBEmoticonsView.OnEmoticonClickListener, CBAppFuncView.OnAppFuncClickListener, View.OnTouchListener, OnRefreshListener, SocketManager.SendMsgCallBack, CBVoice.VoiceStateListener, ChatAdapter.itemClickListener, HeatMapAdapter.HearMapClick {
 
@@ -80,7 +77,8 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
     private int OPTION_TYPE_CARD = 1;
     private int OPTION_TYPE_IMAGE = 2;
     private int OPTION_TYPE_LOCATION = 3;
-    private int OPTION_TYPE_GIF = 4;
+    private int OPTION_TYPE_AUTO_CALL = 4;
+    private int OPTION_TYPE_VIDEO_CALL = 5;
     private int pageNo = 1;
     private int pageSize = 30;
     private String conversation;
@@ -583,6 +581,17 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
         if (emoticonId == OPTION_TYPE_CARD) {
 
         }
+
+        if (emoticonId == OPTION_TYPE_AUTO_CALL){
+
+        }
+
+        if (emoticonId == OPTION_TYPE_VIDEO_CALL){
+            showLoadingDialog();
+            goActivity(VideoCallActivity.class);
+//            overridePendingTransition(R.anim.zoomin, R.anim.zoomout);
+            dismissDialog();
+        }
     }
 
     /**
@@ -785,6 +794,8 @@ public abstract class BaseChatActivity extends BaseMvpActivity<BaseChatContract.
         appFuncBeanList.add(new AppFuncBean(OPTION_TYPE_IMAGE, R.mipmap.icon_tuku, "图片"));
         appFuncBeanList.add(new AppFuncBean(OPTION_TYPE_LOCATION, R.mipmap.icon_weizhi, "位置"));
         appFuncBeanList.add(new AppFuncBean(OPTION_TYPE_CARD, R.mipmap.icon_wodemingpian, "名片"));
+        appFuncBeanList.add(new AppFuncBean(OPTION_TYPE_AUTO_CALL, R.mipmap.icon_video_call, "语音通话"));
+        appFuncBeanList.add(new AppFuncBean(OPTION_TYPE_VIDEO_CALL, R.mipmap.icon_auto_call, "视频通话"));
         CBAppFuncView appFuncView = new CBAppFuncView(this);
         appFuncView.setRol(3);
         appFuncView.setAppFuncBeanList(appFuncBeanList);

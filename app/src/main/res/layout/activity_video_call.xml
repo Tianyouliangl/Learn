@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#00000000"
+    tools:context=".trtc.VideoCallActivity">
+
+    <RelativeLayout
+        android:id="@+id/ll_top"
+        android:layout_width="match_parent"
+        android:layout_weight="1"
+        android:background="@color/deepskyblue"
+        android:layout_height="0dp">
+
+        <ImageView
+            android:id="@+id/iv_lessen"
+            android:layout_width="45dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginLeft="16dp"
+            android:padding="8dp"
+            android:src="@mipmap/icon_sf_1"
+            android:layout_height="45dp"/>
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/ll_bottom"
+        android:layout_width="match_parent"
+        android:background="@color/deepskyblue"
+        android:layout_weight="1"
+        android:layout_height="0dp">
+
+    </RelativeLayout>
+
+
+</LinearLayout>
